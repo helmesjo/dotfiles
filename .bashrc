@@ -2,6 +2,9 @@
 # ~/.bashrc
 #
 
+# Path to file, or source if symlink.
+dotfiles_root=`dirname $(realpath $BASH_SOURCE)`
+
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
@@ -13,4 +16,4 @@ if test -n "$KITTY_INSTALLATION_DIR" -a -e "$KITTY_INSTALLATION_DIR/shell-integr
 # END_KITTY_SHELL_INTEGRATION
 
 # Aliases
-alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+alias config='/usr/bin/git -C $dotfiles_root'
