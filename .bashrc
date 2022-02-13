@@ -13,4 +13,4 @@ if test -n "$KITTY_INSTALLATION_DIR" -a -e "$KITTY_INSTALLATION_DIR/shell-integr
 # END_KITTY_SHELL_INTEGRATION
 
 # Aliases
-alias config='/usr/bin/git --git-dir=/home/fred/.dotfiles/ --work-tree=/home/fred'
+alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
