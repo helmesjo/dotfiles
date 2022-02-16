@@ -2,6 +2,9 @@
 # ~/.bashrc
 #
 
+VISUAL=vim
+EDITOR="$VISUAL"
+
 # Path to file, or source if symlink.
 dotfiles_root=`dirname $(realpath $BASH_SOURCE)`
 
