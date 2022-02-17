@@ -4,7 +4,7 @@ set -eu -o pipefail
 this_file_path=$(dirname $(realpath $BASH_SOURCE))
 dotfiles_root=$(cd $this_file_path/..; pwd)
 dotfiles=$(ls -a $dotfiles_root) # grab the list
-backup_nr=$((test -d $dotfiles_root/_backup && find $dotfiles_root/_backup/ -maxdepth 1 -type d -name '*' -printf x | wc -c) || echo 1)
+backup_nr=$(test -d $dotfiles_root/_backup && find $dotfiles_root/_backup/ -maxdepth 1 -type d -name '*' -printf x | wc -c || echo 1)
 dotfiles_backup="$dotfiles_root/_backup/$backup_nr"
 target_root="$HOME"
 
