@@ -12,4 +12,3 @@ $dotfiles_root/scripts/configure.sh
 for service in ${enable_services}; do
   sudo systemctl enable $service
 done
-
