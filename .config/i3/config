@@ -1,12 +1,17 @@
-# Theme colors
-set $color.bg #1E272B
+# Theme colors (read from .Xresources)
+set_from_resource $color.bg i3wm.background #000000
+set_from_resource $color.fg i3wm.foreground #000000
+set_from_resource $color.color2 i3wm.color2 #000000
+set_from_resource $color.color4 i3wm.color4 #000000
+set_from_resource $color.color6 i3wm.color6 #000000
 
-client.focused #EAD49B #1E272B #EAD49B #9D6A47 #9D6A47
-client.focused_inactive #EAD49B #1E272B #EAD49B #78824B #78824B
-client.unfocused #EAD49B #1E272B #EAD49B #78824B #78824B
-client.urgent #EAD49B #1E272B #EAD49B #78824B #78824B
-client.placeholder #EAD49B #1E272B #EAD49B #78824B #78824B
-client.background $color.bg
+#                       border          background      text            indicator         child_border
+client.focused          $color.fg       $color.bg       $color.fg       $color.color2     $color.color2
+client.focused_inactive $color.fg       $color.bg       $color.fg       $color.color4     $color.color4
+client.unfocused        $color.fg       $color.bg       $color.fg       $color.color4     $color.color4
+client.urgent           $color.fg       $color.bg       $color.fg       $color.color4     $color.color4
+client.placeholder      $color.fg       $color.bg       $color.fg       $color.color4     $color.color4
+client.background       $color.bg
 
 set $mod Mod1
 
@@ -280,5 +285,11 @@ bar {
   status_command i3blocks
   colors {
     background $color.bg
+#                      border           background      text
+    active_workspace   $color.color2    $color.bg       $color.color6
+    focused_workspace  $color.color2    $color.bg       $color.color6
+    inactive_workspace $color.bg        $color.bg       $color.color6
+    urgent_workspace   $color.color2    $color.bg       $color.color6
+    binding_mode       $color.color2    $color.bg       $color.color6
   }
 }

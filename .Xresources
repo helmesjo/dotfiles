@@ -1,23 +1,24 @@
-*background: #1E272B
-*foreground: #EAD49B
-*cursorColor: #EAD49B
+#include ".Xcolors/default"
 
-*color0: #1E272B
-*color8: #666666
-*color1: #685742
-*color9: #685743
-*color2: #9D6A47
-*color10: #9D6A47
-*color3: #B36D43
-*color11: #B36D43
-*color4: #78824B
-*color12: #78824B
-*color5: #D99F57
-*color13: #D99F57
-*color6: #C9A554
-*color14: #C9A554
-*color7: #EAD49B
-*color15: #EAD49B
+*foreground: FOREGROUND
+*background: BACKGROUND
+
+*color0:  COLOR0
+*color8:  COLOR8
+*color1:  COLOR1
+*color9:  COLOR9
+*color2:  COLOR2
+*color10: COLOR10
+*color3:  COLOR3
+*color11: COLOR11
+*color4:  COLOR4
+*color12: COLOR12
+*color5:  COLOR5
+*color13: COLOR13
+*color6:  COLOR6
+*color14: COLOR14
+*color7:  COLOR7
+*color15: COLOR15
 
 URxvt.font: xft:Source Code Pro:size=10.5
 URxvt.depth:                      32
@@ -29,10 +30,10 @@ URxvt*internalBorder: 5
 URxvt*geometry: 70x19
 
 rofi.color-enabled: true
-rofi.color-window: #1E272B, #9D6A47, #9D6A47
-rofi.color-normal: #1E272B, #EAD49B, #1E272B, #1E272B, #78824B
-rofi.color-active: #1E272B, #EAD49B, #1E272B, #1E272B, #78824B
-rofi.color-urgent: #1E272B, #EAD49B, #1E272B, #1E272B, #78824B
+rofi.color-window: BACKGROUND, BACKGROUND, BACKGROUND
+rofi.color-normal: BACKGROUND, FOREGROUND, BACKGROUND, BACKGROUND, COLOR1
+rofi.color-active: BACKGROUND, FOREGROUND, BACKGROUND, BACKGROUND, COLOR1
+rofi.color-urgent: BACKGROUND, FOREGROUND, BACKGROUND, BACKGROUND, COLOR1
 
 rofi.separator-style: solid
 rofi.sidebar-mode: false
