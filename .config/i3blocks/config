@@ -67,9 +67,9 @@ interval=1
 
 # Part 3
 
-#[cpu]
-#label=
-#interval=2
+[cpu]
+label=
+interval=2
 
 [datetime]
 label=
@@ -181,14 +181,14 @@ interval=30
 #label=
 #interval=60
 
-#[temperature]
-#instance=Core
-#label=
-#interval=5
+[temperature]
+instance=Core
+label=
+interval=5
 
-#[user]
-#label=
-#interval=once
+[user]
+label=
+interval=once
 
 # Part 10
 
@@ -228,6 +228,6 @@ interval=30
 #markup=pango
 #interval=repeat
 
-[keymap]
-label=
-interval=10
+#[keymap]
+#label=
+#interval=10
