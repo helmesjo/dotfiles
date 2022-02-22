@@ -23,5 +23,4 @@ KEYMAP_NAME=$(basename $(dirname $(find ${KEYMAP_DIRECTORY} -name "${KEYMAP_FILE
 if [[ "${KEYMAP_NAME}" ]]; then
   echo "${KEYMAP_NAME}"
   echo "${KEYMAP_NAME}"
-  echo ""
 fi
