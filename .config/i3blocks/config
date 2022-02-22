@@ -28,6 +28,7 @@
 command=~/.config/i3blocks/blocks/$BLOCK_NAME
 separator_block_width=15
 markup=none
+color=#C9A554
 
 # Part 1
 
