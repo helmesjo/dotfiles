@@ -33,168 +33,168 @@ color=#C9A554
 # Part 1
 
 [audio]
-label=
+label= 
 interval=5
 
 [bandwidth]
 instance=wlp3s0;in
-label=
+label= 
 interval=1
 
 [bandwidth]
 instance=wlp3s0;out
-label=
+label= 
 interval=1
 
 #[battery]
-#label=
+#label= 
 #instance=0
 #interval=5
 
 # Part 2
 
 #[bluetooth]
-#label=
+#label= 
 #interval=10
 
 #[brightness]
-#label=
+#label= 
 #interval=5
 
 #[countdown]
 #instance=tomorrow 05:00:00
-#label=
+#label= 
 #interval=1
 
 # Part 3
 
 [cpu]
-label=
+label= 
 interval=2
 
 [datetime]
-label=
+label= 
 interval=5
 
 #[display]
-#label=
+#label= 
 #interval=5
 
 # Part 4
 #[feed]
 #instance=http://goo.gl/bR2hcp
-#label=
+#label= 
 #interval=60
 
 #[firewall]
-#label=
+#label= 
 #interval=10
 
 #[ip-address]
-#label=
+#label= 
 #interval=60
 
 # Part 5
 
 #[keystate]
-#label=
+#label= 
 #instance=caps
 #interval=1
 
 #[keystate]
-#label=
+#label= 
 #instance=num
 #interval=1
 
 #[launcher]
-#label=
+#label= 
 #interval=once
 
 #[load]
-#label=
+#label= 
 #interval=10
 
 # Part 6
 
 #[locale]
-#label=
+#label= 
 #interval=once
 
 #[mail]
-#label=
+#label= 
 #instance=~/.gmx-private
 #interval=60
 
 [memory]
-label=
+label= 
 instance=mem;free
 interval=30
 
 #[memory]
-#label=
+#label= 
 #instance=swap;total
 #interval=30
 
 # Part 7
 
 [microphone]
-label=
+label= 
 interval=5
 
 #[network]
-#label=
+#label= 
 #instance=enp4s0f2
 #interval=10
 
 #[network]
-#label=
+#label= 
 #instance=wlp3s0
 #interval=10
 
 #[packages]
-#label=
+#label= 
 #interval=300
 
 # Part 8
 
 #[playerctl]
-#label=
+#label= 
 #instance=rhythmbox
 #interval=5
 
 #[process]
 #instance=http
-#label=
+#label= 
 #interval=10
 
 [space]
-label=
+label= 
 interval=30
 
 #[space]
-#label=
+#label= 
 #instance=/pub
 #interval=30
 
 # Part 9
 
 #[ssid]
-#label=
+#label= 
 #interval=60
 
 [temperature]
 instance=Core
-label=
+label= 
 interval=5
 
 [user]
-label=
+label= 
 interval=once
 
 # Part 10
 
 #[vpn]
-#label=
+#label= 
 #interval=5
 
 #[weather]
@@ -202,22 +202,22 @@ interval=once
 #interval=60
 
 #[webcam]
-#label=
+#label= 
 #interval=5
 
 # Part 11
 #[usb]
 #instance=PhotoSmart
-#label=
+#label= 
 #interval=10
 
 #[trash]
-#label=
+#label= 
 #interval=10
 
 #[cmus]
 #command=~/.i3-blocks/blocks/scroll $BLOCK_NAME
-#label=
+#label= 
 #markup=pango
 #interval=repeat
 
@@ -225,10 +225,10 @@ interval=once
 
 #[window]
 #command=~/.i3-blocks/blocks/scroll $BLOCK_NAME
-#label=
+#label= 
 #markup=pango
 #interval=repeat
 
 #[keymap]
-#label=
+#label= 
 #interval=10
