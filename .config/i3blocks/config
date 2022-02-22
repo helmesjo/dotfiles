@@ -30,12 +30,6 @@ separator_block_width=15
 markup=none
 color=#C9A554
 
-# Part 1
-
-[audio]
-label= 
-interval=5
-
 [bandwidth]
 instance=wlp3s0;in
 label= 
@@ -45,6 +39,40 @@ interval=1
 instance=wlp3s0;out
 label= 
 interval=1
+
+[cpu]
+label= 
+interval=2
+
+[temperature]
+instance=Core
+label= 
+interval=5
+
+[memory]
+label= 
+instance=mem;free
+interval=30
+
+[space]
+label= 
+interval=30
+
+[audio]
+label= 
+interval=5
+
+[microphone]
+label= 
+interval=5
+
+[user]
+label= 
+interval=once
+
+[datetime]
+label= 
+interval=5
 
 #[battery]
 #label= 
@@ -67,14 +95,6 @@ interval=1
 #interval=1
 
 # Part 3
-
-[cpu]
-label= 
-interval=2
-
-[datetime]
-label= 
-interval=5
 
 #[display]
 #label= 
@@ -125,21 +145,12 @@ interval=5
 #instance=~/.gmx-private
 #interval=60
 
-[memory]
-label= 
-instance=mem;free
-interval=30
-
 #[memory]
 #label= 
 #instance=swap;total
 #interval=30
 
 # Part 7
-
-[microphone]
-label= 
-interval=5
 
 #[network]
 #label= 
@@ -167,10 +178,6 @@ interval=5
 #label= 
 #interval=10
 
-[space]
-label= 
-interval=30
-
 #[space]
 #label= 
 #instance=/pub
@@ -181,15 +188,6 @@ interval=30
 #[ssid]
 #label= 
 #interval=60
-
-[temperature]
-instance=Core
-label= 
-interval=5
-
-[user]
-label= 
-interval=once
 
 # Part 10
 
