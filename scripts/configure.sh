@@ -24,14 +24,14 @@ for sourcename in ${dotfiles[@]}; do
     .[a-z,A-Z]*)
       ;;
     *)
-      echo "- Skipping '$sourcename'"
+      echo "  - Skipping '$sourcename'"
       continue
       ;;
   esac
 
   # Skip untracked files  
   if [ -z "$(git -C $dotfiles_root ls-files $sourcename)" ]; then
-    echo "- Skipping untracked '$sourcename'"
+    echo "  - Skipping untracked '$sourcename'"
     continue
   fi
 
@@ -40,18 +40,18 @@ for sourcename in ${dotfiles[@]}; do
 
   # Backup target file if it exists
   if [ -f "$targetpath" ] || [ -d "$targetpath" ]; then
-    echo "- Backup '$targetpath'"
-    printf "%s" " - "
+    echo "  - Backup '$targetpath'"
+    printf "%s" "    - "
     mv -v $targetpath $dotfiles_backup/
   fi
   
-  echo "- Creating symlink for '$sourcename'"
-  printf "%s" " - "
+  echo "  - Creating symlink for '$sourcename'"
+  printf "%s" "    - "
   ln -sv $sourcepath $targetpath
 done
 
 if command -v i3-msg &> /dev/null; then
   echo "Restart i3..."
-  printf "%s" " - "
+  printf "%s" "  - "
   i3-msg restart
 fi
