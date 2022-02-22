@@ -49,3 +49,9 @@ for sourcename in ${dotfiles[@]}; do
   printf "%s" " - "
   ln -sv $sourcepath $targetpath
 done
+
+if command -v i3-msg &> /dev/null; then
+  echo "Restart i3..."
+  printf "%s" " - "
+  i3-msg restart
+fi
