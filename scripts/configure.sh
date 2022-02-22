@@ -50,6 +50,12 @@ for sourcename in ${dotfiles[@]}; do
   ln -sv $sourcepath $targetpath
 done
 
+if command -v xrdb &> /dev/null; then
+  echo "Load Xresources..."
+  printf "%s" "  - "
+  xrdb -I$HOME ~/.Xresources
+fi
+
 if command -v i3-msg &> /dev/null; then
   echo "Restart i3..."
   printf "%s" "  - "
