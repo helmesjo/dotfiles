@@ -3,7 +3,7 @@ set -eu -o pipefail
 
 echo "Installing required packages..."
 
-pacpackages="mesa xorg vim git rxvt-unicode alsa-utils lightdm-gtk-greeter i3-gaps i3blocks nitrogen rofi compton ttf-font-awesome adobe-source-code-pro-fonts ttf-nerd-fonts-symbols"
+pacpackages="mesa xorg vim git rxvt-unicode alsa-utils lightdm-gtk-greeter i3-gaps i3blocks nitrogen rofi compton ttf-font-awesome adobe-source-code-pro-fonts ttf-nerd-fonts-symbols neovim nodejs ccls ctags"
 #aurpackages=""
 
 # Install yay if missing
@@ -21,3 +21,7 @@ sudo pacman -S --noconfirm $pacpackages
 # Build git-credential-libsecret
 (cd /usr/share/git/credential/libsecret && sudo make)
 
+# Install nvim plugs
+if ! command -v nvim &> /dev/null; then
+  nvim +PlugInstall +qa
+fi
