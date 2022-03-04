@@ -1,4 +1,4 @@
-#include ".Xcolors/active"
+#include ".Xcolors/tomorrow-dark"
 
 *foreground: FOREGROUND
 *background: BACKGROUND
