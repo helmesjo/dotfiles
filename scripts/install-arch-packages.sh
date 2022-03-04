@@ -22,6 +22,6 @@ sudo pacman -S --noconfirm $pacpackages
 (cd /usr/share/git/credential/libsecret && sudo make)
 
 # Install nvim plugs
-if ! command -v nvim &> /dev/null; then
+if command -v nvim &> /dev/null; then
   nvim +PlugInstall +qa
 fi
