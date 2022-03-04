@@ -1,5 +1,6 @@
 #!/bin/bash
-# Source: http://www.onlamp.com/pub/a/linux/2000/11/16/LinuxAdmin.html
+this_file_path=$(dirname $(realpath $BASH_SOURCE))
+source $this_file_path/text-color.sh
 
 INSTANCE="${BLOCK_INSTANCE}"
 # If you don't like you can use any other IP
@@ -35,10 +36,6 @@ if [[ -f "${PREV_FILE}" ]]; then
 fi
 
 BANDWIDTH=$(grep "${INSTANCE}" /proc/net/dev | awk -F: '{print  $2}' | awk '{print $1" "$9}')
-
-if [[ "${BANDWIDTH}" = "" ]]; then
-  exit
-fi
 
 BYTES_IN=$(echo "${BANDWIDTH}" | awk -F ' ' '{print $1}')
 BYTES_OUT=$(echo "${BANDWIDTH}" | awk -F ' ' '{print $2}')

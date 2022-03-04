@@ -1,4 +1,6 @@
 #!/bin/bash
+this_file_path=$(dirname $(realpath $BASH_SOURCE))
+source $this_file_path/text-color.sh
 
 FORMAT="${BLOCK_INSTANCE:-%H:%M}"
 DATETIME=$(date "+${FORMAT}")

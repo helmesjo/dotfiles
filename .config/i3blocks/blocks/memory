@@ -1,4 +1,6 @@
 #!/bin/bash
+this_file_path=$(dirname $(realpath $BASH_SOURCE))
+source $this_file_path/text-color.sh
 
 # First argument is source (mem/swap), second is output value
 # Check /proc/meminfo for possible instances

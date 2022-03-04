@@ -1,5 +1,6 @@
 #!/bin/bash
-# Source: http://askubuntu.com/a/450136
+this_file_path=$(dirname $(realpath $BASH_SOURCE))
+source $this_file_path/text-color.sh
 
 URGENT_VALUE=90
 
