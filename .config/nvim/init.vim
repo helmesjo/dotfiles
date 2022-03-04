@@ -32,6 +32,8 @@ au BufWinLeave * call clearmatches()
 
 call plug#begin('~/.config/nvim/plugged')
 
+" General
+Plug 'tomasiser/vim-code-dark'
 " C++
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'jackguo380/vim-lsp-cxx-highlight'
