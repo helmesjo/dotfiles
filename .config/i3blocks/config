@@ -230,3 +230,8 @@ interval=5
 #[keymap]
 #label= 
 #interval=10
+
+# Add some spacing to far right
+[empty]
+interval=-1
+label=
