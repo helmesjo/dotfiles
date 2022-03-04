@@ -40,7 +40,7 @@ bindsym $mod+Return exec i3-sensible-terminal
 bindsym $mod+Shift+q kill
 
 # start program launcher
-bindsym $mod+d exec --no-startup-id rofi -show run
+bindsym $mod+d exec --no-startup-id rofi -theme tomorrow-dark -show run
 
 # change focus
 bindsym $mod+h focus left
@@ -296,6 +296,6 @@ bar {
     focused_workspace  $color.color4    $color.bg       $color.fg
     inactive_workspace $color.bg        $color.bg       $color.fg
     urgent_workspace   $color.color4    $color.bg       $color.fg
-    binding_mode       $color.color4    $color.bg       $color.fg
+    binding_mode       $color.color4    $color.bg       $color.color4
   }
 }
