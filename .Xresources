@@ -1,7 +1,8 @@
-#include ".Xcolors/default"
+#include ".Xcolors/active"
 
 *foreground: FOREGROUND
 *background: BACKGROUND
+*cursorColor: CURSORCOLOR
 
 *color0:  COLOR0
 *color8:  COLOR8
