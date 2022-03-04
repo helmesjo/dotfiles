@@ -292,10 +292,10 @@ bar {
   colors {
     background $color.bg
 #                      border           background      text
-    active_workspace   $color.color4    $color.bg       $color.color4
-    focused_workspace  $color.color4    $color.bg       $color.color4
-    inactive_workspace $color.bg        $color.bg       $color.color4
-    urgent_workspace   $color.color4    $color.bg       $color.color4
-    binding_mode       $color.color4    $color.bg       $color.color4
+    active_workspace   $color.color4    $color.bg       $color.fg
+    focused_workspace  $color.color4    $color.bg       $color.fg
+    inactive_workspace $color.bg        $color.bg       $color.fg
+    urgent_workspace   $color.color4    $color.bg       $color.fg
+    binding_mode       $color.color4    $color.bg       $color.fg
   }
 }
