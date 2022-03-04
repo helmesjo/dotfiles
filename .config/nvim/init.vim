@@ -26,7 +26,9 @@ au InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
 au InsertLeave * match ExtraWhitespace /\s\+$/
 au BufWinLeave * call clearmatches()
 
-" GENERAL CONFIG ------------------------------------------------------
+" CUSTOM MAPPING ------------------------------------------------------
+" Visual mode: ctrl+r to replace selection with text
+vnoremap <C-r> "hy:%s/<C-r>h//gc<left><left><left>
 
 " PLUG CONFIG ---------------------------------------------------------
 
