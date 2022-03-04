@@ -19,20 +19,6 @@ client.urgent           $color.fg      $color.bg       $color.fg       $color.cu
 client.placeholder      $color.fg      $color.bg       $color.fg       $color.cursor     $color.color8
 client.background       $color.bg
 
-bar {
-  position top
-  status_command i3blocks
-  colors {
-    background $color.bg
-#                      border           background      text
-    active_workspace   $color.color4    $color.bg       $color.color4
-    focused_workspace  $color.color4    $color.bg       $color.color4
-    inactive_workspace $color.bg        $color.bg       $color.color4
-    urgent_workspace   $color.color4    $color.bg       $color.color4
-    binding_mode       $color.color4    $color.bg       $color.color4
-  }
-}
-
 set $mod Mod1
 
 new_window pixel 1
@@ -299,3 +285,17 @@ exec --no-startup-id mate-power-manager
 bindsym XF86AudioRaiseVolume exec --no-startup-id amixer -c 0 -q set Master 2dB+ unmute
 bindsym XF86AudioLowerVolume exec --no-startup-id amixer -c 0 -q set Master 2db- unmute
 bindsym XF86AudioMute exec --no-startup-id amixer -q set Master toggle
+
+bar {
+  position top
+  status_command i3blocks
+  colors {
+    background $color.bg
+#                      border           background      text
+    active_workspace   $color.color4    $color.bg       $color.color4
+    focused_workspace  $color.color4    $color.bg       $color.color4
+    inactive_workspace $color.bg        $color.bg       $color.color4
+    urgent_workspace   $color.color4    $color.bg       $color.color4
+    binding_mode       $color.color4    $color.bg       $color.color4
+  }
+}
