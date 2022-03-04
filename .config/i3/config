@@ -1,17 +1,37 @@
 # Theme colors (read from .Xresources)
 set_from_resource $color.bg i3wm.background #000000
 set_from_resource $color.fg i3wm.foreground #000000
+set_from_resource $color.cursor i3wm.cursorColor #000000
+set_from_resource $color.color1 i3wm.color1 #000000
 set_from_resource $color.color2 i3wm.color2 #000000
+set_from_resource $color.color3 i3wm.color3 #000000
 set_from_resource $color.color4 i3wm.color4 #000000
+set_from_resource $color.color5 i3wm.color5 #000000
 set_from_resource $color.color6 i3wm.color6 #000000
+set_from_resource $color.color7 i3wm.color7 #000000
+set_from_resource $color.color8 i3wm.color8 #000000
 
-#                       border          background      text            indicator         child_border
-client.focused          $color.fg       $color.bg       $color.fg       $color.color2     $color.color2
-client.focused_inactive $color.fg       $color.bg       $color.fg       $color.color4     $color.color4
-client.unfocused        $color.fg       $color.bg       $color.fg       $color.color4     $color.color4
-client.urgent           $color.fg       $color.bg       $color.fg       $color.color4     $color.color4
-client.placeholder      $color.fg       $color.bg       $color.fg       $color.color4     $color.color4
+#                       border         background      text            indicator         child_border
+client.focused          $color.fg      $color.bg       $color.fg       $color.cursor     $color.color4
+client.focused_inactive $color.fg      $color.bg       $color.fg       $color.cursor     $color.color8
+client.unfocused        $color.fg      $color.bg       $color.fg       $color.cursor     $color.color8
+client.urgent           $color.fg      $color.bg       $color.fg       $color.cursor     $color.color8
+client.placeholder      $color.fg      $color.bg       $color.fg       $color.cursor     $color.color8
 client.background       $color.bg
+
+bar {
+  position top
+  status_command i3blocks
+  colors {
+    background $color.bg
+#                      border           background      text
+    active_workspace   $color.color4    $color.bg       $color.color4
+    focused_workspace  $color.color4    $color.bg       $color.color4
+    inactive_workspace $color.bg        $color.bg       $color.color4
+    urgent_workspace   $color.color4    $color.bg       $color.color4
+    binding_mode       $color.color4    $color.bg       $color.color4
+  }
+}
 
 set $mod Mod1
 
@@ -279,17 +299,3 @@ exec --no-startup-id mate-power-manager
 bindsym XF86AudioRaiseVolume exec --no-startup-id amixer -c 0 -q set Master 2dB+ unmute
 bindsym XF86AudioLowerVolume exec --no-startup-id amixer -c 0 -q set Master 2db- unmute
 bindsym XF86AudioMute exec --no-startup-id amixer -q set Master toggle
-
-bar {
-  position top
-  status_command i3blocks
-  colors {
-    background $color.bg
-#                      border           background      text
-    active_workspace   $color.color2    $color.bg       $color.color6
-    focused_workspace  $color.color2    $color.bg       $color.color6
-    inactive_workspace $color.bg        $color.bg       $color.color6
-    urgent_workspace   $color.color2    $color.bg       $color.color6
-    binding_mode       $color.color2    $color.bg       $color.color6
-  }
-}
