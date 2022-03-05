@@ -9,7 +9,9 @@ BATTERY_POWER=$(echo "${BATTERY_INFO}" | grep -o '[0-9]\+%' | tr -d '%')
 
 URGENT_VALUE=10
 
-if [[ "${BATTERY_STATE}" = "Charging" ]]; then
+if [[ "${BATTERY_POWER}" = "" ]]; then
+  exit 33
+elif [[ "${BATTERY_STATE}" = "Charging" ]]; then
   echo "${BATTERY_POWER}%+"
   echo "${BATTERY_POWER}%+"
 elif [[ "${BATTERY_STATE}" = "Discharging" ]]; then
