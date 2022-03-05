@@ -8,6 +8,7 @@ enable_services="lightdm"
 $dotfiles_root/scripts/install.sh
 $dotfiles_root/scripts/configure.sh
 $dotfiles_root/scripts/configure-nvim.sh
+$dotfiles_root/scripts/configure-git.sh
 
 # Enable services
 for service in ${enable_services}; do
