@@ -3,7 +3,7 @@ set -eu -o pipefail
 
 echo "Installing required packages..."
 
-pacpackages="mesa xorg vim git python3 firefox bc rxvt-unicode alsa-utils lightdm-gtk-greeter i3-gaps i3blocks nitrogen rofi compton ttf-font-awesome adobe-source-code-pro-fonts ttf-nerd-fonts-symbols neovim nodejs ccls ctags"
+pacpackages="mesa xorg net-tools vim git python3 firefox bc rxvt-unicode alsa-utils lightdm-gtk-greeter i3-gaps i3blocks nitrogen rofi compton ttf-font-awesome adobe-source-code-pro-fonts ttf-nerd-fonts-symbols neovim nodejs ccls ctags"
 #aurpackages=""
 
 # Install yay if missing
