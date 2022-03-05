@@ -2,13 +2,12 @@
 this_file_path=$(dirname $(realpath $BASH_SOURCE))
 source $this_file_path/text-color.sh
 
-INSTANCE="${BLOCK_INSTANCE}"
-# If you don't like you can use any other IP
-INTERFACE="$(ip route get 8.8.8.8 | grep -Po '(?<=(dev )).*(?= src)')"
+INTERFACE="$(route | grep '^default' | grep -o '[^ ]*$')"
+INSTANCE="${INTERFACE};${BLOCK_INSTANCE}"
 
-if [[ "${INSTANCE}" = "" ]]; then
-  INSTANCE="${INTERFACE};both"
-fi
+#if [[ "${INSTANCE}" = "" ]]; then
+#  INSTANCE="${INTERFACE};both"
+#fi
 
 DISPLAY=$(echo "${INSTANCE}" | awk -F ';' '{print $2}')
 INSTANCE=$(echo "${INSTANCE}" | awk -F ';' '{print $1}')
