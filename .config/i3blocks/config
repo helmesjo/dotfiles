@@ -30,41 +30,48 @@ separator_block_width=15
 markup=none
 #color=#C9A554 color is in the blocks, read from Xresources
 
-[bandwidth]
-instance=in
-label= 
-interval=1
+#[bandwidth]
+#instance=in
+#label= 
+#interval=1
 
-[bandwidth]
-instance=out
-label= 
-interval=1
+#[bandwidth]
+#instance=out
+#label= 
+#interval=1
 
-[cpu]
-label= 
-interval=2
+#[cpu]
+#label= 
+#interval=2
 
-[temperature]
-instance=Core
-label= 
-interval=5
+#[temperature]
+#instance=Core
+#label= 
+#interval=5
 
-[memory]
-label= 
-instance=mem;free
-interval=30
+#[memory]
+#label= 
+#instance=mem;free
+#interval=30
 
-[space]
-label= 
-interval=30
+#[space]
+#label= 
+#interval=30
 
-[audio]
+[volume]
 label= 
+command=~/.config/i3blocks/blocks/volume output i3blocks
+interval=once
+signal=10
+
+[battery]
+label= 
+instance=0
 interval=5
 
-[microphone]
-label= 
-interval=5
+#[microphone]
+#label= 
+#interval=5
 
 [user]
 label= 
@@ -73,11 +80,6 @@ interval=once
 [datetime]
 label= 
 interval=5
-
-#[battery]
-#label= 
-#instance=0
-#interval=5
 
 # Part 2
 
