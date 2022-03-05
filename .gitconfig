@@ -1,0 +1,7 @@
+[user]
+	email = helmesjo@gmail.com
+	name = helmesjo
+[credential]
+	helper = libsecret
+[core]
+	editor = nvim
