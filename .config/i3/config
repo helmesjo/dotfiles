@@ -228,13 +228,8 @@ mode "resize" {
 }
 
 # Autostart applications
-exec --no-startup-id nitrogen --restore ~; sleep 1; compton
-#exec --no-startup-id nm-applet
-#exec --no-startup-id xfce4-power-manager
-#exec --no-startup-id pamac-tray
-#exec --no-startup-id clipit
-#exec_always --no-startup-id ff-theme-util
-#exec_always --no-startup-id fix_xcursor
+exec --no-startup-id volctl                          # Volume tray icon
+exec --no-startup-id nitrogen --restore ~; compton   # App switcher and compositor
 
 # Gaps
 gaps inner 10
@@ -279,34 +274,24 @@ mode "$mode_gaps_outer" {
         bindsym Escape mode "default"
 }
 
-## Volume control
+# Volume control
+bindsym XF86AudioPlay exec playerctl play-pause
 
-# Path to volume control, without trailing slash
-set $volumepath ~/.config/i3blocks/blocks
+bindsym XF86AudioPause exec playerctl play-pause
 
-# Command for the status line
-#   ie: i3blocks, i3status
-set $statuscmd i3blocks
+bindsym XF86AudioNext exec playerctl next
 
-# Signal used to update the status line
-#   i3blocks uses SIGRTMIN+10 by default
-#   i3status uses SIGUSR1 by default
-set $statussig SIGUSR1
+bindsym XF86AudioPrev exec playerctl previous
 
-# Amount to increase/decrease volume as a percentage
-set $volumestep 5
+bindsym XF86MonBrightnessUp exec xbacklight -inc 20 # increase screen brightness
 
-# pulseaudio-utils settings
-#
-# Symbolic name for sink (numeric index not supported)
-#   Recommended: comment out this setting and omit the -s option to use default sink
-#   List sink names: pacmd list-sinks | awk -F "[<>]" '/^\s+name: <.*>/{print $2}'
-#set $sinkname alsa_output.pci-0000_00_1b.0.analog-stereo
+bindsym XF86MonBrightnessDown exec xbacklight -dec 20 # decrease screen brightness
 
-# Using pulseaudio-utils (append "-s $sinkname" without quotes to override default sink)
-bindsym XF86AudioRaiseVolume exec --no-startup-id $volumepath/volume -n -t $statuscmd -u $statussig up $volumestep
-bindsym XF86AudioLowerVolume exec --no-startup-id $volumepath/volume -n -t $statuscmd -u $statussig down $volumestep
-bindsym XF86AudioMute        exec --no-startup-id $volumepath/volume -n -t $statuscmd -u $statussig mute
+bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5% && pactl set-sink-mute @DEFAULT_SINK@ 0 # raise volume
+
+bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5% && pactl set-sink-mute @DEFAULT_SINK@ 0 # lower volume
+
+bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle # toggle mute for default device
 
 bar {
   position top

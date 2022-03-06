@@ -58,11 +58,11 @@ markup=none
 #label= 
 #interval=30
 
-[volume]
-label= 
-command=~/.config/i3blocks/blocks/volume output i3blocks
-interval=once
-signal=10
+#[volume]
+#label= 
+#command=~/.config/i3blocks/blocks/volume output i3blocks
+#interval=once
+#signal=10
 
 [battery]
 label= 
