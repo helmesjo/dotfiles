@@ -18,7 +18,7 @@ for sourcename in ${dotfiles[@]}; do
     "." | "..")
       continue
       ;;
-    .git*)
+    .git | .gitignore | .gitattributes)
       continue
       ;;
     .[a-z,A-Z]*)
