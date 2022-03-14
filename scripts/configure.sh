@@ -8,6 +8,7 @@ backup_nr=$(test -d $dotfiles_root/_backup && find $dotfiles_root/_backup/ -maxd
 dotfiles_backup="$dotfiles_root/_backup/$backup_nr"
 target_root="$HOME"
 
+# Setup dotfiles
 echo "Configuring '$dotfiles_root' in '$target_root'..."
 mkdir -p $dotfiles_backup
 for sourcename in ${dotfiles[@]}; do

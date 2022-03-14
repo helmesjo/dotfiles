@@ -3,8 +3,38 @@ set -eu -o pipefail
 
 echo "Installing required packages..."
 
-pacpackages="mesa xorg net-tools pulseaudio vim git gnome-keyring libsecret python3 firefox bc rxvt-unicode lightdm-gtk-greeter i3-gaps i3blocks nitrogen rofi compton ttf-font-awesome adobe-source-code-pro-fonts neovim nodejs ccls ctags"
-aurpackages="volctl"
+pacpkgs=(
+  # Base
+  mesa
+  wayland
+  qt5-wayland
+  glfw-wayland
+  xorg-xwayland
+  xorg-xlsclients
+  net-tools
+  pulseaudio
+  firefox
+  bc
+  ttf-font-awesome
+  adobe-source-code-pro-fonts
+  # GUI
+  lightdm-gtk-greeter
+  sway
+  waybar
+  bemenu-wayland
+  # Dev
+  alacritty
+  vim
+  neovim
+  nodejs
+  ccls
+  ctags
+  git
+  gnome-keyring
+  libsecret
+  python3
+)
+#aurpkgs=()
 
 # Install yay if missing
 if ! command -v yay &> /dev/null; then
@@ -15,6 +45,20 @@ if ! command -v yay &> /dev/null; then
 fi
 
 # Install packages
-sudo pacman -S --noconfirm $pacpackages
-yay -S --noconfirm $aurpackages
+sudo pacman -S --noconfirm "${pacpkgs[@]}"
+#yay -S --noconfirm "${aurpkgs[@]}"
 
+# Setup system/package envars
+envar_file="/etc/environment"
+envars=(
+  MOZ_ENABLE_WAYLAND=1 # Firefox
+)
+for envar in $envars[@]; do
+  envar=($(echo $envar | tr "=" "\n"))
+  if grep -Fxq "${envar[0]}" $envar_file
+  then
+    sed "s/${envar[0]}=.*$/${envar[0]}=${envar[1]}/" $envar_file
+  else
+    echo "${envar[0]}=${envar[1]}" > $envar_file
+  fi
+done
