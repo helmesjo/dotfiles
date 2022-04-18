@@ -30,7 +30,7 @@ for sourcename in ${dotfiles[@]}; do
       ;;
   esac
 
-  # Skip untracked files  
+  # Skip untracked files
   if [ -z "$(git -C $dotfiles_root ls-files $sourcename)" ]; then
     echo "  - Skipping untracked '$sourcename'"
     continue
@@ -45,22 +45,14 @@ for sourcename in ${dotfiles[@]}; do
     printf "%s" "    - "
     mv -v $targetpath $dotfiles_backup/
   fi
-  
+
   echo "  - Creating symlink for '$sourcename'"
   printf "%s" "    - "
   ln -sv $sourcepath $targetpath
 done
 
-if xhost >& /dev/null; then
-  if command -v xrdb &> /dev/null; then
-    echo "Load Xresources..."
-    printf "%s" "  - "
-    xrdb -I$HOME ~/.Xresources
-  fi
-
-  if command -v i3-msg &> /dev/null; then
-    echo "Restart i3..."
-    printf "%s" "  - "
-    i3-msg restart
-  fi
+if command -v swaymsg &> /dev/null; then
+  echo "Reload sway..."
+  printf "%s" "  - "
+  swaymsg reload
 fi
