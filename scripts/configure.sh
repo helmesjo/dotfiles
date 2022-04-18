@@ -51,8 +51,7 @@ for sourcename in ${dotfiles[@]}; do
   ln -sv $sourcepath $targetpath
 done
 
-if command -v swaymsg &> /dev/null; then
+if [ -v SWAYSOCK ]; then
   echo "Reload sway..."
-  printf "%s" "  - "
   swaymsg reload
 fi
