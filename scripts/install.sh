@@ -51,16 +51,19 @@ sudo pacman -S --noconfirm "${pacpkgs[@]}"
 # Setup system/package envars
 envar_file="/etc/environment"
 envars=(
-  MOZ_ENABLE_WAYLAND=1                    # Firefox
-  QT_WAYLAND_DISABLE_WINDOWDECORATION=1   # Qt
+  # Firefox
+  MOZ_ENABLE_WAYLAND=1
+  # Qt
+  QT_WAYLAND_DISABLE_WINDOWDECORATION=1
 )
-for envar in $envars[@]; do
+echo "Setting up environment variables in '$envar_file'..."
+for envar in ${envars[@]}; do
+  echo "  - $envar"
   envar=($(echo $envar | tr "=" "\n"))
-  if grep -Fxq "${envar[0]}" $envar_file
-  then
-    sudo sed "s/${envar[0]}=.*$/${envar[0]}=${envar[1]}/" $envar_file
+  if grep --quiet "${envar[0]}" $envar_file; then
+    sudo sed -i "s/${envar[0]}=.*$/${envar[0]}=${envar[1]}/" $envar_file
   else
-    sudo echo "${envar[0]}=${envar[1]}" > $envar_file
+    echo "${envar[0]}=${envar[1]}" | sudo tee -a $envar_file
   fi
 done
 
