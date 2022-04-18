@@ -58,9 +58,9 @@ for envar in $envars[@]; do
   envar=($(echo $envar | tr "=" "\n"))
   if grep -Fxq "${envar[0]}" $envar_file
   then
-    sed "s/${envar[0]}=.*$/${envar[0]}=${envar[1]}/" $envar_file
+    sudo sed "s/${envar[0]}=.*$/${envar[0]}=${envar[1]}/" $envar_file
   else
-    echo "${envar[0]}=${envar[1]}" > $envar_file
+    sudo echo "${envar[0]}=${envar[1]}" > $envar_file
   fi
 done
 
