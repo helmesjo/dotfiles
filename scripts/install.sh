@@ -51,7 +51,8 @@ sudo pacman -S --noconfirm "${pacpkgs[@]}"
 # Setup system/package envars
 envar_file="/etc/environment"
 envars=(
-  MOZ_ENABLE_WAYLAND=1 # Firefox
+  MOZ_ENABLE_WAYLAND=1                    # Firefox
+  QT_WAYLAND_DISABLE_WINDOWDECORATION=1   # Qt
 )
 for envar in $envars[@]; do
   envar=($(echo $envar | tr "=" "\n"))
@@ -62,3 +63,4 @@ for envar in $envars[@]; do
     echo "${envar[0]}=${envar[1]}" > $envar_file
   fi
 done
+
