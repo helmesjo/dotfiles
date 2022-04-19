@@ -18,7 +18,6 @@ pacpkgs=(
   ttf-font-awesome
   adobe-source-code-pro-fonts
   # GUI
-  lightdm-gtk-greeter
   sway
   waybar
   bemenu-wayland
@@ -34,7 +33,9 @@ pacpkgs=(
   libsecret
   python3
 )
-#aurpkgs=()
+aurpkgs=(
+  greetd
+)
 
 # Install yay if missing
 if ! command -v yay &> /dev/null; then
@@ -46,7 +47,7 @@ fi
 
 # Install packages
 sudo pacman -S --noconfirm "${pacpkgs[@]}"
-#yay -S --noconfirm "${aurpkgs[@]}"
+yay -S --noconfirm "${aurpkgs[@]}"
 
 # Setup system/package envars
 envar_file="/etc/environment"
@@ -65,5 +66,15 @@ for envar in ${envars[@]}; do
   else
     echo "${envar[0]}=${envar[1]}" | sudo tee -a $envar_file
   fi
+done
+
+services=(
+  greetd
+)
+echo "Enabling services..."
+for service in ${services[@]}; do
+  echo "  - $service"
+  printf "%s" "  - "
+  sudo systemctl enable $service
 done
 
