@@ -13,6 +13,7 @@ pacpkgs=(
   xorg-xlsclients
   net-tools
   pulseaudio
+  pavucontrol
   firefox
   bc
   ttf-font-awesome
@@ -46,8 +47,8 @@ if ! command -v yay &> /dev/null; then
 fi
 
 # Install packages
-sudo pacman -S --noconfirm "${pacpkgs[@]}"
-yay -S --noconfirm "${aurpkgs[@]}"
+sudo pacman -Sy --needed --noconfirm "${pacpkgs[@]}"
+yay -Sy --needed --noconfirm "${aurpkgs[@]}"
 
 # Setup system/package envars
 envar_file="/etc/environment"
