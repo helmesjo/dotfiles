@@ -1,6 +1,0 @@
-#!/bin/bash
-this_file_path=$(dirname $(realpath $BASH_SOURCE))
-source $this_file_path/text-color.sh
-
-echo ""
-echo ""
