@@ -26,6 +26,7 @@ pacpkgs=(
   alacritty
   vim
   neovim
+  helix
   nodejs
   ccls
   ctags
