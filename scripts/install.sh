@@ -7,6 +7,7 @@ pacpkgs=(
   # Base
   mesa
   wayland
+  wl-clipboard
   qt5-wayland
   glfw-wayland
   xorg-xwayland
