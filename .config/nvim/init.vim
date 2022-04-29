@@ -41,8 +41,6 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'jackguo380/vim-lsp-cxx-highlight'
 Plug 'itchyny/lightline.vim'
 Plug 'liuchengxu/vista.vim'
-Plug 'ludovicchabant/vim-gutentags'
-Plug 'puremourning/vimspector'
 
 call plug#end()
 
