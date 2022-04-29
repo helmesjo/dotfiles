@@ -2,7 +2,7 @@
 # ~/.bashrc
 #
 
-VISUAL=vim
+VISUAL=helix
 EDITOR="$VISUAL"
 
 # Path to file, or source if symlink.
