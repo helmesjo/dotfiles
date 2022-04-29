@@ -1,5 +1,1 @@
 theme = "dark_plus"
-
-[keys.normal]
-y = ":primary-clipboard-yank"
-p = ":primary-clipboard-paste-after"
