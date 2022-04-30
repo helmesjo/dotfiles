@@ -20,7 +20,9 @@ pacpkgs=(
   ttf-font-awesome
   adobe-source-code-pro-fonts
   # Core
+  alacritty
   bat
+  fish
   fzf
   ripgrep
   # GUI
@@ -28,7 +30,6 @@ pacpkgs=(
   sway
   waybar
   # Dev
-  alacritty
   git
   git-delta
   gnome-keyring
