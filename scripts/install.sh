@@ -19,6 +19,10 @@ pacpkgs=(
   bc
   ttf-font-awesome
   adobe-source-code-pro-fonts
+  # Core
+  bat
+  fzf
+  ripgrep
   # GUI
   bemenu-wayland
   sway
