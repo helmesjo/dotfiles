@@ -20,21 +20,20 @@ pacpkgs=(
   ttf-font-awesome
   adobe-source-code-pro-fonts
   # GUI
+  bemenu-wayland
   sway
   waybar
-  bemenu-wayland
   # Dev
   alacritty
-  vim
-  neovim
-  helix
-  nodejs
-  ccls
-  ctags
   git
+  git-delta
   gnome-keyring
+  helix
   libsecret
+  neovim
+  nodejs
   python3
+  vim
 )
 aurpkgs=(
   greetd
