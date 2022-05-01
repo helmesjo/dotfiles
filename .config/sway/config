@@ -75,6 +75,9 @@ set $bar waybar
 # on the original workspace that the command was run on.
 set $menu bemenu-run --width-factor 0.5 --list 10 --ignorecase --wrap | xargs swaymsg exec --
 
+# App Configs
+for_window [title="^FreeRDP"] move to workspace 4; floating enable; floating_modifier none
+
 ### Output configuration
 output * bg $wallpaper fit $color_bg
 
