@@ -28,6 +28,8 @@ pacpkgs=(
   # GUI
   bemenu-wayland
   sway
+  swayidle
+  swaylock
   waybar
   # Dev
   git

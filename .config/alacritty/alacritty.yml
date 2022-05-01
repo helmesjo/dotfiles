@@ -1,2 +1,7 @@
 shell:
   program: fish
+
+font:
+  normal:
+    family: Source Code Pro
+    style: Regular
