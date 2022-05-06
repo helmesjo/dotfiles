@@ -89,9 +89,10 @@ output * bg $wallpaper fit $color_bg
 
 ### Idle configuration
 exec swayidle -w \
-         timeout 1800 '$lock' \
-         timeout 1860 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
-         before-sleep '$lock'
+        timeout 1800 '$lock' \
+        timeout 10 'if pgrep swaylock; then swaymsg "output * dpms off"; fi' \
+          resume 'swaymsg "output * dpms on"' \
+        before-sleep '$lock'
 
 # This will lock your screen after 300 seconds of inactivity, then turn off
 # your displays after another 300 seconds, and turn your screens back on when
