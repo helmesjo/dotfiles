@@ -27,6 +27,7 @@ pacpkgs=(
   ripgrep
   # GUI
   bemenu-wayland
+  mako
   sway
   swayidle
   swaylock
