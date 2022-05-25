@@ -5,6 +5,8 @@ echo "Installing required packages..."
 
 pacpkgs=(
   # Base
+  net-tools
+  libnotify
   mesa
   wayland
   wl-clipboard
@@ -12,7 +14,6 @@ pacpkgs=(
   glfw-wayland
   xorg-xwayland
   xorg-xlsclients
-  net-tools
   pulseaudio
   pavucontrol
   firefox
@@ -25,9 +26,10 @@ pacpkgs=(
   fish
   fzf
   ripgrep
-  # GUI
-  bemenu-wayland
-  mako
+  # TUI/GUI
+  bemenu-wayland   # application runner
+  bottom           # system monitor
+  mako             # notifications
   sway
   swayidle
   swaylock

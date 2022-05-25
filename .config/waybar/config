@@ -80,10 +80,12 @@
     },
     "cpu": {
         "format": "{usage}% ",
-        "tooltip": false
+        "tooltip": true,
+        "on-click": "alacritty -e btm"
     },
     "memory": {
-        "format": "{}% "
+        "format": "{}% ",
+        "on-click": "alacritty -e btm"
     },
     "temperature": {
         // "thermal-zone": 2,
