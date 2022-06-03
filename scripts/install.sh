@@ -16,16 +16,17 @@ pacpkgs=(
   xorg-xlsclients
   pulseaudio
   pavucontrol
-  firefox
   bc
-  ttf-font-awesome
-  adobe-source-code-pro-fonts
   # Core
   alacritty
   bat
   fish
   fzf
   ripgrep
+  # Fonts
+  adobe-source-code-pro-fonts
+  noto-fonts
+  noto-fonts-emoji
   # TUI/GUI
   bemenu-wayland   # application runner
   bottom           # system monitor
@@ -44,6 +45,8 @@ pacpkgs=(
   nodejs
   python3
   vim
+  # Misc
+  firefox
 )
 aurpkgs=(
   greetd
