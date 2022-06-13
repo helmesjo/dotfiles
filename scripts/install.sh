@@ -27,6 +27,7 @@ pacpkgs=(
   adobe-source-code-pro-fonts
   noto-fonts
   noto-fonts-emoji
+  ttf-font-awesome
   # TUI/GUI
   bemenu-wayland   # application runner
   bottom           # system monitor
