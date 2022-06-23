@@ -3,6 +3,8 @@ set -eu -o pipefail
 
 echo "Installing required packages..."
 
+is_laptop=$(cat /sys/class/dmi/id/chassis_type | grep "\b9\b" > /dev/null && echo "true")
+
 pacpkgs=(
   # Base
   net-tools
@@ -53,6 +55,12 @@ aurpkgs=(
   greetd
 )
 
+# Laptop only
+if [ "$is_laptop" == "true" ]; then
+  # power management
+  pacpkgs+=(tlp)
+fi
+
 # Install yay if missing
 if ! command -v yay &> /dev/null; then
   git clone https://aur.archlinux.org/yay $HOME/git/yay
@@ -85,12 +93,24 @@ for envar in ${envars[@]}; do
 done
 
 services=(
-  greetd
+  greetd.service
 )
+
+# Laptop only
+if [ "$is_laptop" == "true" ]; then
+  services+=(tlp.service)
+fi
+
 echo "Enabling services..."
 for service in ${services[@]}; do
   echo "  - $service"
-  printf "%s" "  - "
+  # printf "%s" "  - "
   sudo systemctl enable $service
 done
 
+# Laptop only
+if [ "$is_laptop" == "true" ]; then
+  # tlp specific
+  sudo systemctl mask systemd-rfkill.service
+  sudo systemctl mask systemd-rfkill.socket
+fi
