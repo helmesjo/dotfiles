@@ -114,10 +114,19 @@ exec swayidle -w \
 # You can get the names of your inputs by running: swaymsg -t get_inputs
 # Read `man 5 sway-input` for more information about this section.
 
+### Input layouts
+input type:keyboard {
+    xkb_layout us,se
+    xkb_options grp:alt_caps_toggle
+}
+
 ### Key bindings
 #
 # Basics:
 #
+    # Switch keyboard layout
+    #bindsym $mod+Ctrl+Alt+space input type:keyboard xkb_switch_layout next # fixed by https://github.com/swaywm/sway/pull/6966 and available in next after sway 1.7
+
     # Start a terminal
     bindsym $mod+Return exec $term
 
