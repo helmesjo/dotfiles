@@ -3,7 +3,7 @@ set -eu -o pipefail
 
 echo "Installing required packages..."
 
-is_laptop=$(cat /sys/class/dmi/id/chassis_type | grep "\b9\b" > /dev/null && echo "true")
+is_laptop=$(cat /sys/class/dmi/id/chassis_type | grep "\b9\b" > /dev/null && echo "true" || echo "false")
 
 pacpkgs=(
   # Base
