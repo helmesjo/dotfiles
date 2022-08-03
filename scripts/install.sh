@@ -35,6 +35,7 @@ pacpkgs=(
   bottom           # system monitor
   mako             # notifications
   sway
+  swaybg
   swayidle
   swaylock
   waybar
