@@ -38,12 +38,14 @@ for sourcename in ${dotfiles[@]}; do
 
   sourcepath=$(realpath $sourcename)
   targetpath="$target_root/$sourcename"
-
-  # Backup target file if it exists
-  if [ -f "$targetpath" ] || [ -d "$targetpath" ]; then
+  
+  # Backup target file/directory if it exists (-L to include broken symlinks)
+  if [ -e $targetpath ] || [ -L $targetpath ]; then
     echo "  - Backup '$targetpath'"
     printf "%s" "    - "
     mv -v $targetpath $dotfiles_backup/
+  else
+    echo "  - '$targetpath' does not exist"
   fi
 
   echo "  - Creating symlink for '$sourcename'"
