@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eu -o pipefail
 
-this_file_path=$(dirname $(realpath $BASH_SOURCE))
+this_file_path=$(dirname $(readlink -f $BASH_SOURCE))
 
 # echo $this_file_path
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eu -o pipefail
 
-dotfiles_root=`dirname $(realpath $BASH_SOURCE)`
+dotfiles_root=`dirname $(readlink -f $BASH_SOURCE)`
 
 os=$($dotfiles_root/scripts/get-os.sh 2>&1)
 

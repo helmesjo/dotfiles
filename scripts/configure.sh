@@ -36,7 +36,7 @@ for sourcename in ${dotfiles[@]}; do
     continue
   fi
 
-  sourcepath=$(realpath $sourcename)
+  sourcepath=$(readlink -f $sourcename)
   targetpath="$target_root/$sourcename"
   
   # Backup target file/directory if it exists (-L to include broken symlinks)
