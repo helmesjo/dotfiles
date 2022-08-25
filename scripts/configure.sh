@@ -1,8 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -eu -o pipefail
 
-this_file_path=$(dirname $(realpath $BASH_SOURCE))
-dotfiles_root=$(cd $this_file_path/..; pwd)
+dotfiles_root=$(pwd)
 dotfiles=$(ls -a $dotfiles_root) # grab the list
 backup_nr=$(test -d $dotfiles_root/_backup && find $dotfiles_root/_backup/ -maxdepth 1 -type d -name '*' -printf x | wc -c || echo 1)
 dotfiles_backup="$dotfiles_root/_backup/$backup_nr"
@@ -10,6 +9,7 @@ target_root="$HOME"
 
 # Setup dotfiles
 echo "Configuring '$dotfiles_root' in '$target_root'..."
+
 mkdir -p $dotfiles_backup
 for sourcename in ${dotfiles[@]}; do
   [ -e "$sourcename" ] || continue
@@ -50,8 +50,3 @@ for sourcename in ${dotfiles[@]}; do
   printf "%s" "    - "
   ln -sv $sourcepath $targetpath
 done
-
-if [ -v SWAYSOCK ]; then
-  echo "Reload sway..."
-  swaymsg reload
-fi

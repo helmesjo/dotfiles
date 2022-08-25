@@ -19,6 +19,7 @@ pacpkgs=(
   pulseaudio
   pavucontrol
   bc
+  lsb-release
   # Core
   alacritty
   bat
