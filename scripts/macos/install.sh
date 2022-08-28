@@ -18,8 +18,9 @@ brewpkgs=(
   ripgrep
 )
 
-# pkginpkgs=(
-# )
+pkginpkgs=(
+  tree
+)
 
 brew install -f ${brewpkgs[@]}
-# sudo pkgin -y install ${pkginpkgs[@]}
+sudo pkgin -y install ${pkginpkgs[@]}
