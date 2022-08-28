@@ -20,4 +20,12 @@ if status is-interactive
     alias cat='bat'
     alias config='git -C $dotfiles_root'
     alias ls='ls --color=auto'
+    # helix doesn't have a 'hx' bin on arch
+    switch (uname)
+        case Linux
+            set distro (lsb_release -a | awk -F':' '/Distributor ID/{print $2}' | awk '{$1=$1};1')
+            if string match -q 'Arch*' -- "$distro"
+              alias hx='helix'
+            end
+    end
 end

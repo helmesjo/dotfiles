@@ -2,7 +2,7 @@
 # ~/.bashrc
 #
 
-VISUAL=helix
+VISUAL=hx
 EDITOR="$VISUAL"
 
 # Path to file, or source if symlink.
@@ -15,9 +15,7 @@ dotfiles_root=$(git -C $this_file rev-parse --show-toplevel)
 PS1='[\u@\h \W]\$ '
 
 # Aliases
-alias cat='bat'
-alias config='/usr/bin/git -C $dotfiles_root'
-alias ls='ls --color=auto'
+source ~/.bazsh_aliases
 
 # Sourcing
 if [[ "$OSTYPE" == "darwin"* ]]; then

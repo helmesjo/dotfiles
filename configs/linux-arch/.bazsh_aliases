@@ -1,0 +1,11 @@
+# helix doesn't have a 'hx' bin on arch
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  DISTRO="$(lsb_release -a | awk -F':' '/Distributor ID/{print $2}' | awk '{$1=$1};1')"
+  if [[ "$DISTRO" == "Arch"* ]]; then
+    alias hx='helix'
+  fi  
+fi
+
+alias cat='bat'
+alias config='/usr/bin/git -C $dotfiles_root'
+alias ls='ls --color=auto'
