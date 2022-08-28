@@ -4,19 +4,22 @@ set -eu -o pipefail
 
 echo "Installing required packages..."
 
-dotfiles_root=`dirname $(readlink -f $BASH_SOURCE)`
+file_dir=`dirname $(readlink -f $BASH_SOURCE)`
+
+$file_dir/install-brew.sh
+$file_dir/install-pkgin.sh
 
 brewpkgs=(
   bat
-  helix
-)
-
-pkginpkgs=(
   fish
   fzf
   git-delta
+  helix
   ripgrep
 )
 
+# pkginpkgs=(
+# )
+
 brew install -f ${brewpkgs[@]}
-sudo pkgin -y install ${pkginpkgs[@]}
+# sudo pkgin -y install ${pkginpkgs[@]}
