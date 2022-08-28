@@ -57,3 +57,13 @@ for sourcename in ${dotfiles[@]}; do
   printf "%s" "    - "
   ln -sv $sourcepath $targetpath
 done
+
+echo "Custom config..."
+
+# os specific configuration
+configs=$(ls $root_dir/scripts/$os | grep "configure-" --include .sh) # grab the list
+for script in ${configs[@]}; do
+  echo "  - Running '$script'..."
+  $root_dir/scripts/$os/$script
+done
+
