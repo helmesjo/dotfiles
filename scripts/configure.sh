@@ -24,7 +24,6 @@ for sourcename in ${dotfiles[@]}; do
       continue
       ;;
     .[a-z,A-Z]*)
-      echo "ok!"
       ;;
     *)
       echo "  - Skipping '$sourcename'"
