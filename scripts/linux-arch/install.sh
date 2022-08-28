@@ -72,6 +72,7 @@ if ! command -v yay &> /dev/null; then
 fi
 
 # Install packages
+sudo pacman -Sy --noconfirm archlinux-keyring && sudo pacman -Su --noconfirm
 sudo pacman -Sy --needed --noconfirm "${pacpkgs[@]}"
 yay -Sy --needed --noconfirm "${aurpkgs[@]}"
 
