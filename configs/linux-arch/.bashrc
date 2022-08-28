@@ -21,8 +21,10 @@ alias ls='ls --color=auto'
 
 # Sourcing
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  :
+  # fzf
+  [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 else
+  # fzf
   source /usr/share/fzf/key-bindings.bash
   source /usr/share/fzf/completion.bash
 fi
@@ -31,4 +33,3 @@ fi
 export FZF_DEFAULT_COMMAND='rg --files --hidden'
 export FZF_CTRL_T_COMMAND='$FZF_DEFAULT_COMMAND'
 export FZF_COMPLETION_TRIGGER='??'
-
