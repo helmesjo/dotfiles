@@ -2,7 +2,7 @@
 set fish_greeting
 
 # Envars
-set -x VISUAL helix
+set -x VISUAL hx
 set -x EDITOR $VISUAL
 
 if status is-interactive
