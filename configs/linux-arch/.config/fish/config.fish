@@ -27,5 +27,7 @@ if status is-interactive
             if string match -q 'Arch*' -- "$distro"
               alias hx='helix'
             end
+        case Darwin
+            fish_add_path /opt/homebrew/bin
     end
 end
