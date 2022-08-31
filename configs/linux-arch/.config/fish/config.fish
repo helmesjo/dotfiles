@@ -13,7 +13,8 @@ if status is-interactive
     # PATH
     switch (uname)
         case Darwin
-            fish_add_path /opt/homebrew/bin
+            fish_add_path -aP /opt/homebrew/bin
+            fish_add_path -aP /opt/homebrew/Cellar/llvm/14.0.6_1/bin # lldb-vscode
     end
 
     # Aliases
