@@ -10,12 +10,13 @@ $file_dir/install-brew.sh
 $file_dir/install-pkgin.sh
 
 brewpkgs=(
-  iterm2
   bat
   fish
   fzf
   git-delta
   helix
+  iterm2
+  llvm      # lldb-vscode
   ripgrep
 )
 
