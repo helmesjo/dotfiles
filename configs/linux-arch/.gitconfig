@@ -2,9 +2,6 @@
 	email = helmesjo@gmail.com
 	name = helmesjo
 
-[credential]
-	helper = libsecret
-
 [core]
 	editor = hx
     pager = delta
@@ -37,3 +34,6 @@
     line-numbers-plus-style = 28
 [pull]
 	rebase = true
+
+[include]
+	path = ~/.gitconfig.local
