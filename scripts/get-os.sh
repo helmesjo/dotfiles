@@ -2,11 +2,8 @@
 set -eu -o pipefail
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  DISTRO="$(lsb_release -a | awk -F':' '/Distributor ID/{print $2}' | awk '{$1=$1};1')"
-  if [[ "$DISTRO" == "Arch"* ]]; then
-    OS="linux-arch"
-  fi  
-  # ...
+  DISTRO="$(cat /etc/*-release | grep DISTRIB_ID | awk -F'=' '{print $2}' | tr '[:upper:]' '[:lower:]' | xargs)"
+  OS="linux-$DISTRO"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
   OS="macos"
 elif [[ "$OSTYPE" == "cygwin" ]]; then
