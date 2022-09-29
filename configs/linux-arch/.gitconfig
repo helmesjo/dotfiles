@@ -1,9 +1,9 @@
 [user]
-	email = helmesjo@gmail.com
-	name = helmesjo
+    email = helmesjo@gmail.com
+    name = helmesjo
 
 [core]
-	editor = hx
+    editor = hx
     pager = delta
 
 [interactive]
@@ -33,7 +33,7 @@
     line-numbers-minus-style = 124
     line-numbers-plus-style = 28
 [pull]
-	rebase = true
+    rebase = true
 
 [include]
-	path = ~/.gitconfig.local
+    path = ~/.gitconfig.local
