@@ -2,7 +2,7 @@
 set -eu -o pipefail
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  PAIR=$(cat /etc/*-release | grep "^DISTRIB_ID=")
+  PAIR=$(cat /etc/*-release | grep "^DISTRIB_ID=" || true)
   PAIR=${PAIR:-$(cat /etc/*-release | grep "^ID=")}
   DISTRO=$(echo $PAIR | awk -F'=' '{print $2}' | tr '[:upper:]' '[:lower:]' | xargs)
   OS="linux-$DISTRO"
