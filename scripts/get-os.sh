@@ -9,9 +9,9 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 elif [[ "$OSTYPE" == "darwin"* ]]; then
   OS="macos"
 elif [[ "$OSTYPE" == "cygwin" ]]; then
-  OS="cygwin"
+  OS="windows"
 elif [[ "$OSTYPE" == "msys" ]]; then
-  OS="mingw"
+  OS="windows"
 elif [[ "$OSTYPE" == "win32" ]]; then
   OS="windows"
 elif [[ "$OSTYPE" == "freebsd"* ]]; then
