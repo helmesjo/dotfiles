@@ -1,6 +1,3 @@
-shell:
-  program: fish
-
 font:
   # The normal (roman) font face to use.
   normal:
@@ -37,3 +34,6 @@ font:
   # for retina displays, but for non-retina you probably want this set to
   # false.
   use_thin_strokes: true
+
+import:
+  -  ./alacritty.local.yml
