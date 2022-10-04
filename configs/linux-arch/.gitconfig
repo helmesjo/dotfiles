@@ -5,6 +5,7 @@
 [core]
     editor = hx
     pager = delta
+    symlinks = true
 
 [interactive]
     diffFilter = delta --color-only
