@@ -17,6 +17,8 @@ brewpkgs=(
   helix
   iterm2
   llvm      # lldb-vscode
+  lua-language-server
+  npm
   ripgrep
 )
 
@@ -24,5 +26,15 @@ pkginpkgs=(
   tree
 )
 
+pippkgs=(
+  cmake-language-server
+)
+
+npmpkgs=(
+  bash-language-server
+)
+
 brew install -f ${brewpkgs[@]}
 sudo pkgin -y install ${pkginpkgs[@]}
+yes | pip3 install ${pippkgs[@]}
+npm install -g ${npmpkgs[@]}
