@@ -17,11 +17,17 @@ if [ "$os" == "windows" ]; then
   export MSYS=winsymlinks:nativestrict
 fi
 
+mkdir -p $dotfiles_backup
 # Create a symlink ~/.config -> ~/AppData/Roaming
 # so that we have the same structure as on unix.
+# Backup target file/directory if it exists (-L to include broken symlinks)
+if [ -e "$HOME/.config" ] || [ -L "$HOME/.config" ]; then
+  echo "  - Backup '$HOME/.config'"
+  printf "%s" "    - "
+  mv -v "$HOME/.config" $dotfiles_backup/
+fi
 ln -sv "$HOME/AppData/Roaming" "$HOME/.config"
 
-mkdir -p $dotfiles_backup
 for sourcename in ${dotfiles[@]}; do
   # Filter out configs
   case $sourcename in
