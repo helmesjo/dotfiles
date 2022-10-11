@@ -1,2 +1,2 @@
 shell:
-  program: git-bash.exe
+  program: C:/Program Files/Git/bin/bash.exe
