@@ -17,6 +17,10 @@ if [ "$os" == "windows" ]; then
   export MSYS=winsymlinks:nativestrict
 fi
 
+# Create a symlink ~/.config -> ~/AppData/Roaming
+# so that we have the same structure as on unix.
+ln -sv "$HOME/AppData/Roaming" "$HOME/.config"
+
 mkdir -p $dotfiles_backup
 for sourcename in ${dotfiles[@]}; do
   # Filter out configs
