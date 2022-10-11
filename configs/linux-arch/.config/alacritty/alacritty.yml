@@ -36,4 +36,4 @@ font:
   use_thin_strokes: true
 
 import:
-  -  ./alacritty.local.yml
+  -  ~/.config/alacritty/alacritty.local.yml
