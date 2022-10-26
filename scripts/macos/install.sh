@@ -36,5 +36,5 @@ npmpkgs=(
 
 brew install -f ${brewpkgs[@]}
 sudo pkgin -y install ${pkginpkgs[@]}
-yes | pip3 install ${pippkgs[@]}
+python3 -m pip install --no-input ${pippkgs[@]} --upgrade
 npm install -g ${npmpkgs[@]}
