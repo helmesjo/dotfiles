@@ -1,4 +1,20 @@
 theme = "dark_plus"
 
+[editor]
+line-number = "absolute"
+color-modes = true
+cursorline = true
+
+[editor.statusline]
+left = ["mode", "spinner"]
+center = ["file-name"]
+right = ["diagnostics", "selections", "position", "file-encoding", "file-line-ending", "file-type"]
+separator = "│"
+
+[editor.whitespace.render]
+space = "all"
+tab = "all"
+newline = "none"
+
 [editor.file-picker]
 hidden = false
