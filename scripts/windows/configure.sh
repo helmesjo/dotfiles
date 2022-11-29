@@ -42,7 +42,7 @@ for sourcename in ${dotfiles[@]}; do
   esac
   
   # get absolute path
-  sourcepath=$dotfiles_root/$sourcename
+  sourcepath=$(readlink -f "$dotfiles_root/$sourcename")
   targetpath="$target_root/$sourcename"
   
   [ -e "$sourcepath" ] || continue
@@ -62,5 +62,5 @@ for sourcename in ${dotfiles[@]}; do
 
   echo "  - Creating symlink for '$sourcename'"
   printf "%s" "    - "
-  ln -sv $sourcepath $targetpath
+  ln -sv "$sourcepath" "$targetpath"
 done
