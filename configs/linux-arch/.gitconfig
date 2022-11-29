@@ -36,5 +36,5 @@
 [pull]
     rebase = true
 
-[includeIf "~/.gitconfig.local"]
+[include]
     path = ~/.gitconfig.local
