@@ -117,7 +117,7 @@ exec swayidle -w \
 ### Input layouts
 input type:keyboard {
     xkb_layout us,se
-    xkb_options grp:alt_caps_toggle
+    xkb_options grp:win_space_toggle
 }
 
 ### Key bindings
@@ -137,7 +137,7 @@ input type:keyboard {
     bindsym $mod+Shift+q kill
 
     # Start your launcher
-    bindsym $mod+d exec $menu
+    bindsym Alt+Space exec $menu
 
     # Drag floating windows by holding down $mod and left mouse button.
     # Resize them with right mouse button + $mod.
