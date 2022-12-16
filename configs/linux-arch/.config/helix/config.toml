@@ -4,6 +4,7 @@ theme = "dark_plus"
 line-number = "absolute"
 color-modes = true
 cursorline = true
+bufferline = 'always'
 
 [editor.statusline]
 left = ["mode", "spinner"]
