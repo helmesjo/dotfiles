@@ -10,6 +10,7 @@ $file_dir/install-brew.sh
 $file_dir/install-pkgin.sh
 
 brewpkgs=(
+  bash
   bat
   fish
   fzf
