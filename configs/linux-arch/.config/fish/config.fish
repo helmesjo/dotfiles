@@ -14,7 +14,7 @@ if status is-interactive
     switch (uname)
         case Darwin
             fish_add_path -pP /opt/homebrew/bin
-            fish_add_path -aP /opt/homebrew/Cellar/llvm/14.0.6_1/bin # lldb-vscode
+            fish_add_path -aP /opt/homebrew/opt/llvm/bin # lldb-vscode
     end
 
     # Aliases
