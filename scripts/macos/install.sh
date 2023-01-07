@@ -12,6 +12,7 @@ $file_dir/install-pkgin.sh
 brewpkgs=(
   bash
   bat
+  exa
   fish
   fzf
   git-delta

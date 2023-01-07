@@ -23,6 +23,7 @@ pacpkgs=(
   # Core
   alacritty
   bat
+  exa
   fish
   fzf
   ripgrep

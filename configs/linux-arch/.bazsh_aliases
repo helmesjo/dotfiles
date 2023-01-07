@@ -5,4 +5,4 @@ fi
 
 alias cat='bat'
 alias config='/usr/bin/git -C $dotfiles_root'
-alias ls='ls --color=auto'
+alias ls='exa --color=auto'
