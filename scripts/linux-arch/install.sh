@@ -77,6 +77,10 @@ sudo pacman -Sy --noconfirm archlinux-keyring && sudo pacman -Su --noconfirm
 sudo pacman -Sy --needed --noconfirm "${pacpkgs[@]}"
 yay -Sy --needed --noconfirm "${aurpkgs[@]}"
 
+# Remove unused (orphan) packages
+pacman -Qtdq | sudo pacman -Rns --noconfirm - 2>/dev/null || true
+yay -Yc --noconfirm
+
 # Setup system/package envars
 envar_file="/etc/environment"
 envars=(
