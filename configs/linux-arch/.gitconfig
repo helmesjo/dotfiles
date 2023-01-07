@@ -41,5 +41,6 @@
 
 [alias]
     ca = commit -a
-    di = diff
-    st = status
+    d = diff
+    l = log
+    s = status

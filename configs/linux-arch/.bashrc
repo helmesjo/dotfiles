@@ -31,3 +31,5 @@ fi
 export FZF_DEFAULT_COMMAND='rg --files --hidden'
 export FZF_CTRL_T_COMMAND='$FZF_DEFAULT_COMMAND'
 export FZF_COMPLETION_TRIGGER='??'
+
+source /home/fred/.config/broot/launcher/bash/br
