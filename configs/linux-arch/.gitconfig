@@ -38,3 +38,8 @@
 
 [include]
     path = ~/.gitconfig.local
+
+[alias]
+    ca = commit -a
+    di = diff
+    st = status
