@@ -19,3 +19,6 @@ newline = "none"
 
 [editor.file-picker]
 hidden = false
+
+[keys.normal]
+X = "extend_line_up"
