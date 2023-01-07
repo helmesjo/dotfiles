@@ -12,6 +12,7 @@ $file_dir/install-pkgin.sh
 brewpkgs=(
   bash
   bat
+  coreutils
   exa
   fish
   fzf
