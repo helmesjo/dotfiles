@@ -41,3 +41,7 @@ brew install -f ${brewpkgs[@]}
 sudo pkgin -y install ${pkginpkgs[@]}
 python3 -m pip install --no-input ${pippkgs[@]} --upgrade
 npm install -g ${npmpkgs[@]}
+
+# Remove unused/orphaned packages
+brew autoremove
+sudo pkgin autoremove
