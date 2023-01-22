@@ -4,5 +4,4 @@ set -eu -o pipefail
 file_dir=$(dirname $(readlink -f $BASH_SOURCE))
 
 $file_dir/configure-greetd.sh
-$file_dir/configure-nvim.sh
 $file_dir/configure-sway.sh

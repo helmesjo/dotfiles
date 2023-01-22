@@ -47,7 +47,6 @@ pacpkgs=(
   gnome-keyring
   helix
   libsecret
-  #neovim
   nodejs
   python3
   vim
