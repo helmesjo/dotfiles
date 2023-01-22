@@ -106,7 +106,7 @@ input type:keyboard {
     xkb_layout us,se
     xkb_options grp:win_space_toggle
     repeat_delay 175
-    repeat_rate 50
+    repeat_rate 75
 }
 
 ### Key bindings
