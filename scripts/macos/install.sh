@@ -18,6 +18,7 @@ brewpkgs=(
   fzf
   git-delta
   helix
+  homebrew/cask-fonts/font-source-code-pro
   iterm2
   llvm      # lldb-vscode
   lua-language-server
@@ -38,6 +39,7 @@ npmpkgs=(
 )
 
 brew install -f ${brewpkgs[@]}
+brew update -f
 sudo pkgin -y install ${pkginpkgs[@]}
 python3 -m pip install --no-input ${pippkgs[@]} --upgrade
 npm install -g ${npmpkgs[@]}
