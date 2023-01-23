@@ -1,5 +1,5 @@
 shell:
-  program: fish
+  program: /opt/homebrew/bin/fish
 
 font:
   # OS X only: use thin stroke font rendering. Thin strokes are suitable
