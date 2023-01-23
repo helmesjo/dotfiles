@@ -20,7 +20,6 @@ brewpkgs=(
   gitui
   helix
   homebrew/cask-fonts/font-source-code-pro
-  iterm2
   llvm      # lldb-vscode
   lua-language-server
   npm
