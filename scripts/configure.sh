@@ -3,7 +3,6 @@ set -eu -o pipefail
 
 function on_error {
     echo "Failed..."
-    sleep 5
     exit 1
 }
 trap on_error ERR

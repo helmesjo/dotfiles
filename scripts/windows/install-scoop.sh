@@ -14,5 +14,5 @@ then
         on_error
     fi
     "powershell" -Command "Set-ExecutionPolicy Bypass -Scope Process"
-    "powershell" -Command "Set-ExecutionPolicy Bypass -Scope Process -Force; powershell [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))"
+    "powershell" -Command "irm get.scoop.sh | iex"
 fi
