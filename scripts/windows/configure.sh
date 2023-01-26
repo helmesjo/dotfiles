@@ -9,6 +9,9 @@ dotfiles=$(ls -a $dotfiles_root) # grab the list
 backup_nr=$(test -d $root_dir/_backup && find $root_dir/_backup/ -maxdepth 1 -type d -name '[0-9]*' | wc -l | xargs || echo 0)
 dotfiles_backup="$root_dir/_backup/$backup_nr"
 target_root="$APPDATA"
+shortcuts_root="$dotfiles_root/shortcuts"
+shortcuts=$(ls $shortcuts_root) # grab the list
+echo "args: ${shortcuts[@]}"
 
 #$this_dir/configure-fzf.sh
 
@@ -63,4 +66,31 @@ for sourcename in ${dotfiles[@]}; do
   echo "  - Creating symlink for '$sourcename'"
   printf "%s" "    - "
   ln -sv "$sourcepath" "$targetpath"
+done
+
+# Create a symlink for each shortcut into Windows Start Menu
+# directory so that they can be find through Windows Search
+for sourcename in ${shortcuts[@]}; do
+  # get absolute path
+  sourcepath="$shortcuts_root/$sourcename"
+  targetpath="$ProgramData/Microsoft/Windows/Start Menu/Programs/$sourcename"
+
+  [ -e "$sourcepath" ] || continue
+
+  # Skip untracked files
+  if [ -z "$(git -C $shortcuts_root ls-files $sourcename)" ]; then
+    echo "  - Skipping untracked '$sourcename'"
+    continue
+  fi
+
+  # Backup target file/directory if it exists (-L to include broken symlinks)
+  if [ -e "$targetpath" ] || [ -L "$targetpath" ]; then
+    echo "  - Backup '$targetpath'"
+    printf "%s" "    - "
+    mv -v "$targetpath" "$dotfiles_backup/"
+  fi
+
+  echo "  - Copying '$sourcename'"
+  printf "%s" "    - "
+  cp -fv "$sourcepath" "$targetpath"
 done
