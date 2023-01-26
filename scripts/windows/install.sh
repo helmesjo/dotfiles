@@ -22,11 +22,16 @@ scooppkgs=(
   delta
   helix
   llvm             # lldb-vscode
-  Office-Code-Pro  # Source Code Pro Font
   ripgrep
   tre-command
 )
+# Fonts must be installed globally
+scooppkgs_global=(
+  Office-Code-Pro  # Source Code Pro Font
+)
 
 #choco install --yes ${chocopkgs[@]}
+scoop install sudo --no-cache
 scoop bucket add nerd-fonts
 scoop install --no-cache ${scooppkgs[@]}
+sudo scoop install --global --no-cache ${scooppkgs_global[@]}
