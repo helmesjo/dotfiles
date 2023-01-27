@@ -46,6 +46,7 @@ pacpkgs=(
   git-delta
   gnome-keyring
   helix
+  lldb             # lldb-vscode
   libsecret
   nodejs
   python3
