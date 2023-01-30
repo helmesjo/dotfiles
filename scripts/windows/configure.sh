@@ -94,3 +94,5 @@ for sourcename in ${shortcuts[@]}; do
   printf "%s" "    - "
   cp -fv "$sourcepath" "$targetpath"
 done
+
+$this_dir/configure-registry.sh
