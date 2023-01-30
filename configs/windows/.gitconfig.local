@@ -1,5 +1,5 @@
 [credential]
-    helper = manager-core
+    helper = manager
 
 [add.interactive]
     useBuiltin = false
