@@ -48,5 +48,7 @@
     d = diff
     dc = diff --cached
     l = log
+    p = push
+    pu = "!git push --set-upstream origin \"$(git rev-parse --abbrev-ref HEAD)\""
     s = status
     ui = !gitui
