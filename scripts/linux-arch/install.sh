@@ -35,6 +35,7 @@ pacpkgs=(
   # TUI/GUI
   bemenu-wayland   # application runner
   bottom           # system monitor
+  gitui
   mako             # notifications
   sway
   swaybg

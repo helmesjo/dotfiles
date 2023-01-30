@@ -40,7 +40,13 @@
     path = ~/.gitconfig.local
 
 [alias]
-    ca = commit -a
+    a = add
+    ap = add --patch
+    c = commit
+    ca = commit --all
+    co = checkout
     d = diff
+    dc = diff --cached
     l = log
     s = status
+    ui = !gitui

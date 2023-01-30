@@ -17,6 +17,7 @@ brewpkgs=(
   fish
   fzf
   git-delta
+  gitui
   helix
   homebrew/cask-fonts/font-source-code-pro
   iterm2

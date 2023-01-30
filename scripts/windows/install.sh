@@ -20,6 +20,7 @@ scooppkgs=(
   bat
   fzf
   delta
+  gitui
   helix
   llvm             # lldb-vscode
   ripgrep
