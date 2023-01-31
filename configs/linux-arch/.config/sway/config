@@ -72,6 +72,7 @@ set $lock swaylock --daemonize --image $wallpaper --scaling fit --color $color_b
 set $term alacritty
 set $bar waybar
 set $sysmonitor "$term -e btm"
+set $snippingtool grim -g "$(slurp)" - | wl-copy
 
 # Note: pass the final command to swaymsg so that the resulting window can be opened
 # on the original workspace that the command was run on.
@@ -127,6 +128,9 @@ input type:keyboard {
 
     # Start your launcher
     bindsym Alt+Space exec $menu
+
+    # Start snipping tool
+    bindsym $mod+G exec $snippingtool
 
     # Drag floating windows by holding down $mod and left mouse button.
     # Resize them with right mouse button + $mod.

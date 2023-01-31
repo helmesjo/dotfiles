@@ -46,6 +46,9 @@ pacpkgs=(
   git
   git-delta
   gnome-keyring
+  grim             # 1. Screenshot tool
+  slurp            # 2. Image grab tool
+  wl-clipboard     # 3. Copy stdin to system clipboard
   helix
   lldb             # lldb-vscode
   libsecret
