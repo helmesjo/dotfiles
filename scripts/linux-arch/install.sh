@@ -43,6 +43,7 @@ pacpkgs=(
   swaylock
   waybar
   # Dev
+  perf             # performance profiler
   git
   git-delta
   gnome-keyring
