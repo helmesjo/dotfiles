@@ -20,7 +20,7 @@ if status is-interactive
     # Aliases
     alias cat='bat'
     alias config='git -C $dotfiles_root'
-    alias ls='exa --color=auto'
+    alias ls='exa -l --color=auto'
     # helix doesn't have a 'hx' bin on arch
     if command -v helix &> /dev/null
         alias hx='helix'
