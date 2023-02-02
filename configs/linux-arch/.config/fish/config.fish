@@ -18,6 +18,8 @@ if status is-interactive
     end
 
     # Aliases
+    # Make sudo work with other aliases
+    alias sudo='sudo '
     alias cat='bat'
     alias config='git -C $dotfiles_root'
     alias ls='exa -l --color=auto'
