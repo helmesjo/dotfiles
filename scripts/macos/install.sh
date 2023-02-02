@@ -10,8 +10,10 @@ $file_dir/install-brew.sh
 $file_dir/install-pkgin.sh
 
 brewpkgs=(
+  alt-tab     # alt-tab switch windows, not apps
   bash
   bat
+  broot       # interactive 'tree' replacement
   coreutils
   exa
   fish
