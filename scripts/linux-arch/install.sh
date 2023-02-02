@@ -35,6 +35,7 @@ pacpkgs=(
   # TUI/GUI
   bemenu-wayland   # application runner
   bottom           # system monitor
+  broot            # tree on steroids
   gitui
   mako             # notifications
   sway
