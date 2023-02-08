@@ -13,6 +13,7 @@ if status is-interactive
     # PATH
     switch (uname)
         case Darwin
+            fish_add_path -pP /opt/pkgin/bin
             fish_add_path -pP /opt/homebrew/bin
             fish_add_path -aP /opt/homebrew/opt/llvm/bin # lldb-vscode
     end
