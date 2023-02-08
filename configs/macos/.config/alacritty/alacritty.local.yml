@@ -1,5 +1,7 @@
 shell:
   program: /opt/homebrew/bin/fish
+  args:
+    - --login
 
 font:
   # OS X only: use thin stroke font rendering. Thin strokes are suitable
