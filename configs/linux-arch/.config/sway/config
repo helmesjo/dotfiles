@@ -70,7 +70,7 @@ focus_follows_mouse no
 
 ### Variables
 #
-# Logo key. Use Mod1 for Alt.
+# caps key as mod.
 set $mod Mod4
 # Home row direction keys, like vim
 set $left h
@@ -117,7 +117,7 @@ exec swayidle -w \
 #
 input type:keyboard {
     xkb_layout us,se
-    xkb_options grp:win_space_toggle
+    xkb_options grp:alt_shift_toggle,caps:super
     repeat_delay 175
     repeat_rate 75
 }
