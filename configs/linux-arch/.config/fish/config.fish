@@ -24,15 +24,11 @@ if status is-interactive
     end
 
     # Aliases
-    # Make sudo work with other aliases
-    alias sudo='sudo '
-    alias cat='bat'
-    alias config='git -C $dotfiles_root'
-    alias ls='exa -l --color=auto'
     # helix doesn't have a 'hx' bin on arch
     if command -v helix &> /dev/null
         alias hx='helix'
     end
+    source ~/.shell-aliases
 
     # Export
     set -x FZF_DEFAULT_COMMAND rg --files --hidden

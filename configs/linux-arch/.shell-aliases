@@ -1,0 +1,6 @@
+# Make sudo work with other aliases
+alias sudo='sudo '
+alias cat='bat'
+alias config='/usr/bin/git -C $dotfiles_root'
+alias ls='exa -l --color=auto'
+alias tree='tre --color=automatic'
