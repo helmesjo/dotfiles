@@ -1,6 +1,11 @@
 # Silence intro
 set fish_greeting
 
+# Disable right side prompt
+function fish_right_prompt
+#intentionally left blank
+end
+
 # Envars
 set -x VISUAL hx
 set -x EDITOR $VISUAL
