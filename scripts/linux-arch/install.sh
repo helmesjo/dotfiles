@@ -61,7 +61,10 @@ pacpkgs=(
   firefox
 )
 aurpkgs=(
+  # Core
   greetd
+  # Hardware
+  bluetuith
 )
 
 # Laptop only
@@ -106,14 +109,30 @@ for envar in ${envars[@]}; do
   fi
 done
 
-services=(
-  greetd.service
+groups=(
+  audio
+  lp # external devices/bluetooth
+  optical
+  storage
+  video
+  wheel
 )
 
+services=(
+  bluetooth.service
+  greetd.service
+)
 # Laptop only
 if [ "$is_laptop" == "true" ]; then
   services+=(tlp.service)
 fi
+
+echo "Adding user '$(whoami)' to groups..."
+for group in ${groups[@]}; do
+  echo "  - $group"
+  # printf "%s" "  - "
+  sudo usermod -aG $group $(whoami)
+done
 
 echo "Enabling services..."
 for service in ${services[@]}; do
