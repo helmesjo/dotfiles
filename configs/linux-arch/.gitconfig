@@ -51,6 +51,7 @@
     ps = push
     psu = "!git push --set-upstream origin \"$(git rev-parse --abbrev-ref HEAD)\""
     pl = pull -p
+    pwd = rev-parse --show-toplevel
     rs = restore --staged
     s = status
     ui = !gitui
