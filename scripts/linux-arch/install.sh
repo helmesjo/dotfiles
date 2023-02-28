@@ -16,8 +16,7 @@ pacpkgs=(
   glfw-wayland
   xorg-xwayland
   xorg-xlsclients
-  pulseaudio
-  pavucontrol
+  pipewire-pulse
   bc
   lsb-release
   # Core
@@ -34,8 +33,10 @@ pacpkgs=(
   ttf-font-awesome
   # TUI/GUI
   bemenu-wayland   # application runner
+  bluetuith        # bluetooth device tui
   bottom           # system monitor
   broot            # tree on steroids
+  easyeffects      # Audio controller
   gitui
   mako             # notifications
   sway
