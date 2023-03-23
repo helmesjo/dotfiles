@@ -1,6 +1,1 @@
-# helix doesn't have a 'hx' bin on arch
-if command -v helix &> /dev/null; then
-  alias hx='helix'
-fi
-
 source ~/.shell-aliases

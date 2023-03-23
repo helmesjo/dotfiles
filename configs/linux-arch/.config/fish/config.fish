@@ -24,10 +24,6 @@ if status is-interactive
     end
 
     # Aliases
-    # helix doesn't have a 'hx' bin on arch
-    if command -v helix &> /dev/null
-        alias hx='helix'
-    end
     source ~/.shell-aliases
 
     # Export
