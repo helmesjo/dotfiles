@@ -119,7 +119,7 @@ exec swayidle -w \
 #
 input type:keyboard {
     xkb_layout us,se
-    xkb_options grp:alt_shift_toggle,caps:super
+    xkb_options caps:super
     repeat_delay 175
     repeat_rate 75
 }
@@ -129,22 +129,22 @@ input type:keyboard {
 # Basics:
 #
     # Switch keyboard layout
-    #bindsym $mod+Ctrl+Alt+space input type:keyboard xkb_switch_layout next # fixed by https://github.com/swaywm/sway/pull/6966 and available in next after sway 1.7
+    bindsym --no-repeat Shift+space input type:keyboard xkb_switch_layout next
 
     # Start a terminal
-    bindsym $mod+Return exec $term
+    bindsym --no-repeat $mod+Return exec $term
 
     # Start system monitor
-    bindsym $mod+Escape exec $sysmonitor
+    bindsym --no-repeat $mod+Escape exec $sysmonitor
 
     # Kill focused window
-    bindsym $mod+Shift+q kill
+    bindsym --no-repeat $mod+Shift+q kill
 
     # Start your launcher
-    bindsym Alt+Space exec $menu
+    bindsym --no-repeat Alt+Space exec $menu
 
     # Start snipping tool
-    bindsym $mod+G exec $snippingtool
+    bindsym --no-repeat $mod+G exec $snippingtool
 
     # Drag floating windows by holding down $mod and left mouse button.
     # Resize them with right mouse button + $mod.
@@ -154,13 +154,13 @@ input type:keyboard {
     floating_modifier $mod normal
 
     # Reload the configuration file
-    bindsym $mod+Shift+c reload
+    bindsym --no-repeat $mod+Shift+c reload
 
     # Exit sway (logs you out of your Wayland session)
     bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
 
     # Lock screen
-    bindsym $mod+Ctrl+Alt+l exec $lock
+    bindsym --no-repeat $mod+Ctrl+Alt+l exec $lock
 #
 # Moving around:
 #
