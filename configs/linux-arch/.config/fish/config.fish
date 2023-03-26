@@ -21,6 +21,8 @@ if status is-interactive
             fish_add_path -pP /opt/pkgin/bin
             fish_add_path -pP /opt/homebrew/bin
             fish_add_path -aP /opt/homebrew/opt/llvm/bin # lldb-vscode
+        case '*'
+            fish_add_path -aP ~/.local/bin # mainly pip packages
     end
 
     # Aliases
