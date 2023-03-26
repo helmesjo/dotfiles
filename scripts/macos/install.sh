@@ -10,6 +10,7 @@ $file_dir/install-brew.sh
 $file_dir/install-pkgin.sh
 
 brewpkgs=(
+  # Core
   alt-tab     # alt-tab switch windows, not apps
   bash
   bat
@@ -18,14 +19,19 @@ brewpkgs=(
   exa
   fish
   fzf
-  git-delta
+  ripgrep
+  # TUI/GUI
   gitui
+  # Dev
+  git-delta
   helix
   homebrew/cask-fonts/font-source-code-pro
-  llvm      # lldb-vscode
-  lua-language-server
   npm
-  ripgrep
+  ## Debugging
+  llvm        # lldb-vscode
+  ## Languge Server Protocol
+  bash-language-server
+  lua-language-server
 )
 
 pkginpkgs=(

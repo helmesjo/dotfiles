@@ -50,7 +50,7 @@ pacpkgs=(
   ## Core
   perf             # performance profiler
   git
-  git-delta
+  git-delta        # diff tool
   gnome-keyring
   helix
   libsecret        # password storage
