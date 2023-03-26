@@ -26,6 +26,7 @@ pacpkgs=(
   fish
   fzf
   ripgrep
+  wl-clipboard     # system clipboard
   # Fonts
   adobe-source-code-pro-fonts
   noto-fonts
@@ -36,8 +37,9 @@ pacpkgs=(
   bluetuith        # bluetooth device tui
   bottom           # system monitor
   broot            # tree on steroids
-  easyeffects      # Audio controller
+  easyeffects      # audio controller
   gitui
+  grim slurp       # screen grab tools
   mako             # notifications
   sway
   swaybg
@@ -45,19 +47,23 @@ pacpkgs=(
   swaylock
   waybar
   # Dev
+  ## Core
   perf             # performance profiler
   git
   git-delta
   gnome-keyring
-  grim             # 1. Screenshot tool
-  slurp            # 2. Image grab tool
-  wl-clipboard     # 3. Copy stdin to system clipboard
   helix
-  lldb             # lldb-vscode
-  libsecret
+  libsecret        # password storage
   nodejs
   python3
   vim
+  ## Debugging
+  lldb             # lldb-vscode
+  ## Languge Server Protocol
+  bash-language-server
+  lua-language-server
+  python-lsp-server
+  yaml-language-server
   # Misc
   firefox
 )
