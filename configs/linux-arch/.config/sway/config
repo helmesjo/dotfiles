@@ -129,7 +129,7 @@ input type:keyboard {
 # Basics:
 #
     # Switch keyboard layout
-    bindsym --no-repeat Shift+space input type:keyboard xkb_switch_layout next
+    bindsym --no-repeat Ctrl+space input type:keyboard xkb_switch_layout next
 
     # Start a terminal
     bindsym --no-repeat $mod+Return exec $term
