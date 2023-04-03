@@ -6,10 +6,24 @@ color-modes = true
 cursorline = true
 bufferline = 'multiple'
 
+[editor.soft-wrap]
+enable = true
+
 [editor.statusline]
-left = ["mode", "spinner"]
+left = [
+  "mode",
+  "version-control",
+  "spinner"
+]
 center = ["file-name"]
-right = ["diagnostics", "selections", "position", "file-encoding", "file-line-ending", "file-type"]
+right = [
+  "diagnostics",
+  "selections",
+  "position",
+  "file-encoding",
+  "file-line-ending",
+  "file-type"
+]
 separator = "│"
 
 [editor.whitespace.render]
