@@ -36,7 +36,6 @@ pacpkgs=(
   bemenu-wayland   # application runner
   bluetuith        # bluetooth device tui
   bottom           # system monitor
-  broot            # tree on steroids
   easyeffects      # audio controller
   gitui
   grim slurp       # screen grab tools
@@ -70,6 +69,7 @@ pacpkgs=(
 aurpkgs=(
   # Core
   greetd
+  tre-command      # nicer tree alternative
   # Hardware
   bluetuith
 )
