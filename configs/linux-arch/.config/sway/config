@@ -94,6 +94,7 @@ set $menu bemenu-run --width-factor 0.5 --list 10 --ignorecase --wrap | xargs sw
 for_window [title="^FreeRDP"] move to workspace 4; floating enable; floating_modifier none
 for_window [title=".*Discord"] floating enable
 for_window [instance="Steam"] floating enable
+for_window [instance="UnrealEditor"] floating enable
 for_window [app_id=com.github.wwmm.easyeffects] floating enable
 
 ### Output configuration
