@@ -34,7 +34,6 @@ pacpkgs=(
   ttf-font-awesome
   # TUI/GUI
   bemenu-wayland   # application runner
-  bluetuith        # bluetooth device tui
   bottom           # system monitor
   easyeffects      # audio controller
   gitui
@@ -73,7 +72,7 @@ aurpkgs=(
   greetd
   tre-command      # nicer tree alternative
   # Hardware
-  bluetuith
+  bluetuith        # bluetooth device tui
 )
 
 # Laptop only
