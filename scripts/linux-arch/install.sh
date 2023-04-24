@@ -44,6 +44,8 @@ pacpkgs=(
   swaybg
   swayidle
   swaylock
+  udisks2          # Auto-mount removable devices
+  udiskie          # udisks2 notifications
   waybar
   # Dev
   ## Core
