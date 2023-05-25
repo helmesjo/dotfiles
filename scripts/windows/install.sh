@@ -15,13 +15,15 @@ file_dir=`dirname $(readlink -f $BASH_SOURCE)`
 $file_dir/install-choco.sh
 $file_dir/install-scoop.sh
 
+wingetpkgs=(
+  Helix.Helix
+)
 #chocopkgs=()
 scooppkgs=(
   bat
   fzf
   delta
   gitui
-  helix
   llvm             # lldb-vscode
   ripgrep
   tre-command
@@ -31,6 +33,7 @@ scooppkgs_global=(
   Office-Code-Pro  # Source Code Pro Font
 )
 
+winget install ${wingetpkgs[@]}
 #choco install --yes ${chocopkgs[@]}
 scoop install sudo --no-cache
 scoop bucket add nerd-fonts
