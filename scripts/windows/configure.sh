@@ -92,7 +92,7 @@ for sourcename in ${shortcuts[@]}; do
 
   echo "  - Copying '$sourcename'"
   printf "%s" "    - "
-  cp -fv "$sourcepath" "$targetpath"
+  sudo cp -fv "$sourcepath" "$targetpath"
 done
 
 $this_dir/configure-registry.sh
