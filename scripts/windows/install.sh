@@ -17,6 +17,7 @@ $file_dir/install-scoop.sh
 
 wingetpkgs=(
   Helix.Helix
+  MSYS2.MSYS2
 )
 #chocopkgs=()
 scooppkgs=(
