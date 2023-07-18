@@ -18,14 +18,8 @@ PS1='[\u@\h \W]\$ '
 source ~/.bazsh_aliases
 
 # Sourcing
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  # fzf
-  [ -f ~/.fzf.bash ] && source ~/.fzf.bash
-else
-  # fzf
-  source /usr/share/fzf/key-bindings.bash
-  source /usr/share/fzf/completion.bash
-fi
+source ~/.config/fzf/key-bindings.bash
+source ~/.config/fzf/completion.bash
 
 # Export
 export FZF_DEFAULT_COMMAND='rg --files --hidden'
