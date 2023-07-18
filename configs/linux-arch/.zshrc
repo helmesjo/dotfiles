@@ -9,8 +9,8 @@ EDITOR="$VISUAL"
 source ~/.bazsh_aliases
 
 # Sourcing
-source ~/.config/fzf/key-bindings.bash
-source ~/.config/fzf/completion.bash
+source ~/.config/fzf/key-bindings.zsh
+source ~/.config/fzf/completion.zsh
 
 # Export
 export FZF_DEFAULT_COMMAND='rg --files --hidden'
