@@ -34,9 +34,17 @@ scooppkgs_global=(
   Office-Code-Pro  # Source Code Pro Font
 )
 
+msys2pkgs=(
+  fish
+  zsh
+)
+
 winget install ${wingetpkgs[@]}
 #choco install --yes ${chocopkgs[@]}
 scoop install sudo --no-cache
 scoop bucket add nerd-fonts
 scoop install --no-cache ${scooppkgs[@]}
 sudo scoop install --global --no-cache ${scooppkgs_global[@]}
+# Install Msys2 packages last (after installing Msys2)
+echo "${msys2pkgs[@]}"
+/c/msys64/msys2_shell.cmd -defterm -here -no-start -ucrt64 -shell bash -use-full-path -c "pacman -S --noconfirm ${msys2pkgs[*]}"
