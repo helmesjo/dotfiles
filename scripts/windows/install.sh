@@ -18,15 +18,15 @@ $file_dir/install-scoop.sh
 wingetpkgs=(
   Helix.Helix
   MSYS2.MSYS2
+  junegunn.fzf
+  BurntSushi.ripgrep.MSVC
 )
 #chocopkgs=()
 scooppkgs=(
   bat
-  fzf
   delta
   gitui
   llvm             # lldb-vscode
-  ripgrep
   tre-command
 )
 # Fonts must be installed globally
