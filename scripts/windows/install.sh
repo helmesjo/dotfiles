@@ -16,6 +16,7 @@ $file_dir/install-choco.sh
 $file_dir/install-scoop.sh
 
 wingetpkgs=(
+  eza-community.eza
   Helix.Helix
 )
 #chocopkgs=()

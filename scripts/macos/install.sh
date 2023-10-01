@@ -16,7 +16,7 @@ brewpkgs=(
   bat
   broot       # interactive 'tree' replacement
   coreutils
-  exa
+  eza
   fish
   fzf
   ripgrep

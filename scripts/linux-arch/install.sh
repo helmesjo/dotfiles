@@ -21,8 +21,8 @@ pacpkgs=(
   lsb-release
   # Core
   alacritty
-  bat
-  exa
+  bat              # cat replacement
+  eza              # ls replacement
   fish
   fzf
   ripgrep
