@@ -16,18 +16,19 @@ $file_dir/install-choco.sh
 $file_dir/install-scoop.sh
 
 wingetpkgs=(
-  eza-community.eza
+  eza-community.eza        # modern ls
+  sharkdp.bat              # modern cat
+  ca.duan.tre-command      # modern tree
   Helix.Helix
+  junegunn.fzf
+  dandavison.delta         # git diff
+  StephanDilly.gitui
+  LLVM.LLVM                # clangd, lldb-vscode
+  BurntSushi.ripgrep.MSVC
+  gerardog.gsudo           # sudo
 )
 #chocopkgs=()
 scooppkgs=(
-  bat
-  fzf
-  delta
-  gitui
-  llvm             # lldb-vscode
-  ripgrep
-  tre-command
 )
 # Fonts must be installed globally
 scooppkgs_global=(
@@ -36,7 +37,7 @@ scooppkgs_global=(
 
 winget install ${wingetpkgs[@]}
 #choco install --yes ${chocopkgs[@]}
-scoop install sudo --no-cache
-scoop bucket add nerd-fonts
-scoop install --no-cache ${scooppkgs[@]}
-sudo scoop install --global --no-cache ${scooppkgs_global[@]}
+# scoop install sudo --no-cache
+# scoop bucket add nerd-fonts
+# scoop install --no-cache ${scooppkgs[@]}
+# sudo scoop install --global --no-cache ${scooppkgs_global[@]}
