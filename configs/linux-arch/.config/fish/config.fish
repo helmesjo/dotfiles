@@ -20,7 +20,7 @@ if status is-interactive
         case Darwin
             fish_add_path -pP /opt/pkgin/bin
             fish_add_path -pP /opt/homebrew/bin
-            fish_add_path -aP /opt/homebrew/opt/llvm/bin # lldb-vscode
+            fish_add_path -pP /opt/homebrew/opt/llvm/bin # lldb-vscode
         case '*'
             fish_add_path -aP ~/.local/bin # mainly pip packages
     end
