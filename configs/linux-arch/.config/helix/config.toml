@@ -6,6 +6,11 @@ color-modes = true
 cursorline = true
 bufferline = 'multiple'
 
+[editor.cursor-shape]
+insert = "bar"
+normal = "block"
+select = "underline"
+
 [editor.soft-wrap]
 enable = true
 
