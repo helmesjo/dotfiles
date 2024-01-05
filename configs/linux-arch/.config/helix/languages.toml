@@ -1,3 +1,39 @@
 [[language]]
+name = "cpp"
+auto-format = true
+
+[[language]]
 name = "bash"
-file-types = ["sh", "bash", "zsh", ".bash_login", ".bash_logout", ".bash_profile", ".bashrc", ".profile", ".zshenv", ".zlogin", ".zlogout", ".zprofile", ".zshrc", "APKBUILD", "PKGBUILD", "eclass", "ebuild", "bazelrc", "buildfile", ".buildfile", ".build", "manifest", ".manifest"]
+file-types = ["sh",
+              "bash",
+              "zsh",
+              ".bash_login",
+              ".bash_logout",
+              ".bash_profile",
+              ".bashrc",
+              ".profile",
+              ".zshenv",
+              ".zlogin",
+              ".zlogout",
+              ".zprofile",
+              ".zshrc",
+              "APKBUILD",
+              "PKGBUILD",
+              "eclass",
+              "ebuild",
+              "bazelrc",
+              "buildfile",
+              ".buildfile",
+              ".build",
+              "manifest",
+              ".manifest"
+              ]
+
+[[language]]
+name = "yaml"
+file-types = ["yaml",
+              "yml",
+              ".clangd",
+              ".clang-format",
+              ".clang-tidy"
+              ]
