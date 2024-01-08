@@ -1,0 +1,3 @@
+[shell]
+program = "fish"
+args = ["--login"]

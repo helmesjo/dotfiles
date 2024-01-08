@@ -1,0 +1,6 @@
+[font]
+AppleFontSmoothing = true
+
+[shell]
+program = "/opt/homebrew/bin/fish"
+args = ["--login"]
