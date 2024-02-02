@@ -19,6 +19,7 @@ brewpkgs=(
   eza
   fish
   fzf
+  git
   ripgrep
   # TUI/GUI
   gitui
@@ -33,6 +34,9 @@ brewpkgs=(
   bash-language-server
   lua-language-server
 )
+brewcasks=(
+  git-credential-manager
+)
 
 pkginpkgs=(
   tree
@@ -45,8 +49,8 @@ pippkgs=(
 npmpkgs=(
   bash-language-server
 )
-
 brew install -f ${brewpkgs[@]}
+brew install -f --cask ${brewcasks[@]}
 brew update -f
 sudo pkgin -y install ${pkginpkgs[@]}
 python3 -m pip install --no-input ${pippkgs[@]} --upgrade
