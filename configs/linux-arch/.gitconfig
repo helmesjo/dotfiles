@@ -7,6 +7,9 @@
     pager = delta
     symlinks = true
 
+[credential "https://dev.azure.com"]
+    useHttpPath = true
+
 [interactive]
     diffFilter = delta --color-only
 
