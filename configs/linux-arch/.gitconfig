@@ -6,6 +6,7 @@
     editor = hx
     pager = delta
     symlinks = true
+	autocrlf = input
 
 [credential "https://dev.azure.com"]
     useHttpPath = true
