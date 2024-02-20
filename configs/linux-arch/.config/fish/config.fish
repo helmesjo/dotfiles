@@ -32,4 +32,6 @@ if status is-interactive
     set -x FZF_DEFAULT_COMMAND rg --files --hidden
     set -x FZF_CTRL_T_COMMAND $FZF_DEFAULT_COMMAND
     set -x FZF_COMPLETION_TRIGGER ??
+
+    zoxide init fish --cmd cd | source
 end

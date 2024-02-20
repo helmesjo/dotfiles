@@ -27,6 +27,7 @@ pacpkgs=(
   fzf
   ripgrep
   wl-clipboard     # system clipboard
+  zoxide           # cd replacement
   # Fonts
   adobe-source-code-pro-fonts
   noto-fonts
@@ -47,7 +48,6 @@ pacpkgs=(
   udiskie          # udisks2 notifications
   waybar
   # Dev
-  ## Core
   perf             # performance profiler
   git
   git-delta        # diff tool

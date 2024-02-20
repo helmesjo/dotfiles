@@ -21,6 +21,8 @@ brewpkgs=(
   fzf
   git
   ripgrep
+  tre-command # tree replacement
+  zoxide      # cd replacement
   # TUI/GUI
   gitui
   # Dev
@@ -38,9 +40,9 @@ brewcasks=(
   git-credential-manager
 )
 
-pkginpkgs=(
-  tree
-)
+# pkginpkgs=(
+#   tree
+# )
 
 pippkgs=(
   cmake-language-server
@@ -52,7 +54,7 @@ npmpkgs=(
 brew install -f ${brewpkgs[@]}
 brew install -f --cask ${brewcasks[@]}
 brew update -f
-sudo pkgin -y install ${pkginpkgs[@]}
+# sudo pkgin -y install ${pkginpkgs[@]}
 python3 -m pip install --no-input ${pippkgs[@]} --upgrade
 npm install -g ${npmpkgs[@]}
 

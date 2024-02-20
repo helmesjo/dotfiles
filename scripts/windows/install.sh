@@ -19,6 +19,7 @@ wingetpkgs=(
   eza-community.eza        # modern ls
   sharkdp.bat              # modern cat
   ca.duan.tre-command      # modern tree
+  ajeetdsouza.zoxide       # modern cd
   Helix.Helix
   junegunn.fzf
   dandavison.delta         # git diff
