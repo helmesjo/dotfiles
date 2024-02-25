@@ -29,16 +29,17 @@ wingetpkgs=(
   BurntSushi.ripgrep.MSVC
   gerardog.gsudo           # sudo
 )
-#chocopkgs=()
-scooppkgs=(
+# Fonts must be installed as admin
+chocopkgs_admin=(
+  jetbrainsmono
 )
-# Fonts must be installed globally
-scooppkgs_global=(
-  Office-Code-Pro  # Source Code Pro Font
-)
+# scooppkgs=(
+# )
+# scooppkgs_global=(
+# )
 
 winget install ${wingetpkgs[@]}
-#choco install --yes ${chocopkgs[@]}
+sudo choco install --yes ${chocopkgs_admin[@]}
 # scoop install sudo --no-cache
 # scoop bucket add nerd-fonts
 # scoop install --no-cache ${scooppkgs[@]}

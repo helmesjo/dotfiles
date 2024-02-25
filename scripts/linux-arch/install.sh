@@ -29,10 +29,10 @@ pacpkgs=(
   wl-clipboard     # system clipboard
   zoxide           # cd replacement
   # Fonts
-  adobe-source-code-pro-fonts
   noto-fonts
   noto-fonts-emoji
   ttf-font-awesome
+  ttf-jetbrains-mono
   # TUI/GUI
   bemenu-wayland   # application runner
   bottom           # system monitor

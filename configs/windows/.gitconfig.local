@@ -1,5 +1,2 @@
 [credential]
     helper = manager
-
-[add.interactive]
-    useBuiltin = false
