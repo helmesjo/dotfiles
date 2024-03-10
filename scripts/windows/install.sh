@@ -20,6 +20,7 @@ wingetpkgs=(
   sharkdp.bat              # modern cat
   ca.duan.tre-command      # modern tree
   ajeetdsouza.zoxide       # modern cd
+  Nushell.Nushell
   Helix.Helix
   junegunn.fzf
   dandavison.delta         # git diff

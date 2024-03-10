@@ -23,8 +23,8 @@ pacpkgs=(
   alacritty
   bat              # cat replacement
   eza              # ls replacement
-  fish
   fzf
+  nushell
   ripgrep
   wl-clipboard     # system clipboard
   zoxide           # cd replacement

@@ -17,9 +17,9 @@ brewpkgs=(
   broot       # interactive 'tree' replacement
   coreutils
   eza
-  fish
   fzf
   git
+  nushell
   ripgrep
   tre-command # tree replacement
   zoxide      # cd replacement
