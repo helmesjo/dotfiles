@@ -1,3 +1,2 @@
 [shell]
-program = "nu.exe"
-args = ["--login"]
+program = "cmd.exe"
