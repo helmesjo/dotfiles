@@ -23,7 +23,8 @@ if status is-interactive
         case Windows Msys
             fish_add_path -aP ~/AppData/Local/Microsoft/WinGet/Links
             fish_add_path -aP ~/AppData/Local/Microsoft/WindowsApps
-            fish_add_path -aP $(cygpath -u $PROGRAMFILES/tre-command/bin)
+            fish_add_path -aP $(cygpath -u "$PROGRAMFILES/tre-command/bin")
+            fish_add_path -aP $(cygpath -u "$PROGRAMFILES/gsudo/Current")
             fish_add_path -aP "/c/build2/bin"
 
             alias sudo=gsudo

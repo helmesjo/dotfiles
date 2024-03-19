@@ -13,18 +13,14 @@ PS1='[\u@\h \W]\$ '
 # Aliases
 source ~/.bazsh_aliases
 
-# Path to file, or source if symlink.
-# this_file=`dirname $(readlink -f $BASH_SOURCE)`
-# dotfiles_root=$(git -C $this_file rev-parse --show-toplevel)
+if [[ $OSTYPE == 'msys' ]]; then
+    PATH="$PATH:~/AppData/Local/Microsoft/WinGet/Links"
+    PATH="$PATH:~/AppData/Local/Microsoft/WindowsApps"
+    PATH="$PATH:$(cygpath -u "$PROGRAMFILES/tre-command/bin")"
+    PATH="$PATH:$(cygpath -u "$PROGRAMFILES/gsudo/Current")"
+    PATH="$PATH:/c/build2/bin"
 
-# Sourcing
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  # fzf
-  [ -f ~/.fzf.bash ] && source ~/.fzf.bash
-else
-  # fzf
-  source /usr/share/fzf/key-bindings.bash
-  source /usr/share/fzf/completion.bash
+    alias sudo=gsudo
 fi
 
 eval "$(fzf --bash)"
