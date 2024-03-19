@@ -12,9 +12,8 @@ echo "Installing required packages..."
 
 file_dir=`dirname $(readlink -f $BASH_SOURCE)`
 
-$file_dir/install-choco.sh
-
 wingetpkgs=(
+  Chocolatey.Chocolatey
   eza-community.eza        # modern ls
   sharkdp.bat              # modern cat
   ca.duan.tre-command      # modern tree
