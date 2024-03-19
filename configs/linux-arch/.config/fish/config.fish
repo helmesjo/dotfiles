@@ -11,32 +11,26 @@ set -x VISUAL hx
 set -x EDITOR $VISUAL
 
 if status is-interactive
-    # Path to file, or source if symlink.
-    set config_path (dirname (readlink -f (status --current-filename)))
-    set dotfiles_root (git -C $config_path rev-parse --show-toplevel)
-    
+    # Aliases
+    source ~/.shell-aliases
+
     # PATH
-    switch (uname)
+    switch (uname -o)
         case Darwin
             fish_add_path -pP /opt/pkgin/bin
             fish_add_path -pP /opt/homebrew/bin
             fish_add_path -pP /opt/homebrew/opt/llvm/bin # lldb-vscode
-        case Windows
-            fish_add_path -aP "~/AppData/Local/Microsoft/WindowsApps"
-            fish_add_path -aP "~/AppData/Local/Microsoft/WinGet/Links"
-            fish_add_path -aP "~/AppData/Local/Programs/Microsoft VS Code/bin"
-            fish_add_path -aP "C:/build2/bin"
+        case Windows Msys
+            fish_add_path -aP ~/AppData/Local/Microsoft/WinGet/Links
+            fish_add_path -aP ~/AppData/Local/Microsoft/WindowsApps
+            fish_add_path -aP $(cygpath -u $PROGRAMFILES/tre-command/bin)
+            fish_add_path -aP "/c/build2/bin"
+
+            alias sudo=gsudo
         case '*'
             fish_add_path -aP ~/.local/bin # mainly pip packages
     end
 
-    # Aliases
-    source ~/.shell-aliases
-
-    # Export
-    set -x FZF_DEFAULT_COMMAND rg --files --hidden
-    set -x FZF_CTRL_T_COMMAND $FZF_DEFAULT_COMMAND
-    set -x FZF_COMPLETION_TRIGGER ??
-
+    fzf --fish | source
     zoxide init fish --cmd cd | source
 end
