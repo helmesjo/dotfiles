@@ -21,6 +21,11 @@ if status is-interactive
             fish_add_path -pP /opt/pkgin/bin
             fish_add_path -pP /opt/homebrew/bin
             fish_add_path -pP /opt/homebrew/opt/llvm/bin # lldb-vscode
+        case Windows
+            fish_add_path -aP "~/AppData/Local/Microsoft/WindowsApps"
+            fish_add_path -aP "~/AppData/Local/Microsoft/WinGet/Links"
+            fish_add_path -aP "~/AppData/Local/Programs/Microsoft VS Code/bin"
+            fish_add_path -aP "C:/build2/bin"
         case '*'
             fish_add_path -aP ~/.local/bin # mainly pip packages
     end
