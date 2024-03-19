@@ -96,3 +96,4 @@ for sourcename in ${shortcuts[@]}; do
 done
 
 $this_dir/configure-registry.sh
+$this_dir/configure-msys.sh

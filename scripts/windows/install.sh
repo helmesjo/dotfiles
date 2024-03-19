@@ -33,9 +33,10 @@ chocopkgs_admin=(
 )
 pacmanpkgs=(
   fish
+  git
 )
 
 winget install ${wingetpkgs[@]}
-sudo choco install --yes ${chocopkgs_admin[@]}
+gsudo choco install --yes ${chocopkgs_admin[@]}
 cmd.exe //C C:/msys64/msys2_shell.cmd -defterm -here -no-start -ucrt64 -shell \
   bash -c "pacman --noconfirm -Syu && pacman --noconfirm -Sy $pacmanpkgs"
