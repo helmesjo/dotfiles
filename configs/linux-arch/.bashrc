@@ -5,10 +5,6 @@
 VISUAL=hx
 EDITOR="$VISUAL"
 
-# Path to file, or source if symlink.
-this_file=`dirname $(readlink -f $BASH_SOURCE)`
-dotfiles_root=$(git -C $this_file rev-parse --show-toplevel)
-
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
@@ -16,6 +12,10 @@ PS1='[\u@\h \W]\$ '
 
 # Aliases
 source ~/.bazsh_aliases
+
+# Path to file, or source if symlink.
+# this_file=`dirname $(readlink -f $BASH_SOURCE)`
+# dotfiles_root=$(git -C $this_file rev-parse --show-toplevel)
 
 # Sourcing
 if [[ "$OSTYPE" == "darwin"* ]]; then
