@@ -13,7 +13,6 @@ echo "Installing required packages..."
 file_dir=`dirname $(readlink -f $BASH_SOURCE)`
 
 $file_dir/install-choco.sh
-$file_dir/install-scoop.sh
 
 wingetpkgs=(
   eza-community.eza        # modern ls
@@ -32,14 +31,11 @@ wingetpkgs=(
 chocopkgs_admin=(
   jetbrainsmono
 )
-# scooppkgs=(
-# )
-# scooppkgs_global=(
-# )
+pacmanpkgs=(
+  fish
+)
 
 winget install ${wingetpkgs[@]}
 sudo choco install --yes ${chocopkgs_admin[@]}
-# scoop install sudo --no-cache
-# scoop bucket add nerd-fonts
-# scoop install --no-cache ${scooppkgs[@]}
-# sudo scoop install --global --no-cache ${scooppkgs_global[@]}
+cmd.exe //C C:/msys64/msys2_shell.cmd -defterm -here -no-start -ucrt64 -shell \
+  bash -c "pacman --noconfirm -Syu && pacman --noconfirm -Sy $pacmanpkgs"
