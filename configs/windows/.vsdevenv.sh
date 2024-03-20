@@ -11,7 +11,19 @@ x86_64-arm64  : x64_arm64
 x86_64-arm32  : x64_arm
 '
 
-# prefix common commands to that aliases and functions are ignored
+VS_ENVAR_CACHE="$(cygpath -m ~/.vsdevenv.cache)"
+function vsdevenv_export_envars()
+{
+    # Read file line by line and extract variables
+    set -o allexport
+    source $VS_ENVAR_CACHE
+    PATH="$PATH:$VCPATHS"
+    set +o allexport
+    which cl.exe >/dev/null 2>&1 || echo "Failed to find cl.exe"
+    return 0
+}
+
+# prefix common commands so that aliases and functions are ignored
 $C command
 
 # If on windows and not in developer prompt (or with wrong architecture), try to set it up
@@ -26,9 +38,9 @@ if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]];then
 
     TARGET_ARCH_CONV=$($C echo -e "$CL_ARCH_TABLE" | $C tr -d ' ' | $C grep "^$HOST_ARCH-$TARGET_ARCH:" | $C awk -F':' '{print $2}')
 
-    if $C cl.exe >/dev/null 2>&1;then
+    if cl.exe >/dev/null 2>&1;then
         # Figure out if we already are in the correct dev prompt (matching architecture)
-        CL_ARCH=$($C cl.exe 2>&1 | $C grep "Compiler.*for" | $C awk '{print $NF}')
+        CL_ARCH=$(cl.exe 2>&1 | $C grep "Compiler.*for" | $C awk '{print $NF}')
         if [ "$CL_ARCH" != "$TARGET_ARCH_CONV" ];then
           REQUIRE_PROMPT=1
         fi
@@ -38,17 +50,17 @@ if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]];then
 
     # Find path to latest VS version
     VSDIR="C:/Program Files/Microsoft Visual Studio"
+    if ! test -f "$VSDIR"; then
+        VSDIR="C:/Program Files (x86)/Microsoft Visual Studio"
+    fi
     VSVER_LATEST=$($C ls -1 "$VSDIR" \
                     | $C grep "[[:digit:]]" | $C sort -r | $C head -n 1)
 
     if [ $REQUIRE_PROMPT -eq 1 ];then
         # See if VS PATHs has been cached already
-        VS_ENVAR_CACHE=~/.vsdevenv.cache
         if [ -f "$VS_ENVAR_CACHE" ]; then
-            VS_PATHS=$(<$VS_ENVAR_CACHE)
-            declare -x PATH="$PATH:$VS_PATHS"
-            # echo "-- Loaded cached VS envars: '$VS_ENVAR_CACHE'"
-            # $C cl.exe >/dev/null 2>&1
+            # Read file line by line and extract variables
+            vsdevenv_export_envars
             return 0
         fi
 
@@ -73,24 +85,47 @@ if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]];then
             *)      CMD_EXE=(cmd /C);;
         esac
 
-        # Inside dev prompt, export all envars (using 'export -p') and run with 'eval' to
-        # setup current environment (basically extract everything the dev prompt sets up)
-        # then extract only the 'PATH' value
-        ${CMD_EXE[@]} " "$VSVARSALL" $TARGET_ARCH_CONV && bash -c "export -p >$VS_ENVAR_CACHE""
-        $C sed -i '/^declare -x PATH=/!d' $VS_ENVAR_CACHE
-        $C sed -i 's/^declare -x PATH=//' $VS_ENVAR_CACHE
-        $C sed -i 's/\"//g' $VS_ENVAR_CACHE
-        VS_PATHS=$(<$VS_ENVAR_CACHE)
-        # Filter all paths not within the VS directory.
-        # We just want the bare minimum.
-        # The result is a string with all paths.
-        VS_PATHS=$($C echo ${VS_PATHS} \
-            | $C awk -v RS=: -v ORS=: '/Visual Studio/ {print} {next}' \
-            | $C sed 's/:*$//')
-        declare -x PATH="$PATH:$VS_PATHS"
-        echo "$VS_PATHS" >$VS_ENVAR_CACHE
+        # Inside dev prompt, export all envars (using 'export -p'),
+        # then extract only the relevant 'PATH' values
+        VS_ENVARS_TMP="${VS_ENVAR_CACHE}.tmp"
+        > $VS_ENVAR_CACHE
+        > $VS_ENVARS_TMP
+        ${CMD_EXE[@]} " "$VSVARSALL" $TARGET_ARCH_CONV >NUL && bash -c "export -p >$VS_ENVARS_TMP""
+        # Clear cache then fill with diff (that is, only the VS stuff).
+        # Deal specifically with 'PATH' to subtract the current PATH. Store result in 'VCPATHS'.
+        while read -r line; do
+          if [[ "${line%=*}" == "declare -x PATH" ]]; then
+            # Remove leading and trailing quotes to not mess up if-check
+            VCPATHS_EXPORTED=$(sed -e 's/^"//' -e 's/"$//' <<<${line#*=})
+            ( IFS=:
+              VCPATHS=""
+              for p in $VCPATHS_EXPORTED; do
+                p="$(cygpath -u "$p")"
+                if [ -d "$p" ] && [[ ":$PATH:" != *":$p:"* ]]; then
+                    VCPATHS="${VCPATHS:+"$VCPATHS:"}$p"
+                fi
+              done
+              echo "VCPATHS=\"$VCPATHS\"" >>"$VS_ENVAR_CACHE"
+            )
+          else
+            # Get var name
+            VAR="${line%=*}"
+            VAR="${VAR##* }"
+
+            # Only append if it doesn't already exist and has a value assigned.
+            if [[ "$VAR" != "_" ]] && [ -z "${VAR:+${!VAR}}" ]; then
+              VALUE="${line#*=}"
+              if [[ "$VALUE" != "$line" ]]; then
+                echo "$VAR=${line#*=}" >> $VS_ENVAR_CACHE
+              fi
+            fi
+          fi
+        done < "$VS_ENVARS_TMP"
+
+        rm $VS_ENVARS_TMP
+        vsdevenv_export_envars
         echo "-- Cached VS envars: '$(cygpath -m $VS_ENVAR_CACHE)'"
     else
-        echo -e "-- Already running in developer prompt ($TARGET_ARCH_CONV) in '$VSDIR/$VSVER_LATEST'"
+        echo -e "-- Already running dev prompt ($TARGET_ARCH_CONV) in '$VSDIR/$VSVER_LATEST'"
     fi
 fi
