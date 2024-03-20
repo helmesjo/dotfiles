@@ -92,8 +92,5 @@ for sourcename in ${shortcuts[@]}; do
 
   echo "  - Copying '$sourcename'"
   printf "%s" "    - "
-  gsudo cp -fv "$sourcepath" "$targetpath"
+  "$(cygpath -u "$PROGRAMFILES/gsudo/Current/gsudo")" cp -fv "$sourcepath" "$targetpath"
 done
-
-$this_dir/configure-registry.sh
-$this_dir/configure-msys.sh
