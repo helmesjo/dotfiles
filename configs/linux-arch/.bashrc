@@ -19,6 +19,7 @@ if [[ $OSTYPE == 'msys' ]]; then
     PATH="$PATH:$(cygpath -u "$PROGRAMFILES/tre-command/bin")"
     PATH="$PATH:$(cygpath -u "$PROGRAMFILES/gsudo/Current")"
     PATH="$PATH:/c/build2/bin"
+    PATH="$PATH:$(cygpath -u "$PROGRAMFILES/Git/mingw64/bin")"
 
     alias sudo=gsudo
 fi

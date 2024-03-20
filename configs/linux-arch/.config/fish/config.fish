@@ -21,6 +21,7 @@ if status is-interactive
             fish_add_path -pP /opt/homebrew/bin
             fish_add_path -pP /opt/homebrew/opt/llvm/bin # lldb-vscode
         case Windows Msys
+            fish_add_path -aP $(cygpath -u "$PROGRAMFILES/Git/mingw64/bin")
             fish_add_path -aP ~/AppData/Local/Microsoft/WinGet/Links
             fish_add_path -aP ~/AppData/Local/Microsoft/WindowsApps
             fish_add_path -aP $(cygpath -u "$PROGRAMFILES/tre-command/bin")
