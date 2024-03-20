@@ -1,2 +1,11 @@
 [shell]
-program = "cmd.exe"
+program = ".config\\shortcuts\\msys2_shell.cmd"
+args = [
+  "-ucrt64",
+  "-defterm",
+  "-here",
+  "-no-start",
+  "-use-full-path",
+  "-shell",
+  "bash -c \"source ~/.vsdevenv.sh && fish\""
+]
