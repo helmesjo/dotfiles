@@ -1,8 +1,7 @@
 # Autodetect text files
 * text=auto eol=lf
 
-# ...Unless the name matches the following
-# overriding patterns
-
-# Linux
+# scripts
 *.sh text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
