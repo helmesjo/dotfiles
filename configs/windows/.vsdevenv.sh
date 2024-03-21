@@ -19,6 +19,10 @@ function vsdevenv_export_envars()
     source $VS_ENVAR_CACHE
     PATH="$PATH:$VCPATHS"
     set +o allexport
+    # Remove clashing tools (eg. msys2 link.exe)
+    bad_linkers=($(which -a link.exe | grep -v "$(cygpath -u "$VCToolsInstallDir")"))
+    for f in ${bad_linkers[@]}; do test -f "$f" && printf '%s' "conflicting link.exe, " && mv -v "$f" "$f.bak"; done
+
     which cl.exe >/dev/null 2>&1 || echo "Failed to find cl.exe"
     return 0
 }
