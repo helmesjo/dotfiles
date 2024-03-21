@@ -8,6 +8,7 @@
     symlinks = true
     autocrlf = input
 
+    filemode = true
 [credential "https://dev.azure.com"]
     useHttpPath = true
 
