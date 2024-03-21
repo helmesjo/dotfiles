@@ -27,6 +27,7 @@ if status is-interactive
             fish_add_path -aP $(cygpath -u "$PROGRAMFILES/tre-command/bin")
             fish_add_path -aP $(cygpath -u "$PROGRAMFILES/gsudo/Current")
             fish_add_path -aP "/c/build2/bin"
+            fish_add_path -aP ~/.cargo/bin
 
             alias sudo=gsudo
         case '*'
