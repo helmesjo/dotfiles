@@ -1,1 +1,1 @@
-./../linux-arch/.bashrc
+../linux-arch/.bashrc
