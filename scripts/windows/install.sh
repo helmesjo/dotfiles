@@ -33,7 +33,6 @@ chocopkgs_admin=(
 )
 pacmanpkgs=(
   fish
-  git
 )
 
 winget install ${wingetpkgs[@]}
