@@ -2,8 +2,8 @@ import = ["~/.config/alacritty/alacritty.local.toml"]
 
 # NOTE: Not pixels.
 [window.dimensions]
-columns = 140
-lines = 40
+columns = 200
+lines = 50
 
 [font]
 size = 12
