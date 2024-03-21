@@ -16,14 +16,27 @@ function vsdevenv_export_envars()
 {
     # Read file line by line and extract variables
     set -o allexport
-    source $VS_ENVAR_CACHE
+    source "$VS_ENVAR_CACHE"
     PATH="$PATH:$VCPATHS"
     set +o allexport
     # Remove clashing tools (eg. msys2 link.exe)
-    bad_linkers=($(which -a link.exe | grep -v "$(cygpath -u "$VCToolsInstallDir")"))
-    for f in ${bad_linkers[@]}; do test -f "$f" && printf '%s' "conflicting link.exe, " && mv -v "$f" "$f.bak"; done
+    if [[ -n "${VCToolsInstallDir}" ]]; then
+      bad_linkers=($(which -a link.exe 2>/dev/null | grep -v "$(cygpath -u "$VCToolsInstallDir")"))
+      for f in ${bad_linkers[@]}; do
+        f="$(cygpath -m "$f")"
+        if test -f "$f" >/dev/null; then
+          printf '%s' "Conflicting link.exe, "
+          if ! mv -v --backup=t "$f" "$f.bak"; then
+            printf '%s\n' " - manually rename/remove it"
+          fi
+        fi
+      done
+    fi
 
-    which cl.exe >/dev/null 2>&1 || echo "Failed to find cl.exe"
+    if ! which cl.exe >/dev/null 2>&1; then
+      echo "Failed to find cl.exe"
+      return 1
+    fi
     return 0
 }
 
@@ -64,8 +77,11 @@ if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]];then
         # See if VS PATHs has been cached already
         if [ -f "$VS_ENVAR_CACHE" ]; then
             # Read file line by line and extract variables
-            vsdevenv_export_envars
-            return 0
+            if vsdevenv_export_envars; then
+              return 0
+            else
+              rm -v "$VS_ENVAR_CACHE"
+            fi
         fi
 
         echo -e "\n-- Setting up developer prompt ($TARGET_ARCH_CONV) in '$VSDIR/$VSVER_LATEST'"
@@ -81,7 +97,7 @@ if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]];then
             return 1
         fi
 
-        VSVARSALL="$(cygpath -w $VSVARSALL)"
+        VSVARSALL="$(cygpath -w "$VSVARSALL")"
 
         # Msys: Deal with '/' being parsed as path & not cmd flag
         case "$(uname -s)" in
@@ -91,12 +107,15 @@ if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]];then
 
         # Inside dev prompt, export all envars (using 'export -p'),
         # then extract only the relevant 'PATH' values
-        VS_ENVARS_TMP="${VS_ENVAR_CACHE}.tmp"
-        > $VS_ENVAR_CACHE
-        > $VS_ENVARS_TMP
+        VS_ENVARS_CACHE_BAK="${VS_ENVAR_CACHE}.bak"
+        VS_ENVARS_TMP="${VS_ENVAR_CACHE}.tmp.extracted"
+        rm -f "$VS_ENVARS_CACHE_BAK"
+        test -f "$VS_ENVAR_CACHE" && cp "$VS_ENVAR_CACHE" "$VS_ENVARS_CACHE_BAK"
+        >"$VS_ENVARS_TMP"
         ${CMD_EXE[@]} " "$VSVARSALL" $TARGET_ARCH_CONV >NUL && bash -c "export -p >$VS_ENVARS_TMP""
         # Clear cache then fill with diff (that is, only the VS stuff).
         # Deal specifically with 'PATH' to subtract the current PATH. Store result in 'VCPATHS'.
+        >"$VS_ENVAR_CACHE"
         while read -r line; do
           if [[ "${line%=*}" == "declare -x PATH" ]]; then
             # Remove leading and trailing quotes to not mess up if-check
@@ -104,12 +123,14 @@ if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]];then
             ( IFS=:
               VCPATHS=""
               for p in $VCPATHS_EXPORTED; do
-                p="$(cygpath -u "$p")"
                 # add if non-empty, is a dir, has not already been added and not already in PATH, add it
-                if [[ -n "${p}" ]] && [ -d "$p" ] && [[ ":$VCPATHS:" != *":$p:"* ]] && [[ ":$PATH:" != *":$p:"* ]]; then
-                  # filter out redundant paths
-                  if [[ "$p" != "." ]] && [[ "$p" != ".." ]] && [[ "$p" != "./" ]]; then
-                    VCPATHS="${VCPATHS:+"$VCPATHS:"}$p"
+                if [[ -n "${p}" ]]; then
+                  p="$(cygpath -u "$p")"
+                  if [ -d "$p" ] && [[ ":$VCPATHS:" != *":$p:"* ]] && [[ ":$PATH:" != *":$p:"* ]]; then
+                    # filter out redundant paths
+                    if [[ "$p" != "." ]] && [[ "$p" != ".." ]] && [[ "$p" != "./" ]]; then
+                      VCPATHS="${VCPATHS:+"$VCPATHS:"}$p"
+                    fi
                   fi
                 fi
               done
@@ -130,9 +151,17 @@ if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]];then
           fi
         done < "$VS_ENVARS_TMP"
 
-        rm $VS_ENVARS_TMP
-        vsdevenv_export_envars
-        echo "-- Cached VS envars: '$(cygpath -m $VS_ENVAR_CACHE)'"
+        if vsdevenv_export_envars; then
+          rm -f "${VS_ENVAR_CACHE}.failed"
+          rm -f "$VS_ENVARS_TMP"
+          rm -f "$VS_ENVARS_CACHE_BAK"
+          echo "-- Cached VS envars: '$(cygpath -m $VS_ENVAR_CACHE)'"
+        else
+          rm -f "$VS_ENVARS_CACHE_BAK"
+          rm -f "${VS_ENVAR_CACHE}.failed"
+          mv "$VS_ENVAR_CACHE" "${VS_ENVAR_CACHE}.failed"
+          echo "See ${VS_ENVAR_CACHE}.failed"
+        fi
     else
         echo -e "-- Already running dev prompt ($TARGET_ARCH_CONV) in '$VSDIR/$VSVER_LATEST'"
     fi
