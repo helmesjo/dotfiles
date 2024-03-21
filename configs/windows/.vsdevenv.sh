@@ -105,8 +105,12 @@ if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]];then
               VCPATHS=""
               for p in $VCPATHS_EXPORTED; do
                 p="$(cygpath -u "$p")"
-                if [ -d "$p" ] && [[ ":$PATH:" != *":$p:"* ]]; then
+                # add if non-empty, is a dir, has not already been added and not already in PATH, add it
+                if [[ -n "${p}" ]] && [ -d "$p" ] && [[ ":$VCPATHS:" != *":$p:"* ]] && [[ ":$PATH:" != *":$p:"* ]]; then
+                  # filter out redundant paths
+                  if [[ "$p" != "." ]] && [[ "$p" != ".." ]] && [[ "$p" != "./" ]]; then
                     VCPATHS="${VCPATHS:+"$VCPATHS:"}$p"
+                  fi
                 fi
               done
               echo "VCPATHS=\"$VCPATHS\"" >>"$VS_ENVAR_CACHE"
