@@ -58,7 +58,10 @@ ${CMD_EXE[@]} C:/msys64/msys2_shell.cmd -defterm -here -no-start -ucrt64 -shell 
 
 # vc++ build tools:
 "$(cygpath -u "$PROGRAMFILES/gsudo/Current/gsudo")" winget install --force --id=Microsoft.VisualStudio.2022.BuildTools \
-               --override "--quiet --wait --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
+               --override "--quiet --wait \
+                 --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 \
+                 --add Microsoft.VisualStudio.Component.Windows11SDK.22000 \
+               "
 
 # font:
 "$(cygpath -u "$PROGRAMFILES/gsudo/Current/gsudo")" choco install --yes ${chocopkgs_admin[@]}
