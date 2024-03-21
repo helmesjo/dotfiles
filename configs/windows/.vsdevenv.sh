@@ -11,7 +11,10 @@ x86_64-arm64  : x64_arm64
 x86_64-arm32  : x64_arm
 '
 
-VS_ENVAR_CACHE="$(cygpath -m ~/.vsdevenv.cache)"
+# NOTE: Don't use '~' since all envars are cleared before
+#       starting devprompt to extract only new vars.
+#       'readlink -f' is so that we get the real windows user path.
+VS_ENVAR_CACHE="$(cygpath -m "$(readlink -f ~/.vsdevenv.cache)")"
 function vsdevenv_export_envars()
 {
     # Read file line by line and extract variables
@@ -97,21 +100,24 @@ if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]];then
             return 1
         fi
 
-        VSVARSALL="$(cygpath -w "$VSVARSALL")"
+        VSVARSALL="$(cygpath -m "$VSVARSALL")"
 
         # Msys: Deal with '/' being parsed as path & not cmd flag
+        CMD_EXE=("$(cygpath -m "$(which cmd.exe)")")
         case "$(uname -s)" in
-            MINGW*) CMD_EXE=(cmd //C);;
-            *)      CMD_EXE=(cmd /C);;
+            MINGW*) CMD_EXE+=(//S //C);;
+            *)      CMD_EXE+=(/S /C);;
         esac
 
         # Inside dev prompt, export all envars (using 'export -p'),
-        # then extract only the relevant 'PATH' values
+        # then extract only the unique envars & 'PATH' values
         VS_ENVARS_CACHE_BAK="${VS_ENVAR_CACHE}.bak"
         VS_ENVARS_TMP="${VS_ENVAR_CACHE}.tmp.extracted"
         rm -f "$VS_ENVARS_CACHE_BAK"
         test -f "$VS_ENVAR_CACHE" && cp "$VS_ENVAR_CACHE" "$VS_ENVARS_CACHE_BAK"
         >"$VS_ENVARS_TMP"
+        # TODO: Use 'env -i bash -c' to create an empty envar and really only extract those set
+        #       by vs dev prompt (it becomes a quoting mess so giving up for now)
         ${CMD_EXE[@]} " "$VSVARSALL" $TARGET_ARCH_CONV >NUL && bash -c "export -p >$VS_ENVARS_TMP""
         # Clear cache then fill with diff (that is, only the VS stuff).
         # Deal specifically with 'PATH' to subtract the current PATH. Store result in 'VCPATHS'.
