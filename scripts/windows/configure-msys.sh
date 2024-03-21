@@ -2,23 +2,17 @@
 set -eu -o pipefail
 
 # Must run with correct HOME dir set and as admin
-if [[ $HOME != $(cygpath -u "$USERPROFILE") ]] || ! net session > /dev/null 2>&1; then
+if [[ "$HOME" != $(cygpath -u "$USERPROFILE") ]] || ! net session > /dev/null 2>&1; then
   # Must run with correct home directory,
   # else it'll create it's own within msys2.
   MSYS=winsymlinks:nativestrict
   HOME=$(cygpath -u "$USERPROFILE")
-  this_script=$(readlink -f $BASH_SOURCE)
+  this_script="$(cygpath -u "$(readlink -f $BASH_SOURCE)")"
 
-  # Msys: Deal with '/' being parsed as path & not cmd flag
-  case "$(uname -o)" in
-      Msys) CMD_EXE=(cmd //C);;
-      *)    CMD_EXE=(cmd /C);;
-  esac
   echo "Re-running as admin with HOME=$HOME"
   test -f "C:/msys64/msys2_shell.cmd"
   "$(cygpath -u "$PROGRAMFILES/gsudo/Current/gsudo")" \
-    ${CMD_EXE[@]} C:/msys64/msys2_shell.cmd -defterm -here -no-start -ucrt64 -shell \
-                  bash -c $this_script
+    C:/msys64/msys2_shell.cmd -defterm -here -no-start -ucrt64 -shell bash -c "$this_script"
   exit 0
 fi
 
