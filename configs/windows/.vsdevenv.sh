@@ -113,8 +113,8 @@ if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]];then
             )
           else
             # Get var name
-            VAR="${line%=*}"
-            VAR="${VAR##* }"
+            VAR="${line%%=*}"
+            VAR="${VAR#"declare -x "*}"
 
             # Only append if it doesn't already exist and has a value assigned.
             if [[ "$VAR" != "_" ]] && [ -z "${VAR:+${!VAR}}" ]; then
