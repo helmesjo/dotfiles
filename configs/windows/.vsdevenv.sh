@@ -11,6 +11,9 @@ x86_64-arm64  : x64_arm64
 x86_64-arm32  : x64_arm
 '
 
+# prefix common commands so that aliases and functions are ignored
+$C command
+
 # NOTE: Don't use '~' since all envars are cleared before
 #       starting devprompt to extract only new vars.
 #       'readlink -f' is so that we get the real windows user path.
@@ -20,11 +23,11 @@ function vsdevenv_remove_clashing_bins()
 {
   # Remove clashing tools (eg. msys2 link.exe)
   if [[ -n "${VCToolsInstallDir}" ]]; then
-    bad_linkers=($(which -a link.exe 2>/dev/null | grep -v "$(cygpath -u "$VCToolsInstallDir")"))
+    bad_linkers=($(which -a link.exe 2>/dev/null | $C grep -v "$(cygpath -u "$VCToolsInstallDir")"))
     for f in ${bad_linkers[@]}; do
       f="$(cygpath -m "$f")"
-      if test -f "$f" >/dev/null; then
-        printf '%s' "Conflicting link.exe, "
+      if $C test -f "$f" >/dev/null; then
+        printf '%s' "-- Conflicting link.exe, "
         if ! mv -v --backup=t "$f" "$f.disabled"; then
           printf '%s\n' " - manually rename/remove it"
         fi
@@ -35,22 +38,23 @@ function vsdevenv_remove_clashing_bins()
 function vsdevenv_export_envars()
 {
     # Read file line by line and extract variables
-    set -o allexport
-    source "$VS_ENVAR_CACHE"
+    $C set -o allexport
+    $C source "$VS_ENVAR_CACHE"
     PATH="$PATH:$VCPATHS"
-    set +o allexport
+    $C set +o allexport
 
     if ! which cl.exe >/dev/null 2>&1; then
-      echo "Failed to find cl.exe"
+      $C echo "-- Failed to find cl.exe"
       return 1
     else
       vsdevenv_remove_clashing_bins
       return 0
     fi
 }
-
-# prefix common commands so that aliases and functions are ignored
-$C command
+function vsdevenv_find_vsvarsall_bat()
+{
+  echo "$($C find "$1" -type f -name "vcvarsall.bat" -print -quit)"
+}
 
 # If on windows and not in developer prompt (or with wrong architecture), try to set it up
 if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]]; then
@@ -74,14 +78,6 @@ if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]]; then
         REQUIRE_PROMPT=1
     fi
 
-    # Find path to latest VS version
-    VSDIR="C:/Program Files/Microsoft Visual Studio"
-    if ! test -f "$VSDIR"; then
-        VSDIR="C:/Program Files (x86)/Microsoft Visual Studio"
-    fi
-    VSVER_LATEST=$($C ls -1 "$VSDIR" \
-                    | $C grep "[[:digit:]]" | $C sort -r | $C head -n 1)
-
     if [ $REQUIRE_PROMPT -eq 1 ]; then
         # See if VS PATHs has been cached already
         if [ -f "$VS_ENVAR_CACHE" ]; then
@@ -93,20 +89,40 @@ if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]]; then
             fi
         fi
 
-        echo -e "\n-- Setting up developer prompt ($TARGET_ARCH_CONV) in '$VSDIR/$VSVER_LATEST'"
-        if [ ! -d "$VSDIR" ]; then
-            echo "Failed to find Visual Studio installation in '$VSDIR'."
-            return 1
-        fi
+        VS_DEFAULT_SEARCH_DIRS=(
+        "$(cygpath -u "$PROGRAMFILES/Microsoft Visual Studio")"
+        "$(cygpath -u "$(printenv "ProgramFiles(x86)")/Microsoft Visual Studio")"
+        )
 
-        VSVARSALL="$($C find "$VSDIR/$VSVER/" -type f -name "vcvarsall.bat" -print -quit)"
+        VSVER_LATEST=0
+        for ((i = 0; i < ${#VS_DEFAULT_SEARCH_DIRS[@]}; i++))
+        do
+          vsdir=$(cygpath -m "${VS_DEFAULT_SEARCH_DIRS[$i]}")
+          # loop until newest is found
+          if [[ -z "${VSVARSALL}" ]]; then
+            if [ -d "$vsdir" ]; then
+              vsdir_latest_ver=$($C ls -1 "$vsdir" \
+                               | $C grep -w "[[:digit:]]*" | $C sort -r | $C head -n 1)
+              # see if this is a newer version
+              if [[ -n "$vsdir_latest_ver" ]] && [[ -z ${VSVER_LATEST} ]] || [[ $VSVER_LATEST -lt $vsdir_latest_ver ]]; then
+                vsvarsall="$(vsdevenv_find_vsvarsall_bat "$vsdir/$vsdir_latest_ver/")"
+                if [[ -n "${vsvarsall}" ]]; then
+                  VSDIR=$(cygpath -m "$vsdir")
+                  VSVER_LATEST=$vsdir_latest_ver
+                  VSVARSALL="$vsvarsall"
+                fi
+              fi
+            fi
+          fi
+        done
 
         if [ ! -f "$VSVARSALL" ]; then
-            echo "Failed to find 'vsvarsall.bat' in '$VSDIR'."
+            echo "-- Failed to find 'vsvarsall.bat' in '$VSDIR'."
             return 1
         fi
 
-        VSVARSALL="$(cygpath -m "$VSVARSALL")"
+        echo -e "\n-- Setting up developer prompt ($TARGET_ARCH_CONV) in '$VSDIR/$VSVER_LATEST'"
+        echo "-- Found: $VSVARSALL"
 
         # Msys: Deal with '/' being parsed as path & not cmd flag
         CMD_EXE=("$(cygpath -m "$(which cmd.exe)")")
@@ -175,7 +191,8 @@ if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]]; then
           echo "See ${VS_ENVAR_CACHE}.failed"
         fi
     else
-        echo -e "-- Already running dev prompt ($TARGET_ARCH_CONV) in '$VSDIR/$VSVER_LATEST'"
+        echo -e "-- Already running dev prompt ($TARGET_ARCH_CONV)"
+        which cl.exe
         vsdevenv_remove_clashing_bins
     fi
 fi
