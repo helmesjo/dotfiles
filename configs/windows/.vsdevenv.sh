@@ -15,6 +15,23 @@ x86_64-arm32  : x64_arm
 #       starting devprompt to extract only new vars.
 #       'readlink -f' is so that we get the real windows user path.
 VS_ENVAR_CACHE="$(cygpath -m "$(readlink -f ~/.vsdevenv.cache)")"
+
+function vsdevenv_remove_clashing_bins()
+{
+  # Remove clashing tools (eg. msys2 link.exe)
+  if [[ -n "${VCToolsInstallDir}" ]]; then
+    bad_linkers=($(which -a link.exe 2>/dev/null | grep -v "$(cygpath -u "$VCToolsInstallDir")"))
+    for f in ${bad_linkers[@]}; do
+      f="$(cygpath -m "$f")"
+      if test -f "$f" >/dev/null; then
+        printf '%s' "Conflicting link.exe, "
+        if ! mv -v --backup=t "$f" "$f.disabled"; then
+          printf '%s\n' " - manually rename/remove it"
+        fi
+      fi
+    done
+  fi
+}
 function vsdevenv_export_envars()
 {
     # Read file line by line and extract variables
@@ -22,32 +39,21 @@ function vsdevenv_export_envars()
     source "$VS_ENVAR_CACHE"
     PATH="$PATH:$VCPATHS"
     set +o allexport
-    # Remove clashing tools (eg. msys2 link.exe)
-    if [[ -n "${VCToolsInstallDir}" ]]; then
-      bad_linkers=($(which -a link.exe 2>/dev/null | grep -v "$(cygpath -u "$VCToolsInstallDir")"))
-      for f in ${bad_linkers[@]}; do
-        f="$(cygpath -m "$f")"
-        if test -f "$f" >/dev/null; then
-          printf '%s' "Conflicting link.exe, "
-          if ! mv -v --backup=t "$f" "$f.bak"; then
-            printf '%s\n' " - manually rename/remove it"
-          fi
-        fi
-      done
-    fi
 
     if ! which cl.exe >/dev/null 2>&1; then
       echo "Failed to find cl.exe"
       return 1
+    else
+      vsdevenv_remove_clashing_bins
+      return 0
     fi
-    return 0
 }
 
 # prefix common commands so that aliases and functions are ignored
 $C command
 
 # If on windows and not in developer prompt (or with wrong architecture), try to set it up
-if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]];then
+if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]]; then
     REQUIRE_PROMPT=0
     if [ ! -n "${HOST_ARCH-}" ]; then
         HOST_ARCH=$(uname -m)
@@ -58,10 +64,10 @@ if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]];then
 
     TARGET_ARCH_CONV=$($C echo -e "$CL_ARCH_TABLE" | $C tr -d ' ' | $C grep "^$HOST_ARCH-$TARGET_ARCH:" | $C awk -F':' '{print $2}')
 
-    if cl.exe >/dev/null 2>&1;then
+    if cl.exe >/dev/null 2>&1; then
         # Figure out if we already are in the correct dev prompt (matching architecture)
         CL_ARCH=$(cl.exe 2>&1 | $C grep "Compiler.*for" | $C awk '{print $NF}')
-        if [ "$CL_ARCH" != "$TARGET_ARCH_CONV" ];then
+        if [ "$CL_ARCH" != "$TARGET_ARCH_CONV" ]; then
           REQUIRE_PROMPT=1
         fi
     else
@@ -76,7 +82,7 @@ if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]];then
     VSVER_LATEST=$($C ls -1 "$VSDIR" \
                     | $C grep "[[:digit:]]" | $C sort -r | $C head -n 1)
 
-    if [ $REQUIRE_PROMPT -eq 1 ];then
+    if [ $REQUIRE_PROMPT -eq 1 ]; then
         # See if VS PATHs has been cached already
         if [ -f "$VS_ENVAR_CACHE" ]; then
             # Read file line by line and extract variables
@@ -170,5 +176,6 @@ if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]];then
         fi
     else
         echo -e "-- Already running dev prompt ($TARGET_ARCH_CONV) in '$VSDIR/$VSVER_LATEST'"
+        vsdevenv_remove_clashing_bins
     fi
 fi
