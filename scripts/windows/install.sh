@@ -26,6 +26,7 @@ wingetpkgs=(
   LLVM.LLVM                # clangd, lldb-vscode
   BurntSushi.ripgrep.MSVC
   gerardog.gsudo           # sudo
+  python3
 )
 # Fonts must be installed as admin
 chocopkgs_admin=(
