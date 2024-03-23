@@ -30,7 +30,7 @@ wingetpkgs=(
 )
 # Fonts must be installed as admin
 chocopkgs_admin=(
-  jetbrainsmono
+  nerd-fonts-JetBrainsMono
 )
 pacmanpkgs=(
   fish

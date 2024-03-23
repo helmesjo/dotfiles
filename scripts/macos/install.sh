@@ -27,7 +27,7 @@ brewpkgs=(
   # Dev
   git-delta
   helix
-  homebrew/cask-fonts/font-jetbrains-mono
+  homebrew/cask-fonts/font-jetbrains-mono-nerd-font
   npm
   ## Debugging
   llvm        # lldb-vscode
