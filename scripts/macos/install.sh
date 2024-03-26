@@ -7,7 +7,7 @@ echo "Installing required packages..."
 file_dir=`dirname $(readlink -f $BASH_SOURCE)`
 
 $file_dir/install-brew.sh
-$file_dir/install-pkgin.sh
+# $file_dir/install-pkgin.sh
 
 brewpkgs=(
   # Core
@@ -27,36 +27,36 @@ brewpkgs=(
   # Dev
   git-delta
   helix
-  homebrew/cask-fonts/font-jetbrains-mono-nerd-font
   npm
   ## Debugging
   llvm        # lldb-vscode
   ## Languge Server Protocol
   bash-language-server
+  cmake-language-server
   lua-language-server
+  # Fonts
+  homebrew/cask-fonts/font-jetbrains-mono-nerd-font
 )
 brewcasks=(
   git-credential-manager
 )
 
 # pkginpkgs=(
-#   tree
 # )
 
-pippkgs=(
-  cmake-language-server
-)
+# pippkgs=(
+# )
 
-npmpkgs=(
-  bash-language-server
-)
+# npmpkgs=(
+# )
 brew install -f ${brewpkgs[@]}
 brew install -f --cask ${brewcasks[@]}
 brew update -f
 # sudo pkgin -y install ${pkginpkgs[@]}
-python3 -m pip install --no-input ${pippkgs[@]} --upgrade
-npm install -g ${npmpkgs[@]}
+# python3 -m venv ~/.local --system-site-packages
+# ~/.local/bin/pip install --no-input ${pippkgs[@]} --upgrade
+# npm install -g ${npmpkgs[@]}
 
 # Remove unused/orphaned packages
 brew autoremove
-sudo pkgin autoremove
+# sudo pkgin autoremove
