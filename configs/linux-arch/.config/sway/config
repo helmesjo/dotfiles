@@ -11,11 +11,11 @@ exec_always {
     gsettings set $gnome-schema gtk-theme 'Adwaita-dark'
     gsettings set $gnome-schema icon-theme 'Adwaita-dark'
     gsettings set $gnome-schema cursor-theme 'Adwaita-dark'
-    gsettings set $gnome-schema font-name 'ttf-font-awesome'
+    gsettings set $gnome-schema font-name 'JetBrainsMono Nerd Font Mono'
 }
 
 # Font
-font pango:SourceCodePro Medium 11
+font pango:'JetBrainsMono Nerd Font Mono' Medium 11
 
 ### Colors
 set $color_fg           #004675
