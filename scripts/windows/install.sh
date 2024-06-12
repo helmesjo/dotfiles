@@ -8,9 +8,26 @@ function on_error {
 }
 trap on_error ERR
 
-echo "Installing required packages..."
+if ! command -v gsudo &>/dev/null; then
+  winget install --accept-source-agreements --accept-package-agreements \
+    gerardog.gsudo # sudo
+fi
 
-file_dir=`dirname $(readlink -f $BASH_SOURCE)`
+# Installing packages requires elevated priviliges, so we ask once.
+if [[ "$HOME" != $(cygpath -u "$USERPROFILE") ]] || ! net session > /dev/null 2>&1; then
+  # Must run with correct home directory,
+  # else it'll create it's own within msys2.
+  MSYS=winsymlinks:nativestrict
+  HOME=$(cygpath -u "$USERPROFILE")
+  this_script="$(cygpath -u "$(readlink -f $BASH_SOURCE)")"
+
+  echo "Re-running as admin with HOME=$HOME"
+  "$(cygpath -u "$PROGRAMFILES/gsudo/Current/gsudo")" \
+    bash -c "$this_script"
+    exit $?
+fi
+
+echo "Installing required packages..."
 
 wingetpkgs=(
   Alacritty.Alacritty
@@ -25,43 +42,39 @@ wingetpkgs=(
   StephanDilly.gitui
   LLVM.LLVM                # clangd, lldb-vscode
   BurntSushi.ripgrep.MSVC
-  gerardog.gsudo           # sudo
   python3
 )
 # Fonts must be installed as admin
-chocopkgs_admin=(
+chocopkgs=(
   nerd-fonts-JetBrainsMono
 )
 pacmanpkgs=(
   fish
 )
 
-winget install ${wingetpkgs[@]}
-
-# Msys: Deal with '/' being parsed as path & not cmd flag
-case "$(uname -o)" in
-    Msys) CMD_EXE=(cmd //C);;
-    *)    CMD_EXE=(cmd /C);;
-esac
+winget install --accept-source-agreements --accept-package-agreements \
+  ${wingetpkgs[@]}
 
 # Pass 'yes' to any prompt from MSYS2. It also always returns error,
 # so always assume success.
-yes | winget install MSYS2.MSYS2 || true
+if ! command -v winget list | grep 'MSYS2' >/dev/null; then
+  yes | winget install MSYS2.MSYS2 || true
+fi
 # finish up MSYS2 install in a detached shell since it'll terminate the shell
 # the first time (to wrap up the install).
-${CMD_EXE[@]} C:/msys64/msys2_shell.cmd -defterm -here -no-start -ucrt64 -shell \
+C:/msys64/msys2_shell.cmd -defterm -here -no-start -ucrt64 -shell \
                 bash -c "exec pacman --noconfirm -Syu; exit 0"
-
-test -f "C:/msys64/msys2_shell.cmd"
-${CMD_EXE[@]} C:/msys64/msys2_shell.cmd -defterm -here -no-start -ucrt64 -shell \
+C:/msys64/msys2_shell.cmd -defterm -here -no-start -ucrt64 -shell \
                 bash -c "pacman --noconfirm -S ${pacmanpkgs[*]}"
 
-# vc++ build tools:
-"$(cygpath -u "$PROGRAMFILES/gsudo/Current/gsudo")" winget install --force --id=Microsoft.VisualStudio.2022.BuildTools \
-               --override "--quiet --wait \
-                 --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 \
-                 --add Microsoft.VisualStudio.Component.Windows11SDK.22000 \
-               "
+# vc++ build tools (if not already available):
+if ! command -v cl.exe &>/dev/null; then
+  winget install --force --id=Microsoft.VisualStudio.2022.BuildTools \
+                 --override "--quiet --wait \
+                   --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 \
+                   --add Microsoft.VisualStudio.Component.Windows11SDK.22000 \
+                 "
+fi
 
 # font:
-"$(cygpath -u "$PROGRAMFILES/gsudo/Current/gsudo")" choco install --yes ${chocopkgs_admin[@]}
+choco install --yes ${chocopkgs[@]}

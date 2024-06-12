@@ -1,8 +1,22 @@
 #!/usr/bin/env bash
 set -eu -o pipefail
 
-this_dir=`dirname $(readlink -f $BASH_SOURCE)`
-root_dir=$(git -C $this_dir rev-parse --show-toplevel)
+# Symlinks for shortcuts requires elevated priviliges, so we ask once.
+if [[ "$HOME" != $(cygpath -u "$USERPROFILE") ]] || ! net session > /dev/null 2>&1; then
+  # Must run with correct home directory,
+  # else it'll create it's own within msys2.
+  MSYS=winsymlinks:nativestrict
+  HOME=$(cygpath -u "$USERPROFILE")
+  this_script="$(cygpath -u "$(readlink -f $BASH_SOURCE)")"
+
+  echo "Re-running as admin with HOME=$HOME"
+  "$(cygpath -u "$PROGRAMFILES/gsudo/Current/gsudo")" \
+    bash -c "$this_script"
+    exit $?
+fi
+
+this_dir=$(cygpath -m `dirname $(readlink -f $BASH_SOURCE)`)
+root_dir=$(git -C "$this_dir" rev-parse --show-toplevel)
 os=$($root_dir/scripts/get-os.sh 2>&1)
 dotfiles_root="$root_dir/configs/$os/appdata"
 dotfiles=$(ls -a $dotfiles_root) # grab the list
@@ -11,9 +25,6 @@ dotfiles_backup="$root_dir/_backup/$backup_nr"
 target_root="$APPDATA"
 shortcuts_root="$dotfiles_root/shortcuts"
 shortcuts=$(ls $shortcuts_root) # grab the list
-echo "args: ${shortcuts[@]}"
-
-#$this_dir/configure-fzf.sh
 
 if [ "$os" == "windows" ]; then
   # https://github.com/git-for-windows/git/pull/156

@@ -10,10 +10,8 @@ if [[ "$HOME" != $(cygpath -u "$USERPROFILE") ]] || ! net session > /dev/null 2>
   this_script="$(cygpath -u "$(readlink -f $BASH_SOURCE)")"
 
   echo "Re-running as admin with HOME=$HOME"
-  test -f "C:/msys64/msys2_shell.cmd"
   "$(cygpath -u "$PROGRAMFILES/gsudo/Current/gsudo")" \
-    C:/msys64/msys2_shell.cmd -defterm -here -no-start -ucrt64 -shell bash -c "$this_script"
-  exit 0
+    bash -c "$this_script;exit \$?";exit $?
 fi
 
 # NOTE: Below are some speed-up tricks found online.
