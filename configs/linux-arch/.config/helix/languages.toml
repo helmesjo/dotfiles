@@ -22,11 +22,10 @@ file-types = ["sh",
               "eclass",
               "ebuild",
               "bazelrc",
-              "buildfile",
-              ".buildfile",
-              ".build",
-              "manifest",
-              ".manifest"
+              { glob = "*.build" },
+              { glob = "buildfile" },
+              { glob = "manifest" },
+              { glob = "*.manifest" },
               ]
 
 [[language]]
