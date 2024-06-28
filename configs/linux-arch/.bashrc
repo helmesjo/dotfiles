@@ -13,7 +13,7 @@ PS1='[\u@\h \W]\$ '
 # Aliases
 source ~/.bazsh_aliases
 
-if [[ $OSTYPE == 'msys' ]]; then
+if [[ "$(uname -o)" =~ Msys|Cygwin ]]; then
     PATH="$PATH:~/AppData/Local/Microsoft/WinGet/Links"
     PATH="$PATH:~/AppData/Local/Microsoft/WindowsApps"
     PATH="$PATH:$(cygpath -u "$PROGRAMFILES/tre-command/bin")"

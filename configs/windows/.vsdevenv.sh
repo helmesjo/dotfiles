@@ -57,7 +57,7 @@ function vsdevenv_find_vsvarsall_bat()
 }
 
 # If on windows and not in developer prompt (or with wrong architecture), try to set it up
-if [[ "$(uname -s)" =~ MINGW*|CYGWIN* ]]; then
+if [[ "$(uname -o)" =~ Msys|Cygwin ]]; then
     REQUIRE_PROMPT=0
     if [ ! -n "${HOST_ARCH-}" ]; then
         HOST_ARCH=$(uname -m)
