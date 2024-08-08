@@ -7,8 +7,9 @@
     pager = delta
     symlinks = true
     autocrlf = input
-
     filemode = true
+    eol = lf
+    longpaths = true
 [credential "https://dev.azure.com"]
     useHttpPath = true
 
