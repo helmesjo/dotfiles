@@ -3,7 +3,7 @@ set fish_greeting
 
 # Disable right side prompt
 function fish_right_prompt
-#intentionally left blank
+    #intentionally left blank
 end
 
 # Envars
@@ -12,6 +12,7 @@ set -x EDITOR $VISUAL
 
 if status is-interactive
     # Aliases
+    set dotfiles_root (dirname (readlink -m (status --current-filename)))
     source ~/.shell-aliases
 
     # PATH
@@ -27,7 +28,7 @@ if status is-interactive
             fish_add_path -aP $(cygpath -u "$PROGRAMFILES/tre-command/bin")
             fish_add_path -aP $(cygpath -u "$PROGRAMFILES/gsudo/Current")
             fish_add_path -aP $(cygpath -u "$PROGRAMFILES/LLVM/bin")
-            fish_add_path -aP "/c/build2/bin"
+            fish_add_path -aP /c/build2/bin
             fish_add_path -aP ~/.cargo/bin
 
             alias sudo=gsudo
