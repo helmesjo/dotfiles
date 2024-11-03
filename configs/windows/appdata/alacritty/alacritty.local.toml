@@ -1,4 +1,4 @@
-[shell]
+[terminal.shell]
 program = ".config\\shortcuts\\msys2_shell.cmd"
 args = [
   "-ucrt64",
