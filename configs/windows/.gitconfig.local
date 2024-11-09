@@ -1,4 +1,6 @@
+# important to first clear any previous helper
 [credential]
+    helper =
     helper = manager
 [core]
     preloadindex = true
