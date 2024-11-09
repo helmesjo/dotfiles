@@ -49,7 +49,6 @@ pacpkgs=(
   perf             # performance profiler
   git
   git-delta        # diff tool
-  gnome-keyring
   helix
   libsecret        # password storage
   nodejs
