@@ -50,6 +50,7 @@
     a = add
     ap = add --patch
     ba = branch --all
+    bpl = "!for branch in $(git for-each-ref --format '%(refname) %(upstream:track)' refs/heads | awk '$2 == \"[gone]\" {sub(\"refs/heads/\", \"\", $1); print $1}'); do echo \"> git branch -D $branch\" && read -p \"  ^ Proceed [Y/n]: \" -r && [[ ! $REPLY =~ ^[Yy] ]] || git branch -D $branch && echo; done"
     c = commit
     ca = commit --all
     co = checkout
