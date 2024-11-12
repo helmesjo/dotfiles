@@ -12,7 +12,7 @@ set -x EDITOR $VISUAL
 
 if status is-interactive
     # Aliases
-    set dotfiles_root (dirname (readlink -m (status --current-filename)))
+    set dotfiles_root (dirname (readlink -f (status --current-filename)))
     source ~/.shell-aliases
 
     # PATH
