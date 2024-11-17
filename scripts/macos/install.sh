@@ -5,8 +5,8 @@ set -eu -o pipefail
 echo "Installing required packages..."
 
 file_dir=`dirname $(readlink -f $BASH_SOURCE)`
-
 $file_dir/install-brew.sh
+$file_dir/install-pure.sh
 # $file_dir/install-pkgin.sh
 
 brewpkgs=(
@@ -16,12 +16,15 @@ brewpkgs=(
   bat
   coreutils
   eza
-  fish
   fzf
   git
   ripgrep
   tre-command # tree replacement
   zoxide      # cd replacement
+  # prompt
+  zsh
+  zsh-autosuggestions
+  zsh-syntax-highlighting
   # TUI/GUI
   gitui
   # Dev

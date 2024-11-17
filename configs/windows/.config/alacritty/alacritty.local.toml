@@ -7,5 +7,5 @@ args = [
   "-no-start",
   "-use-full-path",
   "-shell",
-  "bash -c \"source ~/.vsdevenv.sh && fish\""
+  "bash -c \"source ~/.vsdevenv.sh && zsh\""
 ]

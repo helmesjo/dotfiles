@@ -3,6 +3,9 @@ set -eu -o pipefail
 
 echo "Installing required packages..."
 
+file_dir=`dirname $(readlink -f $BASH_SOURCE)`
+$file_dir/install-pure.sh
+
 is_laptop=$(cat /sys/class/dmi/id/chassis_type 2>/dev/null | grep "\b9\b" > /dev/null && echo "true" || echo "false")
 
 pacpkgs=(

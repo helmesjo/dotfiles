@@ -29,6 +29,11 @@ fi
 
 echo "Installing required packages..."
 
+file_dir=`dirname $(readlink -f $BASH_SOURCE)`
+$file_dir/install-pure.sh
+$file_dir/install-zsh-autosuggestions.sh
+$file_dir/install-zsh-syntax-highlighting.sh
+
 wingetpkgs=(
   Alacritty.Alacritty
   Chocolatey.Chocolatey
@@ -49,7 +54,7 @@ chocopkgs=(
   nerd-fonts-JetBrainsMono
 )
 pacmanpkgs=(
-  fish
+  zsh
 )
 
 winget install --accept-source-agreements --accept-package-agreements \
