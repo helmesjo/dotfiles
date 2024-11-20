@@ -1,0 +1,1 @@
+../linux-arch/install-zsh-history-substring-search.sh

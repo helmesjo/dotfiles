@@ -7,6 +7,9 @@ echo "Installing required packages..."
 file_dir=`dirname $(readlink -f $BASH_SOURCE)`
 $file_dir/install-brew.sh
 $file_dir/install-pure.sh
+$file_dir/install-zsh-autosuggestions.sh
+$file_dir/install-zsh-syntax-highlighting.sh
+$file_dir/install-zsh-history-substring-search.sh
 # $file_dir/install-pkgin.sh
 
 brewpkgs=(
@@ -23,8 +26,6 @@ brewpkgs=(
   zoxide      # cd replacement
   # prompt
   zsh
-  zsh-autosuggestions
-  zsh-syntax-highlighting
   # TUI/GUI
   gitui
   # Dev

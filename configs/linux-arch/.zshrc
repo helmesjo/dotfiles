@@ -6,21 +6,27 @@ export LC_ALL=en_US.UTF-8
 VISUAL=hx
 EDITOR="$VISUAL"
 
+# Plugins
+source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source ~/.zsh/zsh-history-substring-search/zsh-history-substring-search.zsh
+
+# Bindings
+bindkey '^[[A' history-substring-search-up    # arrow-up
+bindkey '^[[B' history-substring-search-down  # arrow-down
+bindkey "^[[1;3C" forward-word                # alt+right
+bindkey "^[[1;3D" backward-word               # alt+left
+
 # Aliases
 source ~/.bazsh_aliases
 
 case "$(uname -o)" in
   Darwin)
-    source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-    source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-
     if [[ ! "$PATH" == */opt/homebrew/opt/llvm/bin* ]]; then
       PATH="${PATH:+${PATH}:}/opt/homebrew/opt/llvm/bin"
     fi
     ;;
   GNU/Linux)
-    source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-    source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
     ;;
   MSYS|MINGW32|MINGW64)
     PATH="$PATH:~/AppData/Local/Microsoft/WinGet/Links"

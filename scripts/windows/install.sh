@@ -33,6 +33,7 @@ file_dir=`dirname $(readlink -f $BASH_SOURCE)`
 $file_dir/install-pure.sh
 $file_dir/install-zsh-autosuggestions.sh
 $file_dir/install-zsh-syntax-highlighting.sh
+$file_dir/install-zsh-history-substring-search.sh
 
 wingetpkgs=(
   Alacritty.Alacritty
