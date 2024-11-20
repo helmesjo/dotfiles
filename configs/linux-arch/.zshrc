@@ -6,6 +6,12 @@ export LC_ALL=en_US.UTF-8
 VISUAL=hx
 EDITOR="$VISUAL"
 
+# Enable shared history
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+setopt INC_APPEND_HISTORY_TIME
+
 # Plugins
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
