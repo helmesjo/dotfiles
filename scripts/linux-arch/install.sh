@@ -34,6 +34,9 @@ pacpkgs=(
   ripgrep
   wl-clipboard     # system clipboard
   zoxide           # cd replacement
+  # prompt
+  zsh
+  zsh-completions
   # Fonts
   noto-fonts-emoji
   ttf-jetbrains-mono-nerd

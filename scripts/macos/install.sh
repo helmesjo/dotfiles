@@ -26,6 +26,7 @@ brewpkgs=(
   zoxide      # cd replacement
   # prompt
   zsh
+  zsh-completion
   # TUI/GUI
   gitui
   # Dev

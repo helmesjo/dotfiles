@@ -28,9 +28,15 @@ source ~/.bazsh_aliases
 
 case "$(uname -o)" in
   Darwin)
-    if [[ ! "$PATH" == */opt/homebrew/opt/llvm/bin* ]]; then
-      PATH="${PATH:+${PATH}:}/opt/homebrew/opt/llvm/bin"
-    fi
+    brew_path=$(brew --prefix)
+
+    (( ! ${PATH[(Ie)$brew_path/opt/llvm/bin]} )) && \
+      PATH="${PATH:+${PATH}:}$brew_path/opt/llvm/bin"
+
+    (( ! ${fpath[(Ie)$brew_path/share/zsh-completions]} )) && \
+      fpath+=$brew_path/share/zsh-completions
+
+    unset brew_path
     ;;
   GNU/Linux)
     ;;
@@ -43,6 +49,11 @@ case "$(uname -o)" in
     PATH="$PATH:$(cygpath -u "$PROGRAMFILES/Git/mingw64/bin")"
     PATH="$PATH:$(cygpath -u "$PROGRAMFILES/LLVM/bin")"
     PATH="$PATH:~/.cargo/bin"
+
+    # complete hard drives in msys2
+    drives=$(mount | sed -rn 's#^[A-Z]: on /([a-z]).*#\1#p' | tr '\n' ' ')
+    zstyle ':completion:*' fake-files /: "/:$drives"
+    unset drives
 
     alias sudo=gsudo
     ;;
@@ -89,3 +100,5 @@ zstyle ':vcs_info:git*' formats "%b"
 
 # hook the precmd function
 add-zsh-hook precmd prompt_pure_precmd
+
+autoload -Uz compinit; compinit -u
