@@ -74,6 +74,7 @@ function prompt_pure_precmd() {
 
   # git information
   vcs_info
+  local git_info="${vcs_info_msg_0_:+$vcs_info_msg_0_ }"
 
   if [ $last_command_exit -ne 0 -a $last_command_exit -ne 145 ]; then
     # if the last command failed (and not from ctrl+z),
@@ -87,7 +88,7 @@ function prompt_pure_precmd() {
   local prompt_symbol=${PURE_PROMPT_SYMBOL:-'>'}
 
   # set the prompt (single line)
-  PROMPT="%F{blue}${dir}%f %F{magenta}${vcs_info_msg_0_}%f ${error_code}${prompt_symbol} "
+  PROMPT="%F{blue}${dir}%f %F{magenta}${git_info}%f${error_code}${prompt_symbol} "
 
   # clear any existing right prompt
   RPROMPT=""
