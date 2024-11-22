@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -eu -o pipefail
+unalias -a # disable aliases for script
 
 function on_error {
     echo "Failed..."

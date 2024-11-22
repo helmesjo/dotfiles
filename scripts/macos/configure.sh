@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -eu -o pipefail
+unalias -a # disable aliases for script
 
 this_dir=$(dirname $(readlink -f $BASH_SOURCE))
 
