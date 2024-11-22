@@ -1,2 +1,2 @@
-dotfiles_root=`dirname $(readlink -f $BASH_SOURCE)`
+dotfiles_root=`dirname $(readlink -f ${BASH_SOURCE[0]:-$0})`
 source ~/.shell-aliases
