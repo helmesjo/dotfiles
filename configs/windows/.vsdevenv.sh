@@ -1,5 +1,8 @@
 #! /bin/echo This file should be sourced
 
+# if zsh, emulate 'bash' for this file (-L)
+if [ -n "$ZSH_VERSION" ]; then emulate -L ksh; fi
+
 #  Table for converting between our representation of architecture
 ## to that of Microsoft/CL.exe fantasy land.
 ## See: https://learn.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-170#vcvarsall-syntax
@@ -12,7 +15,7 @@ x86_64-arm32  : x64_arm
 '
 
 # prefix common commands so that aliases and functions are ignored
-$C command
+C=command
 
 # NOTE: Don't use '~' since all envars are cleared before
 #       starting devprompt to extract only new vars.
@@ -57,7 +60,7 @@ function vsdevenv_find_vsvarsall_bat()
 }
 
 # If on windows and not in developer prompt (or with wrong architecture), try to set it up
-if [[ "$(uname -o)" =~ Msys|Cygwin ]]; then
+if [[ "$(uname -o)" == Msys ]] || [[ "$(uname -o)" == Cygwin ]]; then
     REQUIRE_PROMPT=0
     if [ ! -n "${HOST_ARCH-}" ]; then
         HOST_ARCH=$(uname -m)
