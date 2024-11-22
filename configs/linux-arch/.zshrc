@@ -26,6 +26,9 @@ bindkey "^[[1;3D" backward-word               # alt+left
 # Aliases
 source ~/.bazsh_aliases
 
+# pure (see install-pure.sh)
+(( ! ${fpath[(Ie)$HOME/.zsh/pure]} )) && fpath+=($HOME/.zsh/pure)
+
 case "$(uname -o)" in
   Darwin)
     brew_path=$(brew --prefix)
@@ -34,13 +37,20 @@ case "$(uname -o)" in
       PATH="${PATH:+${PATH}:}$brew_path/opt/llvm/bin"
 
     (( ! ${fpath[(Ie)$brew_path/share/zsh-completions]} )) && \
-      fpath+=$brew_path/share/zsh-completions
+      fpath+=($brew_path/share/zsh-completions)
+
+    # pure:
+    autoload -U compinit promptinit; compinit; promptinit
+    prompt pure
 
     unset brew_path
     ;;
   GNU/Linux)
+    # pure:
+    autoload -U compinit promptinit; compinit; promptinit
+    prompt pure
     ;;
-  MSYS|MINGW32|MINGW64)
+  Msys|MINGW32|MINGW64)
     PATH="$PATH:~/AppData/Local/Microsoft/WinGet/Links"
     PATH="$PATH:~/AppData/Local/Microsoft/WindowsApps"
     PATH="$PATH:$(cygpath -u "$PROGRAMFILES/tre-command/bin")"
@@ -56,16 +66,18 @@ case "$(uname -o)" in
     unset drives
 
     alias sudo=gsudo
+
+    # pure:
+    # manual handling required because msys2 does not understand plain
+    # 'pure.zsh' as "source with zsh", it falls back to sourcing with sh.
+    # see ~/.zsh/pure/prompt_pure_setup
+    source $HOME/.zsh/pure/async.zsh
+    source $HOME/.zsh/pure/pure.zsh
     ;;
 esac
 
 eval "$(fzf --zsh)"
 eval "$(zoxide init zsh --cmd cd)"
-
-# pure (see install-pure.sh)
-(( ! ${fpath[(Ie)$HOME/.zsh/pure]} )) && fpath+=$HOME/.zsh/pure
-autoload -U promptinit; promptinit
-prompt pure
 
 # custom prompt (single-line)
 function prompt_pure_precmd() {
@@ -94,12 +106,10 @@ function prompt_pure_precmd() {
   RPROMPT=""
 }
 
+# hook the custom precmd function
+add-zsh-hook precmd prompt_pure_precmd
+
 # ensure vcs_info is loaded for git status
 autoload -Uz vcs_info
 zstyle ':vcs_info:*' enable git
 zstyle ':vcs_info:git*' formats "%b"
-
-# hook the precmd function
-add-zsh-hook precmd prompt_pure_precmd
-
-autoload -Uz compinit; compinit -u
