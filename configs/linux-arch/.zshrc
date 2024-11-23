@@ -18,10 +18,11 @@ source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source ~/.zsh/zsh-history-substring-search/zsh-history-substring-search.zsh
 
 # Bindings
-bindkey '^[[A' history-substring-search-up    # arrow-up
-bindkey '^[[B' history-substring-search-down  # arrow-down
-bindkey "^[[1;3C" forward-word                # alt+right
-bindkey "^[[1;3D" backward-word               # alt+left
+bindkey '^[[A'    history-substring-search-up    # arrow-up
+bindkey '^[[B'    history-substring-search-down  # arrow-down
+bindkey '^[[1;3C' forward-word                   # alt+right
+bindkey '^[[1;3D' backward-word                  # alt+left
+bindkey '^[[3~'   delete-char
 
 # Aliases
 source ~/.bazsh_aliases
