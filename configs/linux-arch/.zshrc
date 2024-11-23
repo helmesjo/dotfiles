@@ -12,6 +12,9 @@ HISTSIZE=10000
 SAVEHIST=10000
 setopt INC_APPEND_HISTORY_TIME
 
+# don't kill session on Ctrl+D
+setopt IGNORE_EOF
+
 # Plugins
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
