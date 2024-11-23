@@ -15,10 +15,15 @@ setopt INC_APPEND_HISTORY_TIME
 # don't kill session on Ctrl+D
 setopt IGNORE_EOF
 
+# fpaths
+(( ! ${fpath[(Ie)$HOME/.zsh/git]} )) && fpath+=($HOME/.zsh/git)
+(( ! ${fpath[(Ie)$HOME/.zsh/pure]} )) && fpath+=($HOME/.zsh/pure)
+
 # Plugins
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source ~/.zsh/zsh-history-substring-search/zsh-history-substring-search.zsh
+
 
 # Bindings
 bindkey '^[[A'    history-substring-search-up    # arrow-up
@@ -30,9 +35,6 @@ bindkey '^[[3~'   delete-char
 # Aliases
 source ~/.bazsh_aliases
 
-# pure (see install-pure.sh)
-(( ! ${fpath[(Ie)$HOME/.zsh/pure]} )) && fpath+=($HOME/.zsh/pure)
-
 case "$(uname -o)" in
   Darwin)
     brew_path=$(brew --prefix)
@@ -43,15 +45,13 @@ case "$(uname -o)" in
     (( ! ${fpath[(Ie)$brew_path/share/zsh-completions]} )) && \
       fpath+=($brew_path/share/zsh-completions)
 
-    # pure:
-    autoload -U compinit promptinit; compinit; promptinit
+    autoload -U promptinit; promptinit
     prompt pure
 
     unset brew_path
     ;;
   GNU/Linux)
-    # pure:
-    autoload -U compinit promptinit; compinit; promptinit
+    autoload -U promptinit; promptinit
     prompt pure
     ;;
   Msys|MINGW32|MINGW64)
@@ -79,6 +79,9 @@ case "$(uname -o)" in
     source $HOME/.zsh/pure/pure.zsh
     ;;
 esac
+
+# load fpath completion functions
+autoload -U bashcompinit compinit; bashcompinit; compinit
 
 eval "$(fzf --zsh)"
 eval "$(zoxide init zsh --cmd cd)"
