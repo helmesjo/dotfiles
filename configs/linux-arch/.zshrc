@@ -40,6 +40,9 @@ case "$(uname -o)" in
   Darwin)
     brew_path=$(brew --prefix)
 
+    (( ! ${PATH[(Ie)$brew_path/bin]} )) && \
+      PATH="${PATH:+${PATH}:}$brew_path/bin"
+
     (( ! ${PATH[(Ie)$brew_path/opt/llvm/bin]} )) && \
       PATH="${PATH:+${PATH}:}$brew_path/opt/llvm/bin"
 
