@@ -56,7 +56,7 @@ function vsdevenv_export_envars()
 }
 function vsdevenv_find_vsvarsall_bat()
 {
-  echo "$($C find "$1" -type f -name "vcvarsall.bat" -print -quit)"
+  echo -e "$($C find "$1" -type f -name "vcvarsall.bat" -print -quit)"
 }
 
 # If on windows and not in developer prompt (or with wrong architecture), try to set it up
@@ -112,7 +112,7 @@ if [[ "$(uname -o)" == Msys ]] || [[ "$(uname -o)" == Cygwin ]]; then
                 if [[ -n "${vsvarsall}" ]]; then
                   VSDIR=$(cygpath -m "$vsdir")
                   VSVER_LATEST=$vsdir_latest_ver
-                  VSVARSALL="$vsvarsall"
+                  VSVARSALL=$(cygpath -m "$vsvarsall")
                 fi
               fi
             fi
@@ -124,26 +124,32 @@ if [[ "$(uname -o)" == Msys ]] || [[ "$(uname -o)" == Cygwin ]]; then
             return 1
         fi
 
-        echo -e "\n-- Setting up developer prompt ($TARGET_ARCH_CONV) in '$VSDIR/$VSVER_LATEST'"
+        echo "-- Setting up developer prompt ($TARGET_ARCH_CONV) in '$VSDIR/$VSVER_LATEST'"
         echo "-- Found: $VSVARSALL"
 
         # Msys: Deal with '/' being parsed as path & not cmd flag
-        CMD_EXE=("$(cygpath -m "$(which cmd.exe)")")
+        CMD_EXE=($(cygpath -m $(which cmd.exe)))
         case "$(uname -s)" in
-            MINGW*) CMD_EXE+=(//S //C);;
-            *)      CMD_EXE+=(/S /C);;
+            MINGW*) CMD_EXE+=(//C);;
+            *)      CMD_EXE+=(/C);;
         esac
 
         # Inside dev prompt, export all envars (using 'export -p'),
-        # then extract only the unique envars & 'PATH' values
+        # then extract only the unique envars & 'PATH' values.
         VS_ENVARS_CACHE_BAK="${VS_ENVAR_CACHE}.bak"
         VS_ENVARS_TMP="${VS_ENVAR_CACHE}.tmp.extracted"
         rm -f "$VS_ENVARS_CACHE_BAK"
         test -f "$VS_ENVAR_CACHE" && cp "$VS_ENVAR_CACHE" "$VS_ENVARS_CACHE_BAK"
+        VS_DEVPROMPT_CMD=("\"$VSVARSALL\"" "$TARGET_ARCH_CONV" ">NUL")
+        BASH_PATH=$(which bash)
+
+        # Run subshell in a clean environment & extract new envars specified by devprompt.
+        # NOTE: Below is such a pain in the ass to get right, so avoid modifying.
         >"$VS_ENVARS_TMP"
-        # TODO: Use 'env -i bash -c' to create an empty envar and really only extract those set
-        #       by vs dev prompt (it becomes a quoting mess so giving up for now)
-        ${CMD_EXE[@]} " "$VSVARSALL" $TARGET_ARCH_CONV >NUL && bash -c "export -p >$VS_ENVARS_TMP""
+        /usr/bin/env -i $BASH_PATH --noprofile --norc -c \
+          "${CMD_EXE[*]} \" \"$VSVARSALL\" x64 >NUL && \
+          $(cygpath -w $BASH_PATH) --noprofile --norc -c \"export -p >$VS_ENVARS_TMP\"\""
+
         # Clear cache then fill with diff (that is, only the VS stuff).
         # Deal specifically with 'PATH' to subtract the current PATH. Store result in 'VCPATHS'.
         >"$VS_ENVAR_CACHE"
@@ -173,11 +179,15 @@ if [[ "$(uname -o)" == Msys ]] || [[ "$(uname -o)" == Cygwin ]]; then
             VAR="${VAR#"declare -x "*}"
 
             # Only append if it doesn't already exist and has a value assigned.
-            if [[ "$VAR" != "_" ]] && [ -z "${VAR:+${!VAR}}" ]; then
+            if [[ "$VAR" != "$line" ]] && \
+               [[ "$VAR" != "_" ]] && \
+               [[ -z "$(eval echo \$$VAR 2>/dev/null)" ]]; then
               VALUE="${line#*=}"
               if [[ "$VALUE" != "$line" ]]; then
-                echo "$VAR=${line#*=}" >> $VS_ENVAR_CACHE
+                echo -E "$VAR=${line#*=}" >> $VS_ENVAR_CACHE
               fi
+            # else
+            #   echo "Skipped envar: $VAR=${line#*=}"
             fi
           fi
         done < "$VS_ENVARS_TMP"
@@ -186,7 +196,9 @@ if [[ "$(uname -o)" == Msys ]] || [[ "$(uname -o)" == Cygwin ]]; then
           rm -f "${VS_ENVAR_CACHE}.failed"
           rm -f "$VS_ENVARS_TMP"
           rm -f "$VS_ENVARS_CACHE_BAK"
-          echo "-- Cached VS envars: '$(cygpath -m $VS_ENVAR_CACHE)'"
+
+          echo "-- $(cl 2>&1 >/dev/null | head -n 1)"
+          echo "-- Cached VS envars: $(cygpath -m $VS_ENVAR_CACHE)"
         else
           rm -f "$VS_ENVARS_CACHE_BAK"
           rm -f "${VS_ENVAR_CACHE}.failed"
