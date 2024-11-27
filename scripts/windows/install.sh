@@ -78,7 +78,7 @@ if ! command -v cl.exe &>/dev/null; then
   winget install --force --id=Microsoft.VisualStudio.2022.BuildTools \
                  --override "--quiet --wait \
                    --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 \
-                   --add Microsoft.VisualStudio.Component.Windows11SDK.22000 \
+                   --add Microsoft.VisualStudio.Component.Windows11SDK.26100 \
                  "
 fi
 

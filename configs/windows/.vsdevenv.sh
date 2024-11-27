@@ -143,10 +143,10 @@ if [[ "$(uname -o)" == Msys ]] || [[ "$(uname -o)" == Cygwin ]]; then
         VS_DEVPROMPT_CMD=("\"$VSVARSALL\"" "$TARGET_ARCH_CONV" ">NUL")
         BASH_PATH=$(which bash)
 
-        # Run subshell in a clean environment & extract new envars specified by devprompt.
+        # Run varsall.bat in a subshell & extract new envars specified by devprompt.
         # NOTE: Below is such a pain in the ass to get right, so avoid modifying.
         >"$VS_ENVARS_TMP"
-        /usr/bin/env -i $BASH_PATH --noprofile --norc -c \
+        $BASH_PATH --noprofile --norc -c \
           "${CMD_EXE[*]} \" \"$VSVARSALL\" x64 >NUL && \
           $(cygpath -w $BASH_PATH) --noprofile --norc -c \"export -p >$VS_ENVARS_TMP\"\""
 
@@ -154,9 +154,9 @@ if [[ "$(uname -o)" == Msys ]] || [[ "$(uname -o)" == Cygwin ]]; then
         # Deal specifically with 'PATH' to subtract the current PATH. Store result in 'VCPATHS'.
         >"$VS_ENVAR_CACHE"
         while read -r line; do
+          # Remove leading and trailing quotes to not mess up if-check
+          VCPATHS_EXPORTED=$(sed -e 's/^"//' -e 's/"$//' <<<${line#*=})
           if [[ "${line%=*}" == "declare -x PATH" ]]; then
-            # Remove leading and trailing quotes to not mess up if-check
-            VCPATHS_EXPORTED=$(sed -e 's/^"//' -e 's/"$//' <<<${line#*=})
             ( IFS=:
               VCPATHS=""
               for p in $VCPATHS_EXPORTED; do
@@ -177,17 +177,19 @@ if [[ "$(uname -o)" == Msys ]] || [[ "$(uname -o)" == Cygwin ]]; then
             # Get var name
             VAR="${line%%=*}"
             VAR="${VAR#"declare -x "*}"
-
             # Only append if it doesn't already exist and has a value assigned.
+            # echo "-- Read envar: $VAR"
             if [[ "$VAR" != "$line" ]] && \
                [[ "$VAR" != "_" ]] && \
                [[ -z "$(eval echo \$$VAR 2>/dev/null)" ]]; then
               VALUE="${line#*=}"
               if [[ "$VALUE" != "$line" ]]; then
+                # echo "-- Added envar: $VAR=${line#*=}"
                 echo -E "$VAR=${line#*=}" >> $VS_ENVAR_CACHE
               fi
-            # else
-            #   echo "Skipped envar: $VAR=${line#*=}"
+            else
+              # echo "-- Skipped envar: $VAR=${line#*=}"
+              # echo "---- Already have: $VAR=$(eval echo \$$VAR)"
             fi
           fi
         done < "$VS_ENVARS_TMP"
