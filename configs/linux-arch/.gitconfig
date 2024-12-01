@@ -50,7 +50,7 @@
     a = add
     ap = add --patch
     ba = branch --all
-    bpl = "!for branch in $(git for-each-ref --format '%(refname) %(upstream:track)' refs/heads | awk '$2 == \"[gone]\" {sub(\"refs/heads/\", \"\", $1); print $1}'); do echo \"> git branch -D $branch\" && read -p \"  ^ Proceed [Y/n]: \" -r && [[ ! $REPLY =~ ^[Yy] ]] || git branch -D $branch && echo; done"
+    bpl = "!for branch in $(git for-each-ref --format '%(refname) %(upstream:track)' refs/heads | awk '$2 == \"[gone]\" {sub(\"refs/heads/\", \"\", $1); print $1}'); do echo \"> git branch -D $branch\" && read -p \"  ^ Proceed? [Y/n]: \" -r && [[ $REPLY =~ ^[Yy]$ ]] && git branch -D $branch && echo || true; done"
     c = commit
     ca = commit --all
     co = checkout
@@ -58,6 +58,7 @@
     dc = diff --cached
     l = log
     ps = push
+    psf = "!read -p \"Force push? [Y/n]: \" -r && [[ $REPLY =~ ^[Yy]$ ]] && git ps --force || true"
     psu = "!git push --set-upstream origin \"$(git rev-parse --abbrev-ref HEAD)\""
     pl = pull -p
     pwd = rev-parse --show-toplevel
