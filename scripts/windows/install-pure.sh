@@ -1,1 +1,0 @@
-../linux-arch/install-pure.sh
