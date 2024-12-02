@@ -7,5 +7,5 @@ args = [
   "-no-start",
   "-use-full-path",
   "-shell zsh",
-  "--login -c 'source ~/.vsdevenv.sh; zsh'"
+  "--login"
 ]

@@ -26,6 +26,8 @@ if [[ "$(uname -o)" =~ Msys|Cygwin ]]; then
     PATH="$PATH:~/.cargo/bin"
 
     alias sudo=gsudo
+
+    source "$HOME/.vsdevenv.sh"
 fi
 
 eval "$(fzf --bash)"

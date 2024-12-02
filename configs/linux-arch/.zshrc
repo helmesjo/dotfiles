@@ -17,14 +17,12 @@ setopt INC_APPEND_HISTORY_TIME
 setopt IGNORE_EOF
 
 # fpaths
-(( ! ${fpath[(Ie)$HOME/.zsh/git]} )) && fpath+=($HOME/.zsh/git)
 (( ! ${fpath[(Ie)$HOME/.zsh/pure]} )) && fpath+=($HOME/.zsh/pure)
 
 # Plugins
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source ~/.zsh/zsh-history-substring-search/zsh-history-substring-search.zsh
-
 
 # Bindings
 bindkey '^[[A'    history-substring-search-up    # arrow-up
@@ -79,8 +77,9 @@ case "$(uname -o)" in
     # manual handling required because msys2 does not understand plain
     # 'pure.zsh' as "source with zsh", it falls back to sourcing with sh.
     # see ~/.zsh/pure/prompt_pure_setup
-    source $HOME/.zsh/pure/async.zsh
-    source $HOME/.zsh/pure/pure.zsh
+    source "$HOME/.zsh/pure/async.zsh"
+    source "$HOME/.zsh/pure/pure.zsh"
+    source "$HOME/.vsdevenv.sh"
     ;;
 esac
 
