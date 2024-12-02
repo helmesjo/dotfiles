@@ -68,7 +68,9 @@ function vsdevenv_export_envars()
     # Read file line by line and extract variables
     $C set -o allexport
     $C source "$VS_ENVAR_CACHE"
-    PATH="$PATH:$VCPATHS"
+    if [[ -n "${VCPATHS:-}" ]]; then
+      PATH="$PATH:$VCPATHS"
+    fi
     $C set +o allexport
 
     if ! which cl.exe >/dev/null 2>&1; then
@@ -200,64 +202,65 @@ function vsdevenv_setup()
           BASH_PATH="$(vsdevenv_retard_path "$(cygpath -m "$(which bash)")")"
           VS_VARSALL="$(vsdevenv_retard_path "$(cygpath -m "$VS_VARSALL")")"
           VS_ENVARS_TMP="$(cygpath -m "$(mktemp)")"
-          ${CMD_EXE[@]} " "$VS_VARSALL" $TARGET_ARCH_CONV && "$BASH_PATH" -c 'export -p' " >$VS_ENVARS_TMP
+          ${CMD_EXE[@]} " "$VS_VARSALL" $TARGET_ARCH_CONV >NUL 2>&1 && "$BASH_PATH" -c 'export -p' " >$VS_ENVARS_TMP
 
           # Clear cache then fill with diff (that is, only the VS stuff).
           # Deal specifically with 'PATH' to subtract the current PATH. Store result in 'VCPATHS'.
           >"$VS_ENVAR_CACHE"
           while read -r line; do
-            # Remove leading and trailing quotes to not mess up if-check
-            VCPATHS_EXPORTED=$(sed -e 's/^"//' -e 's/"$//' <<<${line#*=})
-            if [[ "${line%=*}" == "declare -x PATH" ]]; then
-              ( IFS=:
-                VCPATHS=""
-                for p in $VCPATHS_EXPORTED; do
-                  # add if non-empty, is a dir, has not already been added and not already in PATH, add it
-                  if [[ -n "${p}" ]]; then
-                    p="$(cygpath -u "$p")"
-                    if [ -d "$p" ] && [[ ":$VCPATHS:" != *":$p:"* ]] && [[ ":$PATH:" != *":$p:"* ]]; then
-                      # filter out redundant paths
-                      if [[ "$p" != "." ]] && [[ "$p" != ".." ]] && [[ "$p" != "./" ]]; then
-                        VCPATHS="${VCPATHS:+"$VCPATHS:"}$p"
-                      fi
-                    fi
+            # Clean up path separators (sometimes double or even quad backslashes in paths)
+            line="${line//\\\\\\\\//}"
+            line="${line//\\\\//}"
+
+            VAR="${line%=*}"
+            VAR="${VAR#'declare -x '*}"
+            VAL="${line#*=}"
+            VAL="${VAL#\"}" # Removes leading "
+            VAL="${VAL%\"}" # Removes trailing "
+
+            if    [[ "$VAR"   == "$line" ]] \
+               || [[ "$VALUE" == "$line" ]] \
+               || [[ "$VAR"   == "_" ]]; then
+              continue
+            fi
+
+            if [[ $VAR == 'PATH' ]]; then
+              # Split VAL into an array using ':' as the delimiter
+              VCPATH_EXPORTED=("${(s/:/)VAL}")
+
+              VCPATHS=""
+              # Loop through each path in devprompt exported PATH and add it to VCPATHS if it's not in PATH
+              for p in "${VCPATH_EXPORTED[@]}"; do
+                  if [[ ":$PATH:" != *":$p:"* ]]; then
+                      VCPATHS="${VCPATHS:+$VCPATHS:}$p"
                   fi
-                done
-                echo "VCPATHS=\"$VCPATHS\"" >>"$VS_ENVAR_CACHE"
-              )
+              done
+              echo "export VCPATHS=\"$VCPATHS\"" >>"$VS_ENVAR_CACHE"
+              # echo "-- Added envar: $VCPATHS=\"$VCPATHS\""
             else
-              # Get var name
-              VAR="${line%%=*}"
-              VAR="${VAR#"declare -x "*}"
-              # Only append if it doesn't already exist and has a value assigned.
-              # echo "-- Read envar: $VAR"
-              if [[ "$VAR" != "$line" ]] && \
-                 [[ "$VAR" != "_" ]] && \
-                 [[ -z "$(eval echo \$$VAR 2>/dev/null)" ]]; then
-                VALUE="${line#*=}"
-                if [[ "$VALUE" != "$line" ]]; then
-                  # echo "-- Added envar: $VAR=${line#*=}"
-                  echo -E "$VAR=${line#*=}" >> $VS_ENVAR_CACHE
-                fi
+              # Only add if it doesn't already exist and has a value assigned.
+              if [[ -z "$(eval echo \$$VAR 2>/dev/null)" ]]; then
+                echo "export $VAR=\"$VAL\"" >> $VS_ENVAR_CACHE
+                # echo "-- Added envar: $VAR=\"$VAL\""
               else
                 true
-                # echo "-- Skipped envar: $VAR=${line#*=}"
+                # echo "-- Skipped envar: $VAR=$VAL"
                 # echo "---- Already have: $VAR=$(eval echo \$$VAR)"
               fi
             fi
-          done < $VS_ENVARS_TMP
+          done <$VS_ENVARS_TMP
 
+          rm -f "${VS_ENVAR_CACHE}.failed"
           if vsdevenv_export_envars; then
-            rm -f "${VS_ENVAR_CACHE}.failed"
             rm -f "$VS_ENVARS_TMP"
             rm -f "$VS_ENVARS_CACHE_BAK"
 
             echo "-- $(cl 2>&1 >/dev/null | head -n 1)"
             echo "-- Cached VS envars: $(cygpath -m $VS_ENVAR_CACHE)"
             rm -f "$VS_ENVARS_CACHE_BAK"
-            rm -f "${VS_ENVAR_CACHE}.failed"
             return 0
           else
+            cp "$VS_ENVAR_CACHE" "${VS_ENVAR_CACHE}.failed"
             echo "-- Failed to export VS environment variables, see ${VS_ENVAR_CACHE}.failed"
             return 1
           fi
