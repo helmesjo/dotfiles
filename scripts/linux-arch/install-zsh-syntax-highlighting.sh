@@ -2,6 +2,13 @@
 
 set -eu -o pipefail
 
-mkdir -p "$HOME/.zsh"
-rm -rf "$HOME/.zsh/zsh-syntax-highlighting"
-command git clone --depth=1 --branch=0.8.0 https://github.com/zsh-users/zsh-syntax-highlighting.git "$HOME/.zsh/zsh-syntax-highlighting"
+URL="https://github.com/zsh-users/zsh-syntax-highlighting"
+BRANCH=0.8.0
+NAME=$(basename $URL)
+DIR="$HOME/.zsh/$NAME"
+echo "Installing $NAME $BRANCH to $DIR..."
+if ! test -d $DIR || \
+   ! command git -C "$DIR" rev-parse --is-inside-work-tree >/dev/null; then
+  mkdir -p "$DIR"
+  git clone --quiet --depth=1 --branch=$BRANCH $URL "$DIR" >/dev/null
+fi

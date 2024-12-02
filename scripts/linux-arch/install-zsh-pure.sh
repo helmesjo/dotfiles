@@ -2,8 +2,8 @@
 
 set -eu -o pipefail
 
-URL="https://github.com/zsh-users/zsh-autosuggestions"
-BRANCH=v0.7.1
+URL="https://github.com/sindresorhus/pure"
+BRANCH=v1.23.0
 NAME=$(basename $URL)
 DIR="$HOME/.zsh/$NAME"
 echo "Installing $NAME $BRANCH to $DIR..."
