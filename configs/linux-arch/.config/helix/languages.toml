@@ -25,7 +25,8 @@ file-types = ["sh",
               { glob = "*.build" },
               { glob = "buildfile" },
               { glob = "manifest" },
-              { glob = "*.manifest" },
+              { glob = "*manifest" },
+              { glob = "*testscript" },
              ]
 
 [[language]]
