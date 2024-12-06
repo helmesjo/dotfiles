@@ -8,6 +8,7 @@ $file_dir/install-zsh-pure.sh
 $file_dir/install-zsh-autosuggestions.sh
 $file_dir/install-zsh-syntax-highlighting.sh
 $file_dir/install-zsh-history-substring-search.sh
+$file_dir/install-yay.sh
 
 is_laptop=$(cat /sys/class/dmi/id/chassis_type 2>/dev/null | grep "\b9\b" > /dev/null && echo "true" || echo "false")
 
@@ -85,14 +86,6 @@ aurpkgs=(
 if [ "$is_laptop" == "true" ]; then
   # power management
   pacpkgs+=(tlp)
-fi
-
-# Install yay if missing
-if ! command -v yay &> /dev/null; then
-  git clone https://aur.archlinux.org/yay $HOME/git/yay
-  (cd $HOME/git/yay && makepkg -Acs --noconfirm)
-  sudo pacman -U --noconfirm $HOME/git/yay/*.pkg.tar.zst
-  rm -rf $HOME/git
 fi
 
 # Install packages
