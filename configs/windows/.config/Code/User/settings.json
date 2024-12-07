@@ -1,0 +1,12 @@
+{
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "files.associations": {
+      "*.build": "cpp",
+      "buildfile": "cpp",
+      "*.buildfile": "cpp",
+      "testscript": "cpp",
+      "*.testscript": "cpp",
+      "*.manifest": "yaml",
+      "manifest": "yaml",
+  },
+}
