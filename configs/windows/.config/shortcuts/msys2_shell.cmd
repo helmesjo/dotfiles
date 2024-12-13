@@ -6,7 +6,7 @@ set MSYS=winsymlinks:native
 set "HOME=%USERPROFILE%"
 
 IF EXIST "C:\msys64\msys2_shell.cmd" (
-  cmd /C "C:\msys64\msys2_shell.cmd %*"
+  C:\msys64\msys2_shell.cmd %*
   IF ERRORLEVEL 1 (
     ECHO Failed to start shell >&2
     cmd.exe
