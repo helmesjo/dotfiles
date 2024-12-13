@@ -59,11 +59,11 @@ case "$(uname -o)" in
   Msys|MINGW32|MINGW64)
     PATH="$PATH:$HOME/AppData/Local/Microsoft/WinGet/Links"
     PATH="$PATH:$HOME/AppData/Local/Microsoft/WindowsApps"
-    PATH="$PATH:$(cygpath -m "$PROGRAMFILES/tre-command/bin")"
-    PATH="$PATH:$(cygpath -m "$PROGRAMFILES/gsudo/Current")"
+    PATH="$PATH:$(cygpath -u "$PROGRAMFILES/tre-command/bin")"
+    PATH="$PATH:$(cygpath -u "$PROGRAMFILES/gsudo/Current")"
     PATH="$PATH:/c/build2/bin"
-    PATH="$PATH:$(cygpath -m "$PROGRAMFILES/Git/mingw64/bin")"
-    PATH="$PATH:$(cygpath -m "$PROGRAMFILES/LLVM/bin")"
+    PATH="$PATH:$(cygpath -u "$PROGRAMFILES/Git/mingw64/bin")"
+    PATH="$PATH:$(cygpath -u "$PROGRAMFILES/LLVM/bin")"
     PATH="$PATH:$HOME/.cargo/bin"
 
     # complete hard drives in msys2
