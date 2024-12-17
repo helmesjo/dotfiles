@@ -9,8 +9,8 @@ EDITOR="$VISUAL"
 
 # Enable shared history
 HISTFILE=~/.zsh_history
-HISTSIZE=10000
-SAVEHIST=10000
+HISTSIZE=50000
+SAVEHIST=50000
 setopt INC_APPEND_HISTORY_TIME
 
 # don't kill session on Ctrl+D
@@ -47,6 +47,7 @@ case "$(uname -o)" in
     (( ! ${fpath[(Ie)$brew_path/share/zsh-completions]} )) && \
       fpath+=($brew_path/share/zsh-completions)
 
+    chmod -R go-w "$(brew --prefix)/share"
     autoload -U promptinit; promptinit
     prompt pure
 
@@ -84,7 +85,7 @@ case "$(uname -o)" in
 esac
 
 # load fpath completion functions
-autoload -U bashcompinit compinit; bashcompinit; compinit
+autoload -Uz bashcompinit compinit; bashcompinit; compinit
 
 eval "$(fzf --zsh)"
 eval "$(zoxide init zsh --cmd cd)"
