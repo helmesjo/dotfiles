@@ -54,6 +54,13 @@ case "$(uname -o)" in
     unset brew_path
     ;;
   GNU/Linux)
+    if [[ "$(uname -r)" == *WSL* ]]; then
+      if ! test -f /mnt/c/Program\ Files/Git/mingw/bin/git-credential-manager.exe; then
+        export GIT_CONFIG_COUNT=1
+        export GIT_CONFIG_KEY_0=credential.helper
+        export GIT_CONFIG_VALUE_0='/mnt/c/Program\ Files/Git/mingw64/bin/git-credential-manager.exe'
+      fi
+    fi
     autoload -U promptinit; promptinit
     prompt pure
     ;;
