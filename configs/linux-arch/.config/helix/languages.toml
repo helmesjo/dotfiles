@@ -50,6 +50,11 @@ file-types = [
   { glob = ".yashrc" },
   { glob = ".yash_profile" },
   { glob = ".hushlogin" },
+  { glob = "*.build" },
+  { glob = "*.buildfile" },
+  { glob = "buildfile" },
+  { glob = "testscript" },
+  { glob = "*.testscript" },
 ]
 
 [[language]]
@@ -75,14 +80,10 @@ file-types = ["cc",
               "h++",
               "ii",
               "inl",
+              { glob = "*.h.in" },
               { glob = "*.hxx.in" },
               { glob = "*.hpp.in" },
               { glob = "*.h.in" },
-              { glob = "*.build" },
-              { glob = "buildfile" },
-              { glob = "*.buildfile" },
-              { glob = "testscript" },
-              { glob = "*.testscript" },
              ]
 
 [[language]]

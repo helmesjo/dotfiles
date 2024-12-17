@@ -1,11 +1,11 @@
 {
   "C_Cpp.intelliSenseEngine": "disabled",
   "files.associations": {
-      "*.build": "cpp",
-      "buildfile": "cpp",
-      "*.buildfile": "cpp",
-      "testscript": "cpp",
-      "*.testscript": "cpp",
+      "*.build": "shellscript",
+      "buildfile": "shellscript",
+      "*.buildfile": "shellscript",
+      "testscript": "shellscript",
+      "*.testscript": "shellscript",
       "*.manifest": "yaml",
       "manifest": "yaml",
   },
