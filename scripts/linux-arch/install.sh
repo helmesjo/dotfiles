@@ -16,6 +16,7 @@ pacpkgs=(
   # Base
   net-tools
   libnotify
+  less
   mesa
   wayland
   wl-clipboard
