@@ -1,8 +1,16 @@
 Windows Registry Editor Version 5.00
 
+; Note: Only set HKEY_CURRENT_USER to not require admin
+;       privileges.
+
+; Speed up repeat rate & lower repeat delay
 [HKEY_CURRENT_USER\Control Panel\Accessibility\Keyboard Response]
 "AutoRepeatDelay"="160" 
 "AutoRepeatRate"="7" 
 "BounceTime"="0"
 "DelayBeforeAcceptance"="0" 
 "Flags"="59" 
+
+; Disable CapsLock
+[HKEY_CURRENT_USER\SYSTEM\CurrentControlSet\Control\Keyboard Layout]
+"Scancode Map"=hex:00,00,00,00,00,00,00,00,02,00,00,00,00,00,3a,00,00,00,00,00

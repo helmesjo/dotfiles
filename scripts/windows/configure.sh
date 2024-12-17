@@ -2,7 +2,7 @@
 set -eu -o pipefail
 unalias -a # disable aliases for script
 
-# Symlinks for shortcuts requires elevated priviliges, so we ask once.
+# Symlinks for shortcuts requires elevated privileges, so we ask once.
 if [[ "$HOME" != $(cygpath -u "$USERPROFILE") ]] || ! net session > /dev/null 2>&1; then
   # Must run with correct home directory,
   # else it'll create it's own within msys2.
