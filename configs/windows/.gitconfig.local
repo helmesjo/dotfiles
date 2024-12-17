@@ -7,3 +7,8 @@
     fscache = true
 [gc]
     auto = 256
+
+# in wsl we use the windows installed git.exe,
+# thus we need to mark wsl dirs as 'safe'
+[safe]
+    directory = //wsl.localhost/*
