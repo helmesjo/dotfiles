@@ -6,9 +6,8 @@ URL="https://aur.archlinux.org/yay"
 BRANCH=
 NAME=$(basename $URL)
 DIR="/tmp/build/$NAME"
-echo "Installing $NAME $BRANCH to $DIR..."
-if ! test -d $DIR || \
-   ! command git -C "$DIR" rev-parse --is-inside-work-tree >/dev/null; then
+if ! command -v yay >/dev/null 2>&1; then
+  echo "Installing $NAME $BRANCH to $DIR..."
   mkdir -p "$DIR"
   git clone --quiet --depth=1 https://aur.archlinux.org/yay $DIR >/dev/null
   (cd $DIR && makepkg -Acs --noconfirm)

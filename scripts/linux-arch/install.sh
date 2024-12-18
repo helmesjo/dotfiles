@@ -10,7 +10,8 @@ $file_dir/install-zsh-syntax-highlighting.sh
 $file_dir/install-zsh-history-substring-search.sh
 $file_dir/install-yay.sh
 
-is_laptop=$(cat /sys/class/dmi/id/chassis_type 2>/dev/null | grep "\b9\b" > /dev/null && echo "true" || echo "false")
+is_laptop=$(cat /sys/class/dmi/id/chassis_type 2>/dev/null | grep "\b9\b" > /dev/null && echo 1 || echo 0)
+is_wsl=$([[ "$(uname -r)" == *WSL* ]] && echo 1 || echo 0 )
 
 pacpkgs=(
   # Base
@@ -83,16 +84,35 @@ aurpkgs=(
   bluetuith        # bluetooth device tui
 )
 
-# Laptop only
-if [ "$is_laptop" == "true" ]; then
+if [[ $is_wsl -eq 1 ]]; then
+  # WSL requires compatible win32 clipboard.
+  pacpkgs_rem=(wl-clipboard)
+  wingetpkgs=(
+    equalsraf.win32yank
+  )
+fi
+
+if [[ $is_laptop -eq 1 ]]; then
   # power management
   pacpkgs+=(tlp)
+fi
+
+if command -v winget.exe >/dev/null 2>&1; then
+  winget install --no-upgrade \
+                 --disable-interactivity \
+                 --ignore-warnings \
+                 --accept-source-agreements \
+                 --accept-package-agreements \
+                 ${wingetpkgs[@]}
 fi
 
 # Install packages
 sudo pacman -Sy --noconfirm archlinux-keyring && sudo pacman -Su --noconfirm
 sudo pacman -Sy --needed --noconfirm "${pacpkgs[@]}"
 yay -Sy --needed --noconfirm "${aurpkgs[@]}"
+
+# Remove packages (if any)
+[ ${#pacpkgs_rem[@]} -gt 0 ] && sudo pacman -R --noconfirm "${pacpkgs_rem[@]}"
 
 # Remove unused (orphan) packages
 pacman -Qtdq | sudo pacman -Rns --noconfirm - 2>/dev/null || true
