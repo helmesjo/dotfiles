@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -eu -o pipefail
 
-echo "Installing required packages..."
-
 file_dir=`dirname $(readlink -f $BASH_SOURCE)`
 $file_dir/install-zsh-pure.sh
 $file_dir/install-zsh-autosuggestions.sh
@@ -98,12 +96,12 @@ if [[ $is_laptop -eq 1 ]]; then
 fi
 
 if command -v winget.exe >/dev/null 2>&1; then
-  winget install --no-upgrade \
-                 --disable-interactivity \
+  winget install --disable-interactivity \
                  --ignore-warnings \
                  --accept-source-agreements \
                  --accept-package-agreements \
-                 ${wingetpkgs[@]}
+                 ${wingetpkgs[@]} \
+         || true
 fi
 
 # Install packages

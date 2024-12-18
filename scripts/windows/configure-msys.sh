@@ -1,17 +1,13 @@
 #!/usr/bin/env bash
 set -eu -o pipefail
+unalias -a # disable aliases for script
 
-# Must run with correct HOME dir set and as admin
-if [[ "$HOME" != $(cygpath -u "$USERPROFILE") ]] || ! net session > /dev/null 2>&1; then
-  # Must run with correct home directory,
-  # else it'll create it's own within msys2.
-  MSYS=winsymlinks:nativestrict
-  HOME=$(cygpath -u "$USERPROFILE")
-  this_script="$(cygpath -u "$(readlink -f $BASH_SOURCE)")"
+export MSYS=winsymlinks:nativestrict
 
-  echo "Re-running as admin with HOME=$HOME"
-  "$(cygpath -u "$PROGRAMFILES/gsudo/Current/gsudo")" \
-    bash -c "$this_script;exit \$?";exit $?
+# Symlinks for shortcuts requires elevated privileges.
+if ! net session > /dev/null 2>&1; then
+  echo "Re-run as admin" >&2
+  exit 1
 fi
 
 # NOTE: Below are some speed-up tricks found online.

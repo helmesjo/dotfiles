@@ -17,9 +17,6 @@ if ! command -v gsudo &>/dev/null; then
 fi
 
 file_dir=`dirname $(readlink -f "${BASH_SOURCE[0]:-$0}")`
-
-echo "Installing required packages..."
-
 $file_dir/install-zsh-pure.sh
 $file_dir/install-zsh-autosuggestions.sh
 $file_dir/install-zsh-syntax-highlighting.sh
