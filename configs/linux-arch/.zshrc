@@ -59,27 +59,33 @@ case "$(uname -o)" in
         export GIT_CONFIG_COUNT=1
         export GIT_CONFIG_KEY_0=credential.helper
         export GIT_CONFIG_VALUE_0='/mnt/c/Program\ Files/Git/mingw64/bin/git-credential-manager.exe'
-
-        # when running in wsl, override 'cmd not found' handler and
-        # see if there is an .exe file available to avoid explicitly
-        # spelling it out each time.
-        export command_not_found_handler() {
-          local cmd="$1"
-          shift
-          # Check if the command with .exe exists
-          if [ -x "$(command -v "$cmd.exe")" ]; then
-            "$cmd.exe" "$@"
-          else
-            # If no .exe is found, use the default command-not-found handler
-            if [ -x /usr/lib/command-not-found ]; then
-              /usr/lib/command-not-found "$cmd"
-            else
-              echo "$cmd: command not found" >&2
-              return 127
-            fi
-          fi
-        }
       fi
+      # when running in wsl, override 'cmd not found' handler and
+      # see if there is an .exe file available to avoid explicitly
+      # spelling it out each time.
+      export command_not_found_handler() {
+        local cmd="$1"
+        shift
+        if [[ -x "$(command -v "$cmd.exe")" ]]; then
+          "$cmd.exe" "$@"
+          return $?
+        else
+          echo "$cmd: command not found" >&2
+          return 127
+        fi
+      }
+      export which() {
+        local cmds=()
+        for cmd in "$@"; do
+          # if not found in PATH, fall back to checking with .exe suffix.
+          if ! (( ${+commands[$cmd]} )) && \
+               ((  ${+commands[$cmd.exe]} )); then
+            cmd="$cmd.exe"
+          fi
+          cmds+=("$cmd")
+        done
+        command which ${cmds[@]}
+      }
     fi
     autoload -U promptinit; promptinit
     prompt pure
