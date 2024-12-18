@@ -1,5 +1,6 @@
 # Make sudo work with other aliases
 alias sudo='sudo '
+alias win32yank='win32yank --lf'
 alias cat='bat'
 alias config='git -C $dotfiles_root'
 alias ls='eza -l --color=auto'
