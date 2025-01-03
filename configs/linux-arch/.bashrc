@@ -68,4 +68,6 @@ case "$(uname -o)" in
 esac
 
 eval "$(fzf --bash)"
+# don't have ESC+c start fzf
+bind '"\ec": nop'
 eval "$(zoxide init bash --cmd cd)"

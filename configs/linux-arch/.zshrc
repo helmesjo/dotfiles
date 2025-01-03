@@ -121,6 +121,8 @@ esac
 autoload -Uz bashcompinit compinit; bashcompinit; compinit
 
 eval "$(fzf --zsh)"
+# don't have ESC+c start fzf
+bindkey -s '\ec' ''
 eval "$(zoxide init zsh --cmd cd)"
 
 # custom prompt (single-line)
