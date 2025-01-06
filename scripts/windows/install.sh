@@ -34,6 +34,8 @@ wingetpkgs=(
   dandavison.delta         # git diff
   StephanDilly.gitui
   LLVM.LLVM                # clangd, lldb-vscode
+  LGUG2Z.komorebi          # tiling window manager
+  LGUG2Z.whkd              # hotkey override
   BurntSushi.ripgrep.MSVC
   python3
 )
