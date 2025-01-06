@@ -114,6 +114,9 @@ case "$(uname -o)" in
     source "$HOME/.zsh/pure/async.zsh"
     source "$HOME/.zsh/pure/pure.zsh"
     source "$HOME/.vsdevenv.sh"
+
+    alias reboot='powershell.exe -command restart-computer'
+    alias shutdown='powershell.exe -command stop-computer'
     ;;
 esac
 

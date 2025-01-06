@@ -64,6 +64,9 @@ case "$(uname -o)" in
     PATH="$PATH:$HOME/.cargo/bin"
 
     source "$HOME/.vsdevenv.sh"
+
+    alias reboot='powershell.exe -command restart-computer'
+    alias shutdown='powershell.exe -command stop-computer'
     ;;
 esac
 
