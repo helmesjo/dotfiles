@@ -24,18 +24,19 @@ $file_dir/install-zsh-history-substring-search.sh
 
 wingetpkgs=(
   Alacritty.Alacritty
-  eza-community.eza        # modern ls
-  sharkdp.bat              # modern cat
-  ca.duan.tre-command      # modern tree
-  ajeetdsouza.zoxide       # modern cd
+  eza-community.eza           # modern ls
+  sharkdp.bat                 # modern cat
+  ca.duan.tre-command         # modern tree
+  ajeetdsouza.zoxide          # modern cd
   Helix.Helix
   DEVCOM.JetBrainsMonoNerdFont
   junegunn.fzf
-  dandavison.delta         # git diff
+  dandavison.delta            # git diff
   StephanDilly.gitui
-  LLVM.LLVM                # clangd, lldb-vscode
-  LGUG2Z.komorebi          # tiling window manager
-  LGUG2Z.whkd              # hotkey override
+  LLVM.LLVM                   # clangd, lldb-vscode
+  LGUG2Z.komorebi             # tiling window manager
+  LGUG2Z.whkd                 # hotkey override
+  Flow-Launcher.Flow-Launcher # app launcher
   BurntSushi.ripgrep.MSVC
   python3
 )
