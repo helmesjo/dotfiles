@@ -4,12 +4,6 @@ unalias -a # disable aliases for script
 
 export MSYS=winsymlinks:nativestrict
 
-# Symlinks for shortcuts requires elevated privileges.
-if ! net session > /dev/null 2>&1; then
-  echo "Re-run as admin" >&2
-  exit 1
-fi
-
 this_dir=$(dirname $(readlink -f $BASH_SOURCE))
 
 # Msys: Deal with '/' being parsed as path & not cmd flag
@@ -19,4 +13,4 @@ case "$(uname -s)" in
     *)      CMD_EXE+=(/C);;
 esac
 
-${CMD_EXE[@]} "reg.exe import "$(cygpath -u $this_dir)/settings.reg""
+${CMD_EXE[@]} " reg.exe import "$(cygpath -w $this_dir)/settings.reg" "

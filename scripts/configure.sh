@@ -8,26 +8,8 @@ function on_error {
 }
 trap on_error ERR
 
-# this_dir=$(dirname $(readlink -f $BASH_SOURCE))
 root_dir=$(git rev-parse --show-toplevel)
 os=$($root_dir/scripts/get-os.sh 2>&1)
-
-# Windows reguires elevated privileges for shortcuts, reg import etc , so we ask once.
-# Also make sure HOME points to the current users home directory.
-if [[ $os == 'windows' ]]; then
-  if [[ "$HOME" != $(cygpath -u "$USERPROFILE") ]] || ! net session > /dev/null 2>&1; then
-    # Must run with correct home directory,
-    # else it'll create it's own within msys2.
-    export MSYS=winsymlinks:nativestrict
-    export HOME=$(cygpath -u "$USERPROFILE")
-    this_script="$(cygpath -u "$(readlink -f $BASH_SOURCE)")"
-
-    echo "Re-running as admin with HOME=$HOME"
-    "$(cygpath -u "$PROGRAMFILES/gsudo/Current/gsudo")" \
-      bash -c "$this_script"
-      exit $?
-  fi
-fi
 
 dotfiles_root=$root_dir/configs/$os
 dotfiles=$(ls -a $dotfiles_root) # grab the list
