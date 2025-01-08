@@ -38,6 +38,7 @@ newline = "none"
 
 [editor.file-picker]
 hidden = false
+git-ignore = true
 
 [keys.normal]
 X = "extend_line_up"
