@@ -9,6 +9,7 @@ alt + shift + o         : komorebic reload-configuration
 # The apps will be focused if open, or launched if not open
 # alt + f                 : if ($wshell.AppActivate('Firefox') -eq $False) { start firefox }
 # alt + b                 : if ($wshell.AppActivate('Chrome') -eq $False) { start chrome }
+alt + return            : start "$env:APPDATA/Microsoft/Windows/Start Menu/Programs/alacritty.lnk"
 
 alt + q                 : komorebic close
 alt + m                 : komorebic minimize
