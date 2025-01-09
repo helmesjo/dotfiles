@@ -12,6 +12,7 @@ $file_dir/install-zsh-history-substring-search.sh
 
 brewpkgs=(
   # Core
+  alacritty   # terminal
   alt-tab     # alt-tab switch windows, not apps
   bash
   bat
