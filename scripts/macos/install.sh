@@ -22,6 +22,8 @@ brewpkgs=(
   git
   ripgrep
   tre-command # tree replacement
+  koekeishiya/formulae/yabai # tiling window manager
+  koekeishiya/formulae/skhd  # hotkey daemon
   zoxide      # cd replacement
   # prompt
   zsh
@@ -53,6 +55,16 @@ brewcasks=(
 
 # npmpkgs=(
 # )
+
+# remove old service file because homebrew changes binary path
+if command -v yabai >/dev/null; then
+  yabai --uninstall-service 2>/dev/null || true
+fi
+
+if command -v skhd >/dev/null; then
+  skhd --uninstall-service 2>/dev/null || true
+fi
+
 brew install -f ${brewpkgs[@]}
 brew install -f --cask ${brewcasks[@]}
 brew update -f
