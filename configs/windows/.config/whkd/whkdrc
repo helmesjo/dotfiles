@@ -12,6 +12,7 @@ alt + shift + o         : komorebic reload-configuration
 alt + return            : start "$env:APPDATA/Microsoft/Windows/Start Menu/Programs/alacritty.lnk"
 
 alt + q                 : komorebic close
+alt + shift + q         : powershell -executionpolicy bypass -File "$env:KOMOREBI_CONFIG_HOME/quit-focused-app.ps1"
 alt + m                 : komorebic minimize
 
 # Focus windows
