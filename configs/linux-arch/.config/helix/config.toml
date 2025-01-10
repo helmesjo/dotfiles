@@ -6,6 +6,9 @@ color-modes = true
 cursorline = true
 bufferline = 'multiple'
 
+[editor.inline-diagnostics]
+cursor-line = "error"
+
 [editor.cursor-shape]
 insert = "bar"
 normal = "block"
