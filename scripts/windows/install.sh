@@ -39,6 +39,9 @@ wingetpkgs=(
   Flow-Launcher.Flow-Launcher # app launcher
   BurntSushi.ripgrep.MSVC
   python3
+  # language servers
+  LuaLS.lua-language-server
+  tamasfe.taplo               # toml
 )
 pacmanpkgs=(
   zsh

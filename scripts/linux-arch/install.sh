@@ -71,6 +71,7 @@ pacpkgs=(
   lua-language-server
   python-lsp-server
   yaml-language-server
+  taplo-cli        # toml
   # Misc
   firefox
 )
