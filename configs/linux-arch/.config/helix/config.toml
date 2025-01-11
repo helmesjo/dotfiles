@@ -4,7 +4,8 @@ theme = "dark_plus"
 line-number = "absolute"
 color-modes = true
 cursorline = true
-bufferline = 'multiple'
+bufferline = "multiple"
+end-of-line-diagnostics = "hint"
 
 [editor.inline-diagnostics]
 cursor-line = "error"
