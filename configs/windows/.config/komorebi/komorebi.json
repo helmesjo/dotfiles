@@ -3,8 +3,8 @@
   "app_specific_configuration_path": "$Env:KOMOREBI_CONFIG_HOME/applications.json",
   "window_hiding_behaviour": "Cloak",
   "cross_monitor_move_behaviour": "Insert",
-  "default_workspace_padding": 6,
-  "default_container_padding": 6,
+  "default_workspace_padding": 0,
+  "default_container_padding": 0,
   "border": true,
   "border_width": 4,
   "border_offset": -1,
@@ -15,7 +15,7 @@
     "bar_accent": "Base0D"
   },
   "stackbar": {
-    "height": 40,
+    "height": 24,
     "mode": "OnStack",
     "tabs": {
       "width": 300
