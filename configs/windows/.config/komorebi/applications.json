@@ -1041,20 +1041,6 @@
         "id": "MsoSplash",
         "matching_strategy": "Equals"
       }
-    ],
-    "tray_and_multi_window": [
-      {
-        "kind": "Exe",
-        "id": "OUTLOOK.EXE",
-        "matching_strategy": "Equals"
-      }
-    ],
-    "layered": [
-      {
-        "kind": "Exe",
-        "id": "OUTLOOK.EXE",
-        "matching_strategy": "Equals"
-      }
     ]
   },
   "Microsoft PC Manager": {

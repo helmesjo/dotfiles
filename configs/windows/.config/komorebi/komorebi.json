@@ -54,5 +54,27 @@
         }
       ]
     }
+  ],
+  "ignore_rules": [
+    {
+      "kind": "Exe",
+      "id": "explorer.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "SystemSettings.*\\.exe",
+      "matching_strategy": "Regex",
+    },
+    {
+      "kind": "Exe",
+      "id": "ApplicationFrameHost.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "olk.exe",
+      "matching_strategy": "Equals",
+    }
   ]
 }
