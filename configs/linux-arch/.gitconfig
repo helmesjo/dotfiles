@@ -58,7 +58,7 @@
     co = checkout
     d = diff
     dc = diff --cached
-    l = log
+    l = "!HEAD=$(git rev-parse --abbrev-ref HEAD);MAIN=$(git symbolic-ref refs/remotes/origin/HEAD);MAIN=${MAIN##*/}; [[ $HEAD == $MAIN ]] && git log || git log $MAIN..$HEAD"
     ps = push
     psf = "!read -p \"Force push? [Y/n]: \" -r && [[ $REPLY =~ ^[Yy]$ ]] && git ps --force || true"
     psu = "!git push --set-upstream origin \"$(git rev-parse --abbrev-ref HEAD)\""
