@@ -4,4 +4,4 @@ Settings/Plugins/Flow.Launcher.Plugin.Program/Settings.json
 Settings/History.json
 Settings/TopMostRecord.json
 Settings/UserSelectedRecord.json
-**/Settings.json.bak
+**/*.bak
