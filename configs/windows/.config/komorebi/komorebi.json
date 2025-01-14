@@ -75,6 +75,11 @@
       "kind": "Exe",
       "id": "olk.exe",
       "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "ms-teams.exe",
+      "matching_strategy": "Equals",
     }
   ]
 }
