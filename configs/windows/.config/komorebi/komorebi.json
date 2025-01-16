@@ -85,6 +85,11 @@
       "kind": "Exe",
       "id": "slack.exe",
       "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "steam.*\\.exe",
+      "matching_strategy": "Regex",
     }
   ]
 }
