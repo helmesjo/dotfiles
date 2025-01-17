@@ -57,10 +57,26 @@
     ca = commit --all
     cane = commit --all --amend --no-edit
     co = checkout
+    cop = checkout --patch
     d = diff
     dc = diff --cached
-    # log ('git log' if main branch, else 'git log main...HEAD/arg1')
-    l = "!f(){ HEAD=${1:-$(git rev-parse --abbrev-ref HEAD)};MAIN=$(git symbolic-ref refs/remotes/origin/HEAD);MAIN=${MAIN##*/}; COMP=$([[ $HEAD == $MAIN ]] && echo $HEAD || echo $MAIN..$HEAD); git log --oneline $COMP; }; f"
+    # log (pretty-log HEAD if not default branch, else default..HEAD/last-arg)
+    l = "!f() { \
+        if [ $# -ge 1 ]; then \
+            OPTS=\"$(printf '%s ' \"${@:1:$(($#-1))}\")\"; \
+            HEAD=\"${@: -1}\"; \
+            if ! git rev-parse --verify $HEAD >/dev/null 2>&1; then \
+              OPTS=\"$OPTS $HEAD\"; \
+              HEAD=; \
+            fi; \
+        fi; \
+        HEAD=${HEAD:-$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)}; \
+        MAIN=$(git symbolic-ref refs/remotes/origin/HEAD >/dev/null 2>&1); \
+        MAIN=${MAIN:-$HEAD}; \
+        MAIN=${MAIN##*/}; \
+        COMP=$([[ $HEAD == $MAIN ]] && echo $HEAD || echo $MAIN..$HEAD); \
+        git log --pretty=format:\"%C(2)%cd %C(auto)%h%C(auto)%d %C(auto)%s\" --date=short $OPTS $COMP; \
+    }; f"
     ps = push
     psf = "!read -p \"Force push? [Y/n]: \" -r && [[ $REPLY =~ ^[Yy]$ ]] && git ps --force || true"
     psu = "!git push --set-upstream origin \"$(git rev-parse --abbrev-ref HEAD)\""
