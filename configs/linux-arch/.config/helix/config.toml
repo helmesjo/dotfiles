@@ -1,6 +1,7 @@
 theme = "dark_plus"
 
 [editor]
+default-line-ending = "lf"
 line-number = "absolute"
 color-modes = true
 cursorline = true
