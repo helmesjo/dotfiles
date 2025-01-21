@@ -14,3 +14,55 @@ Windows Registry Editor Version 5.00
 ; Disable CapsLock
 [HKEY_CURRENT_USER\Control Panel\Keyboard Layout]
 "Scancode Map"=hex:00,00,00,00,00,00,00,00,02,00,00,00,00,00,3a,00,00,00,00,00
+
+; Tweaks inspired by winutil:
+; https://christitustech.github.io/winutil/dev/tweaks/z--Advanced-Tweaks---CAUTION/Display/
+
+; Allow draging maximized windows
+[HKEY_CURRENT_USER\Control Panel\Desktop]
+"DragFullWindows"="0"
+
+; Sub-menus: Disable show-delay (default: 400)
+[HKEY_CURRENT_USER\Control Panel\Desktop]
+"MenuShowDelay"="0"
+
+; Animation - Minimize (default: 1)
+[HKEY_CURRENT_USER\Control Panel\Desktop\WindowMetrics]
+"MinAnimate"="0"
+
+; Animation - Taskbar (default: 1)
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
+"TaskbarAnimations"=dword:0
+
+; Translucent selection rectangle (default: 1)
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
+"ListviewAlphaSelect"=dword:0
+
+; Selection rectangle shadow (default: 1)
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
+"ListviewShadow"=dword:0
+
+; Visual effects preset (default: 1 [3 = custom])
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects]
+"VisualFXSetting"=dword:3
+
+; Taskbar Chat icon (default: 1)
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
+"TaskbarMn"=dword:0
+
+;; Taskbar Widget icon (default: 1) REQUIRES ADMIN = nogo
+;[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
+;"TaskbarDa"=dword:0
+
+; Taskview button (default: 1)
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
+"ShowTaskViewButton"=dword:0
+
+; Taskbar search button (default: 1)
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Search]
+"SearchboxTaskbarMode"=dword:0
+
+; Peek desktop (default: 1)
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\DWM]
+"EnableAeroPeek"=dword:0
+
