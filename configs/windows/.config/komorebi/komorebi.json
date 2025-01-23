@@ -90,6 +90,11 @@
       "kind": "Exe",
       "id": "steam.*\\.exe",
       "matching_strategy": "Regex",
+    },
+    {
+      "kind": "Exe",
+      "id": "ScreenToGif.exe",
+      "matching_strategy": "Equals",
     }
   ]
 }
