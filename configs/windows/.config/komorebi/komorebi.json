@@ -95,6 +95,11 @@
       "kind": "Exe",
       "id": "ScreenToGif.exe",
       "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "setup.exe",
+      "matching_strategy": "Equals",
     }
   ]
 }
