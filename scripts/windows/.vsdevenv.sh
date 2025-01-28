@@ -212,22 +212,28 @@ function vsdevenv_setup()
             line="${line//\\\\\\\\//}"
             line="${line//\\\\//}"
 
-            VAR="${line%=*}"
-            VAR="${VAR#'declare -x '*}"
-            VAL="${line#*=}"
-            VAL="${VAL#\"}" # Removes leading "
-            VAL="${VAL%\"}" # Removes trailing "
+            VAR="${line%%=*}"           # Remove from first '=' to end of string
+            VAR="${VAR#'declare -x '*}" # Keep everything from '*' to end of string
+            VAL="${line#*=}"            # Remove from (including) first '=' to start of string
+            VAL="${VAL#\"}"             # Removes leading "
+            VAL="${VAL%\"}"             # Removes trailing "
 
             if    [[ "$VAR"   == "$line" ]] \
-               || [[ "$VALUE" == "$line" ]] \
+               || [[ "$VAL" == "$line" ]] \
                || [[ "$VAR"   == "_" ]]; then
+              # echo "-- SKIPPED envar: $VAR=\"$VAL\""
               continue
             fi
 
             if [[ $VAR == 'PATH' ]]; then
               # Split VAL into an array using ':' as the delimiter
-              VCPATH_EXPORTED=("${(s/:/)VAL}")
-
+              # note: zsh (even in emulated ksh mode) doesn't support
+              #       '-a' ("read into array")
+              if [[ -n $ZSH_VERSION ]]; then
+                  VCPATH_EXPORTED=("${(s/:/)VAL}")
+              else
+                  IFS=: read -ra VCPATH_EXPORTED <<< "$VAL"
+              fi
               VCPATHS=""
               # Loop through each path in devprompt exported PATH and add it to VCPATHS if it's not in PATH
               for p in "${VCPATH_EXPORTED[@]}"; do
