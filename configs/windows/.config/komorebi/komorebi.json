@@ -112,6 +112,11 @@
       "kind": "Exe",
       "id": "Photos.exe",
       "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "Spotify.exe",
+      "matching_strategy": "Equals",
     }
   ]
 }
