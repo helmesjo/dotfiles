@@ -1,0 +1,4 @@
+[wsl2]
+# disabling this stops msrc.exe from
+# randomly stealing window focus
+guiApplications=false
