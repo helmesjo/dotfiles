@@ -13,8 +13,9 @@ HISTSIZE=50000
 SAVEHIST=50000
 setopt INC_APPEND_HISTORY_TIME
 
-# don't kill session on Ctrl+D
-setopt IGNORE_EOF
+
+setopt IGNORE_EOF   # don't kill session on Ctrl+D
+setopt rmstarsilent # don't prompt [y/n] on rm -rf
 
 # fpaths
 (( ! ${fpath[(Ie)$HOME/.zsh/pure]} )) && fpath+=($HOME/.zsh/pure)
