@@ -5,11 +5,11 @@ Windows Registry Editor Version 5.00
 
 ; Speed up keyboard repeat rate & lower repeat delay
 [HKEY_CURRENT_USER\Control Panel\Accessibility\Keyboard Response]
-"AutoRepeatDelay"="160" 
-"AutoRepeatRate"="7" 
+"AutoRepeatDelay"="160"
+"AutoRepeatRate"="10"
 "BounceTime"="0"
-"DelayBeforeAcceptance"="0" 
-"Flags"="59" 
+"DelayBeforeAcceptance"="0"
+"Flags"="59"
 
 ; Disable CapsLock
 [HKEY_CURRENT_USER\Control Panel\Keyboard Layout]
