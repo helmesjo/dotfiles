@@ -35,6 +35,7 @@ bindkey '^[[3~'   delete-char
 # Aliases
 source ~/.bazsh_aliases
 
+PATH="$PATH:$HOME/.local/bin"
 case "$(uname -o)" in
   Darwin)
     brew_path=$(brew --prefix)

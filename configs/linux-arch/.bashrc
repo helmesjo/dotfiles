@@ -15,6 +15,7 @@ PS1='[\u@\h \W]\$ '
 # Aliases
 source ~/.bazsh_aliases
 
+PATH="$PATH:$HOME/.local/bin"
 case "$(uname -o)" in
   GNU/Linux)
     if [[ "$(uname -r)" == *WSL* ]]; then
