@@ -2,6 +2,9 @@
     email = helmesjo@gmail.com
     name = helmesjo
 
+[includeIf "hasconfig:remote.*.url:https://*@dev.azure.com/*/*/_git/*"]
+    path = ~/.gitconfig.azure
+
 [core]
     editor = hx
     pager = delta
