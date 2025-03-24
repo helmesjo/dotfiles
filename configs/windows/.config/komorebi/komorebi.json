@@ -122,6 +122,11 @@
       "kind": "Exe",
       "id": "QTM.exe",
       "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "texttest.*\\.exe",
+      "matching_strategy": "Regex",
     }
   ]
 }
