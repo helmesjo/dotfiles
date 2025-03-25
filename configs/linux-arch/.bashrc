@@ -4,8 +4,9 @@
 
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
-VISUAL=hx
-EDITOR="$VISUAL"
+export VISUAL=hx
+export EDITOR="$VISUAL"
+export COLORTERM=truecolor
 
 # Enable shared history
 touch ~/.bash_history
