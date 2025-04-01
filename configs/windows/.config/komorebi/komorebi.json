@@ -132,6 +132,11 @@
       "kind": "Exe",
       "id": "devenv.exe",
       "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "Code.exe",
+      "matching_strategy": "Equals",
     }
   ]
 }
