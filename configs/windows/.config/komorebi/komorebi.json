@@ -127,6 +127,11 @@
       "kind": "Exe",
       "id": "texttest.*\\.exe",
       "matching_strategy": "Regex",
+    },
+    {
+      "kind": "Exe",
+      "id": "devenv.exe",
+      "matching_strategy": "Equals",
     }
   ]
 }
