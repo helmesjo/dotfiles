@@ -1,11 +1,16 @@
 [terminal.shell]
-program = ".config\\shortcuts\\msys2_shell.cmd"
+program = "cmd.exe"
 args = [
-  "-ucrt64",
-  "-defterm",
-  "-here",
-  "-no-start",
-  "-use-full-path",
-  "-shell zsh",
-  "--login"
+  "/c",
+  """\
+"cd %USERPROFILE% && \
+  .config\\shortcuts\\msys2_shell.cmd \
+    -ucrt64 \
+    -defterm \
+    -here \
+    -no-start \
+    -use-full-path \
+    -shell \
+    zsh --login"
+  """
 ]

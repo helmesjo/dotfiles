@@ -1,15 +1,15 @@
 .shell powershell
 
 # Reload whkd configuration
-# alt + o                 : taskkill /f /im whkd.exe && start /b whkd                      # if shell is cmd
-alt + o                 : komorebic reload-configuration; taskkill /f /im whkd.exe; Start-Process whkd -WindowStyle hidden # if shell is pwsh / powershell
-alt + shift + o         : cmd.exe /c "komorebic stop --whkd --bar && komorebic start --whkd --bar --clean-state"
+# alt + o                 : komorebic reload-configuration; taskkill /f /im whkd.exe; Start-Process whkd -WindowStyle hidden # if shell is pwsh / powershell
+alt + o                 : cmd.exe /c "taskkill /f /im whkd.exe && start /b whkd"
+alt + shift + o         : komorebic stop --whkd --bar; cmd.exe /c "start /b komorebic start --whkd --bar --clean-state"
 
 # App shortcuts - these require shell to be pwsh / powershell
 # The apps will be focused if open, or launched if not open
 # alt + f                 : if ($wshell.AppActivate('Firefox') -eq $False) { start firefox }
 # alt + b                 : if ($wshell.AppActivate('Chrome') -eq $False) { start chrome }
-alt + return            : start "$env:APPDATA/Microsoft/Windows/Start Menu/Programs/alacritty.lnk"
+alt + return            : start alacritty.exe
 
 alt + q                 : komorebic close
 alt + shift + q         : powershell -executionpolicy bypass -File "$env:KOMOREBI_CONFIG_HOME/quit-focused-app.ps1"
