@@ -65,6 +65,12 @@
       "Battery": {
         "enable": true
       }
+    },
+    {
+      "Keyboard": {
+        "enable": true,
+        "data_refresh_interval": 1
+      }
     }
   ]
 }
