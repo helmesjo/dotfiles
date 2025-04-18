@@ -47,3 +47,8 @@ git-ignore = true
 
 [keys.normal]
 X = "extend_line_up"
+
+# bindings
+[keys.normal."space"]
+f = "file_picker_in_current_buffer_directory"
+F = "file_picker"
