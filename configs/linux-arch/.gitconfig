@@ -2,7 +2,7 @@
     email = helmesjo@gmail.com
     name = helmesjo
 
-[includeIf "hasconfig:remote.*.url:https://*@dev.azure.com/*/*/_git/*"]
+[includeIf "hasconfig:remote.*.url:https://*dev.azure.com/*/*/_git/*"]
     path = ~/.gitconfig.azure
 
 [core]
