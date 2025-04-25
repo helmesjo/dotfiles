@@ -41,11 +41,8 @@ bindkey '^[[1;3C' forward-word                   # alt+right
 bindkey '^[[1;3D' backward-word                  # alt+left
 bindkey '^[[3~'   delete-char
 
-# Aliases
-source ~/.bazsh_aliases
-
 PATH="$PATH:$HOME/.local/bin"
-case "$(uname -o)" in
+case "$(uname -s)" in
   Darwin)
     brew_path=$(brew --prefix)
 
@@ -64,7 +61,7 @@ case "$(uname -o)" in
 
     unset brew_path
     ;;
-  GNU/Linux)
+  Linux)
     if [[ "$(uname -r)" == *WSL* ]]; then
       if ! test -f /mnt/c/Program\ Files/Git/mingw/bin/git-credential-manager.exe; then
         export GIT_CONFIG_COUNT=1
@@ -77,7 +74,10 @@ case "$(uname -o)" in
       export command_not_found_handler() {
         local cmd="$1"
         shift
-        if [[ -x "$(command -v "$cmd.exe")" ]]; then
+        # Skip if cmd is a shell function
+        if [[ -n "$(typeset -f "$cmd" 2>/dev/null)" ]]; then
+          return 127
+        elif [[ -x "$(command -v "$cmd.exe")" ]]; then
           "$cmd.exe" "$@"
           return $?
         else
@@ -101,7 +101,7 @@ case "$(uname -o)" in
     autoload -U promptinit; promptinit
     prompt pure
     ;;
-  Msys|MINGW32|MINGW64)
+  MSYS*|MINGW*|CYGWIN*)
     PATH="$PATH:$HOME/AppData/Local/Microsoft/WinGet/Links"
     PATH="$PATH:$HOME/AppData/Local/Microsoft/WindowsApps"
     PATH="$PATH:$(cygpath -u "$PROGRAMFILES/tre-command/bin")"
@@ -173,3 +173,41 @@ add-zsh-hook precmd prompt_pure_precmd
 autoload -Uz vcs_info
 zstyle ':vcs_info:*' enable git
 zstyle ':vcs_info:git*' formats "%b"
+
+function _open_file_explorer() {
+  local tgt_path="${1:-.}"
+  if [[ ! -e "$tgt_path" ]]; then
+    command $tgt_path
+    return $?
+  fi
+  case "$(uname -s)" in
+    Darwin)
+      /usr/bin/open "$tgt_path"
+      ;;
+    Linux)
+      xdg-open "$tgt_path" 2>/dev/null || gio open "$tgt_path" 2>/dev/null || nautilus "$tgt_path" 2>/dev/null
+      ;;
+    MINGW*|MSYS*|CYGWIN*)
+      explorer "$(cygpath -w "$tgt_path")" >/dev/null 2>&1 & disown
+      ;;
+    *)
+      echo "Unsupported platform: $(uname -s)" >&2
+      return 1
+      ;;
+  esac
+}
+
+# completion function for _open_file_explorer
+function _open_file_explorer_completion() {
+  _files -/  # Completes files and directories
+}
+
+# Bind completion to the function and alias
+compdef _open_file_explorer_completion _open_file_explorer
+compdef _open_file_explorer_completion open
+
+# alias for 'open <path>' on various platforms
+alias open="_open_file_explorer"
+
+# source aliases
+source ~/.bazsh_aliases

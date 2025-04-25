@@ -25,12 +25,9 @@ shopt -s histappend              # Append new history entries to the file instea
 
 PS1='[\u@\h \W]\$ '
 
-# Aliases
-source ~/.bazsh_aliases
-
 PATH="$PATH:$HOME/.local/bin"
-case "$(uname -o)" in
-  GNU/Linux)
+case "$(uname -s)" in
+  Linux)
     if [[ "$(uname -r)" == *WSL* ]]; then
       if ! test -f /mnt/c/Program\ Files/Git/mingw/bin/git-credential-manager.exe; then
         export GIT_CONFIG_COUNT=1
@@ -67,7 +64,7 @@ case "$(uname -o)" in
       export -f which
     fi
     ;;
-  Msys|MINGW32|MINGW64)
+  MSYS*|MINGW*|CYGWIN)
     PATH="$PATH:$HOME/AppData/Local/Microsoft/WinGet/Links"
     PATH="$PATH:$HOME/AppData/Local/Microsoft/WindowsApps"
     PATH="$PATH:$(cygpath -u "$PROGRAMFILES/tre-command/bin")"
@@ -84,7 +81,48 @@ case "$(uname -o)" in
     ;;
 esac
 
+function _open_file_explorer() {
+  local tgt_path="${1:-.}"
+  if [[ ! -e "$tgt_path" ]]; then
+    command $tgt_path
+    return $?
+  fi
+  case "$(uname -s)" in
+    Darwin)
+      open "$tgt_path"
+      ;;
+    Linux)
+      xdg-open "$tgt_path" 2>/dev/null || gio open "$tgt_path" 2>/dev/null || nautilus "$tgt_path" 2>/dev/null
+      ;;
+    MINGW*|MSYS*|CYGWIN*)
+      explorer "$(cygpath -w "$tgt_path")" >/dev/null 2>&1 & disown
+      ;;
+    *)
+      echo "Unsupported platform: $(uname -s)" >&2
+      return 1
+      ;;
+  esac
+}
+
+# completion function for _open_file_explorer
+function _open_file_explorer_completion() {
+  local cur="${COMP_WORDS[COMP_CWORD]}"
+  COMPREPLY=($(compgen -f -- "$cur"))
+  # Prevent trailing space for directories
+  [[ -d "${COMPREPLY[0]}" ]] && compopt -o nospace
+}
+
+# Bind completion to the function and alias
+complete -F _open_file_explorer_completion _open_file_explorer
+complete -F _open_file_explorer_completion open
+
 eval "$(fzf --bash)"
 # don't have ESC+c start fzf
 bind '"\ec": nop'
 eval "$(zoxide init bash --cmd cd)"
+
+# alias for 'open <path>' on various platforms
+alias open="_open_file_explorer"
+
+# source aliases
+source ~/.bazsh_aliases
