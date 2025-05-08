@@ -51,18 +51,19 @@ function vsdevenv_remove_clashing_bins()
 {
   # Remove clashing tools (eg. msys2 link.exe)
   if [[ -n "${VCToolsInstallDir}" ]]; then
-    bad_linkers=($(which -a link.exe 2>/dev/null | $C grep -v "$(cygpath -u "$VCToolsInstallDir")"))
+    local bad_linkers=($(which -a link.exe 2>/dev/null | $C grep -v "$(cygpath -u "$VCToolsInstallDir")"))
     for f in ${bad_linkers[@]}; do
       f="$(cygpath -u "$f")"
       if $C test -f "$f" >/dev/null; then
         printf '%s' "-- Conflicting link.exe, "
-        if ! mv -v --backup=t "$f" "$f.disabled"; then
-          printf '%s\n' " - manually rename/remove it"
+        if ! $C mv -v --backup=t "$f" "$f.disabled"; then
+          return 1
         fi
       fi
     done
   fi
 }
+
 function vsdevenv_export_envars()
 {
     # Read file line by line and extract variables
@@ -77,7 +78,11 @@ function vsdevenv_export_envars()
       $C echo "-- Failed to find cl.exe"
       return 1
     else
-      vsdevenv_remove_clashing_bins
+      # Requires elevated priviliges (accesses C:/),
+      # so assume that caused the failure.
+      vsdevenv_remove_clashing_bins || \
+        typeset -f vsdevenv_remove_clashing_bins \
+          | gsudo bash -c '$(cat); vsdevenv_remove_clashing_bins'
       return 0
     fi
 }
@@ -277,7 +282,7 @@ function vsdevenv_setup()
 }
 
 # if zsh, emulate 'bash' for this file (-L)
-[[ -n "$ZSH_VERSION" ]] && ZSH_MODE=$(emulate) && emulate -L ksh
+[[ -n "$ZSH_VERSION" ]] && ZSH_MODE=$(emulate) && emulate -L bash
 vsdevenv_setup; ec=$?
 [[ -n "$ZSH_VERSION" ]] && emulate -L $ZSH_MODE
 return $ec
