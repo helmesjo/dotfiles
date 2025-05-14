@@ -139,6 +139,16 @@ eval "$(fzf --zsh)"
 bindkey -s '\ec' ''
 eval "$(zoxide init zsh --cmd cd)"
 
+color_Black=$'\e[0;30m';
+color_White=$'\e[1;37m';  color_DarkWhite=$'\e[1;0m'
+color_Red=$'\e[1;31m';    color_DarkRed=$'\e[0;31m';
+color_Green=$'\e[1;32m';  color_DarkGreen=$'\e[0;32m';
+color_Yellow=$'\e[1;33m'; color_DarkYellow=$'\e[0;33m';
+color_Blue=$'\e[1;34m';   color_DarkBlue=$'\e[0;34m';
+color_Purple=$'\e[1;35m'; color_DarkPurple=$'\e[0;35m';
+color_Cyan=$'\e[1;36m';   color_DarkCyan=$'\e[0;36m';
+color_Default=$color_DarkWhite
+
 # custom prompt (single-line)
 function prompt_pure_precmd() {
   local last_command_exit=$?
@@ -151,7 +161,7 @@ function prompt_pure_precmd() {
   if [ $last_command_exit -ne 0 -a $last_command_exit -ne 145 ]; then
     # if the last command failed (and not from ctrl+z),
     # show the error code
-    local error_code="%F{red}[$last_command_exit]%f "
+    local error_code="$(printf '%b%s%b' $color_Red "[$last_command_exit] " $color_Default)"
   else
     local error_code=""
   fi
@@ -160,7 +170,8 @@ function prompt_pure_precmd() {
   local prompt_symbol=${PURE_PROMPT_SYMBOL:-'>'}
 
   # set the prompt (single line)
-  PROMPT="%F{blue}${dir}%f %F{magenta}${git_info}%f${error_code}${prompt_symbol} "
+  PROMPT="$(printf '%b%s %b%s%b%s%b%s%b ' \
+    $color_DarkBlue "$dir" $color_DarkPurple "$git_info" $color_Red "$error_code" $color_White "$prompt_symbol" $color_Default)"
 
   # clear any existing right prompt
   RPROMPT=""
