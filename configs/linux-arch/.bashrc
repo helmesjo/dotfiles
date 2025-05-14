@@ -25,7 +25,16 @@ shopt -s histappend              # Append new history entries to the file instea
 
 PS1='[\u@\h \W]\$ '
 
-PATH="$PATH:$HOME/.local/bin"
+function pathappend() {
+  for arg in "$@"; do
+    case ":$PATH:" in
+      *":$arg:"*) ;;
+      *) PATH="$PATH${PATH:+:}$arg" ;;
+    esac
+  done
+}
+
+pathappend "$HOME/.local/bin"
 case "$(uname -s)" in
   Linux)
     if [[ "$(uname -r)" == *WSL* ]]; then
@@ -65,14 +74,14 @@ case "$(uname -s)" in
     fi
     ;;
   MSYS*|MINGW*|CYGWIN)
-    PATH="$PATH:$HOME/AppData/Local/Microsoft/WinGet/Links"
-    PATH="$PATH:$HOME/AppData/Local/Microsoft/WindowsApps"
-    PATH="$PATH:$(cygpath -u "$PROGRAMFILES/tre-command/bin")"
-    PATH="$PATH:$(cygpath -u "$PROGRAMFILES/gsudo/Current")"
-    PATH="$PATH:/c/build2/bin"
-    PATH="$PATH:$(cygpath -u "$PROGRAMFILES/Git/mingw64/bin")"
-    PATH="$PATH:$(cygpath -u "$PROGRAMFILES/LLVM/bin")"
-    PATH="$PATH:$HOME/.cargo/bin"
+    pathappend "$HOME/AppData/Local/Microsoft/WinGet/Links"
+    pathappend "$HOME/AppData/Local/Microsoft/WindowsApps"
+    pathappend "$(cygpath -u "$PROGRAMFILES/tre-command/bin")"
+    pathappend "$(cygpath -u "$PROGRAMFILES/gsudo/Current")"
+    pathappend "/c/build2/bin"
+    pathappend "$(cygpath -u "$PROGRAMFILES/Git/mingw64/bin")"
+    pathappend "$(cygpath -u "$PROGRAMFILES/LLVM/bin")"
+    pathappend "$HOME/.cargo/bin"
 
     source "$HOME/.vsdevenv.sh"
 

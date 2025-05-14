@@ -41,16 +41,22 @@ bindkey '^[[1;3C' forward-word                   # alt+right
 bindkey '^[[1;3D' backward-word                  # alt+left
 bindkey '^[[3~'   delete-char
 
-PATH="$PATH:$HOME/.local/bin"
+function pathappend() {
+  for arg in "$@"; do
+    case ":$PATH:" in
+      *":$arg:"*) ;;
+      *) PATH="$PATH${PATH:+:}$arg" ;;
+    esac
+  done
+}
+
+pathappend "$HOME/.local/bin"
 case "$(uname -s)" in
   Darwin)
     brew_path=$(brew --prefix)
 
-    (( ! ${PATH[(Ie)$brew_path/bin]} )) && \
-      PATH="${PATH:+${PATH}:}$brew_path/bin"
-
-    (( ! ${PATH[(Ie)$brew_path/opt/llvm/bin]} )) && \
-      PATH="${PATH:+${PATH}:}$brew_path/opt/llvm/bin"
+    pathappend "$brew_path/bin"
+    pathappend "$brew_path/opt/llvm/bin"
 
     (( ! ${fpath[(Ie)$brew_path/share/zsh-completions]} )) && \
       fpath+=($brew_path/share/zsh-completions)
@@ -102,14 +108,14 @@ case "$(uname -s)" in
     prompt pure
     ;;
   MSYS*|MINGW*|CYGWIN*)
-    PATH="$PATH:$HOME/AppData/Local/Microsoft/WinGet/Links"
-    PATH="$PATH:$HOME/AppData/Local/Microsoft/WindowsApps"
-    PATH="$PATH:$(cygpath -u "$PROGRAMFILES/tre-command/bin")"
-    PATH="$PATH:$(cygpath -u "$PROGRAMFILES/gsudo/Current")"
-    PATH="$PATH:/c/build2/bin"
-    PATH="$PATH:$(cygpath -u "$PROGRAMFILES/Git/mingw64/bin")"
-    PATH="$PATH:$(cygpath -u "$PROGRAMFILES/LLVM/bin")"
-    PATH="$PATH:$HOME/.cargo/bin"
+    pathappend "$HOME/AppData/Local/Microsoft/WinGet/Links"
+    pathappend "$HOME/AppData/Local/Microsoft/WindowsApps"
+    pathappend "$(cygpath -u "$PROGRAMFILES/tre-command/bin")"
+    pathappend "$(cygpath -u "$PROGRAMFILES/gsudo/Current")"
+    pathappend "/c/build2/bin"
+    pathappend "$(cygpath -u "$PROGRAMFILES/Git/mingw64/bin")"
+    pathappend "$(cygpath -u "$PROGRAMFILES/LLVM/bin")"
+    pathappend "$HOME/.cargo/bin"
 
     # complete hard drives in msys2
     drives=$(mount | sed -rn 's#^[A-Z]: on /([a-z]).*#\1#p' | tr '\n' ' ')
