@@ -130,8 +130,13 @@ eval "$(fzf --bash)"
 bind '"\ec": nop'
 eval "$(zoxide init bash --cmd cd)"
 
-# alias for 'open <path>' on various platforms
-alias open="_open_file_explorer"
+# alias for 'view in file manager' on various platforms
+name=open
+if command -v $name >/dev/null && [[ $(type -t $name) != "alias" ]]; then
+    echo "Error: '$name' is an existing command" >&2
+    exit 1
+fi
+alias $name="_open_file_explorer"
 
 # source aliases
 source ~/.bazsh_aliases

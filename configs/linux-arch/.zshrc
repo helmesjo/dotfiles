@@ -223,8 +223,14 @@ function _open_file_explorer_completion() {
 compdef _open_file_explorer_completion _open_file_explorer
 compdef _open_file_explorer_completion open
 
-# alias for 'open <path>' on various platforms
-alias open="_open_file_explorer"
+# alias for 'view in file manager' on various platforms
+name=open
+if command -v $name >/dev/null && [[ "$(whence -w $name)" != *": alias" ]]; then
+    echo "Error: '$name' is an existing command" >&2
+    exit 1
+else
+  alias $name="_open_file_explorer"
+fi
 
 # source aliases
 source ~/.bazsh_aliases
