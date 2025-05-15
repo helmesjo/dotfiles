@@ -177,14 +177,26 @@ function prompt_pure_precmd() {
 
   # set the prompt (single line)
   PROMPT="$(printf '%b%s %b%s%b%s%b%s%b ' \
-    $color_DarkBlue "$dir" $color_DarkPurple "$git_info" $color_Red "$error_code" $color_White "$prompt_symbol" $color_Default)"
+    %{$color_DarkBlue%} "$dir" \
+    %{$color_DarkPurple%} "$git_info" \
+    %{$color_Red%} "$error_code" \
+    %{$color_White%} "$prompt_symbol" \
+    %{$color_Default%})"
 
   # clear any existing right prompt
   RPROMPT=""
 }
+# unset before executing commands (but after rendered)
+# to not pollute subprocesses (eg. cmd.exe)
+# cmd.exe as a subprocess can't read zsh color markers %{%}
+function prompt_pure_postprompt()
+{
+  unset -v PROMPT
+}
 
 # hook the custom precmd function
 add-zsh-hook precmd prompt_pure_precmd
+add-zsh-hook preexec prompt_pure_postprompt
 
 # ensure vcs_info is loaded for git status
 autoload -Uz vcs_info
