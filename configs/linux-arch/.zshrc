@@ -203,6 +203,7 @@ autoload -Uz vcs_info
 zstyle ':vcs_info:*' enable git
 zstyle ':vcs_info:git*' formats "%b"
 
+# alias for 'view in file manager' on various platforms
 function _open_file_explorer() {
   local tgt_path="${1:-.}"
   if [[ ! -e "$tgt_path" ]]; then
@@ -210,9 +211,6 @@ function _open_file_explorer() {
     return $?
   fi
   case "$(uname -s)" in
-    Darwin)
-      /usr/bin/open "$tgt_path"
-      ;;
     Linux)
       xdg-open "$tgt_path" 2>/dev/null || gio open "$tgt_path" 2>/dev/null || nautilus "$tgt_path" 2>/dev/null
       ;;
@@ -231,17 +229,13 @@ function _open_file_explorer_completion() {
   _files -/  # Completes files and directories
 }
 
-# Bind completion to the function and alias
-compdef _open_file_explorer_completion _open_file_explorer
-compdef _open_file_explorer_completion open
-
-# alias for 'view in file manager' on various platforms
+# NOTE: MacOS already has 'open' that does the right thing.
 name=open
-if command -v $name >/dev/null && [[ "$(whence -w $name)" != *": alias" ]]; then
-    echo "Error: '$name' is an existing command" >&2
-    exit 1
-else
+if ! command -v $name >/dev/null || [[ "$(whence -w $name)" == *": alias" ]]; then
   alias $name="_open_file_explorer"
+  # Bind completion to the function and alias
+  compdef _open_file_explorer_completion _open_file_explorer
+  compdef _open_file_explorer_completion open
 fi
 
 # source aliases

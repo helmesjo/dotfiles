@@ -90,6 +90,7 @@ case "$(uname -s)" in
     ;;
 esac
 
+# alias for 'view in file manager' on various platforms
 function _open_file_explorer() {
   local tgt_path="${1:-.}"
   if [[ ! -e "$tgt_path" ]]; then
@@ -97,9 +98,6 @@ function _open_file_explorer() {
     return $?
   fi
   case "$(uname -s)" in
-    Darwin)
-      open "$tgt_path"
-      ;;
     Linux)
       xdg-open "$tgt_path" 2>/dev/null || gio open "$tgt_path" 2>/dev/null || nautilus "$tgt_path" 2>/dev/null
       ;;
@@ -115,28 +113,22 @@ function _open_file_explorer() {
 
 # completion function for _open_file_explorer
 function _open_file_explorer_completion() {
-  local cur="${COMP_WORDS[COMP_CWORD]}"
-  COMPREPLY=($(compgen -f -- "$cur"))
-  # Prevent trailing space for directories
-  [[ -d "${COMPREPLY[0]}" ]] && compopt -o nospace
+  _files -/  # Completes files and directories
 }
 
-# Bind completion to the function and alias
-complete -F _open_file_explorer_completion _open_file_explorer
-complete -F _open_file_explorer_completion open
+# NOTE: MacOS already has 'open' that does the right thing.
+name=open
+if ! command -v $name >/dev/null || [[ $(type -t $name) == "alias" ]]; then
+  alias $name="_open_file_explorer"
+  # Bind completion to the function and alias
+  complete -F _open_file_explorer_completion _open_file_explorer
+  complete -F _open_file_explorer_completion open
+fi
+
+# source aliases
+source ~/.bazsh_aliases
 
 eval "$(fzf --bash)"
 # don't have ESC+c start fzf
 bind '"\ec": nop'
 eval "$(zoxide init bash --cmd cd)"
-
-# alias for 'view in file manager' on various platforms
-name=open
-if command -v $name >/dev/null && [[ $(type -t $name) != "alias" ]]; then
-    echo "Error: '$name' is an existing command" >&2
-    exit 1
-fi
-alias $name="_open_file_explorer"
-
-# source aliases
-source ~/.bazsh_aliases
