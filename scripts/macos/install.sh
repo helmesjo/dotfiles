@@ -41,7 +41,9 @@ brewpkgs=(
   cmake-language-server
   lua-language-server
   yaml-language-server
-  taplo # toml
+  taplo                  # toml
+  marksman               # markdown (code assist)
+  markdown-oxide         # markdown (lsp)
   # Fonts
   homebrew/cask-fonts/font-jetbrains-mono-nerd-font
 )

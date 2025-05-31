@@ -71,7 +71,8 @@ pacpkgs=(
   lua-language-server
   python-lsp-server
   yaml-language-server
-  taplo-cli        # toml
+  taplo-cli              # toml
+  marksman               # markdown (code assist)
   # Misc
   firefox
 )
@@ -81,6 +82,8 @@ aurpkgs=(
   tre-command      # nicer tree alternative
   # Hardware
   bluetuith        # bluetooth device tui
+  ## Languge Server Protocol
+  markdown-oxide   # markdown (lsp)
 )
 
 if [[ $is_wsl -eq 1 ]]; then

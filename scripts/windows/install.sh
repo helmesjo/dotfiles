@@ -42,6 +42,8 @@ wingetpkgs=(
   # language servers
   LuaLS.lua-language-server
   tamasfe.taplo               # toml
+  marksman                    # markdown (code assist)
+  markdown-oxide              # markdown (lsp)
 )
 pacmanpkgs=(
   zsh
