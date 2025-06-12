@@ -152,6 +152,11 @@
       "kind": "Exe",
       "id": "gui.exe",
       "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "OneDrive.exe",
+      "matching_strategy": "Equals",
     }
   ]
 }
