@@ -157,6 +157,21 @@
       "kind": "Exe",
       "id": "OneDrive.exe",
       "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "MaxPayne3.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "SocialClubHelper.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "Discord.exe",
+      "matching_strategy": "Equals",
     }
   ]
 }
