@@ -45,7 +45,7 @@ brewpkgs=(
   marksman               # markdown (code assist)
   markdown-oxide         # markdown (lsp)
   # Fonts
-  homebrew/cask-fonts/font-jetbrains-mono-nerd-font
+  font-jetbrains-mono
 )
 brewcasks=(
   git-credential-manager
