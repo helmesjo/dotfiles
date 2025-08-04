@@ -26,7 +26,7 @@ wingetpkgs=(
   Alacritty.Alacritty
   eza-community.eza           # modern ls
   sharkdp.bat                 # modern cat
-  ca.duan.tre-command         # modern tree
+  duan.tre                    # modern tree
   ajeetdsouza.zoxide          # modern cd
   Helix.Helix
   DEVCOM.JetBrainsMonoNerdFont
@@ -49,12 +49,12 @@ pacmanpkgs=(
   zsh
 )
 
-winget install --no-upgrade \
+winget install --accept-source-agreements \
+               --accept-package-agreements \
                --disable-interactivity \
                --ignore-warnings \
-               --accept-source-agreements \
-               --accept-package-agreements \
-  ${wingetpkgs[@]}
+               --no-upgrade \
+                 ${wingetpkgs[@]}
 
 # execute Msys stuff in separate terminal since it
 # needs to "restart" after install.
