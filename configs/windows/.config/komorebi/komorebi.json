@@ -172,6 +172,11 @@
       "kind": "Exe",
       "id": "Discord.exe",
       "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": ".*OneConnect.*",
+      "matching_strategy": "Regex",
     }
   ]
 }
