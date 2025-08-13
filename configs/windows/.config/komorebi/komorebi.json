@@ -177,6 +177,11 @@
       "kind": "Exe",
       "id": ".*OneConnect.*",
       "matching_strategy": "Regex",
+    },
+    {
+      "kind": "Exe",
+      "id": "Docker Desktop.exe",
+      "matching_strategy": "Equals",
     }
   ]
 }
