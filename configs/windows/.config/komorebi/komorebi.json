@@ -182,6 +182,11 @@
       "kind": "Exe",
       "id": "Docker Desktop.exe",
       "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "iCloudPasswords.exe",
+      "matching_strategy": "Equals",
     }
   ]
 }
