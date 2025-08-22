@@ -187,6 +187,11 @@
       "kind": "Exe",
       "id": "iCloudPasswords.exe",
       "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": ".+Installer.exe",
+      "matching_strategy": "Regex",
     }
   ]
 }
