@@ -192,6 +192,11 @@
       "kind": "Exe",
       "id": ".+Installer.exe",
       "matching_strategy": "Regex",
-    }
+    },
+    {
+      "kind": "Exe",
+      "id": "mspaint.exe",
+      "matching_strategy": "Equals",
+    },
   ]
 }
