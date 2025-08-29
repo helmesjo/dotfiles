@@ -43,4 +43,7 @@ yabai -m config                                 \
     mouse_action2                resize         \
     mouse_drop_action            swap
 
+# ignored applications
+yabai -m rule --add app='^Code$' manage=off
+
 echo "yabai configuration loaded.."
