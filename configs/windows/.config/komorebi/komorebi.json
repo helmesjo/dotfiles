@@ -185,8 +185,8 @@
     },
     {
       "kind": "Exe",
-      "id": "iCloudPasswords.exe",
-      "matching_strategy": "Equals",
+      "id": "iCloud.*exe",
+      "matching_strategy": "Regex",
     },
     {
       "kind": "Exe",
@@ -197,6 +197,6 @@
       "kind": "Exe",
       "id": "mspaint.exe",
       "matching_strategy": "Equals",
-    },
+    }
   ]
 }
