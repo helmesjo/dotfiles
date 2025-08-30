@@ -45,5 +45,6 @@ yabai -m config                                 \
 
 # ignored applications
 yabai -m rule --add app='^Code$' manage=off
+yabai -m rule --add app='^UnrealEditor$' manage=off
 
 echo "yabai configuration loaded.."
