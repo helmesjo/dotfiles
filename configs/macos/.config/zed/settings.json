@@ -10,7 +10,6 @@
   "ui_font_family": "JetBrainsMono Nerd Font Mono",
   "buffer_font_family": "JetBrainsMono Nerd Font Mono",
   "buffer_font_features": { "calt": false },
-  "base_keymap": "VSCode",
   "helix_mode": true,
   "telemetry": {
     "diagnostics": false,
