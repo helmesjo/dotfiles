@@ -197,6 +197,10 @@
       "kind": "Exe",
       "id": "mspaint.exe",
       "matching_strategy": "Equals",
+    },
+    {
+      "kind": "class",
+      "id": "UnrealWindow"
     }
   ]
 }
