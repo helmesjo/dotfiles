@@ -24,16 +24,19 @@ enable = true
 left = [
   "mode",
   "version-control",
-  "spinner"
+  "spinner",
 ]
-center = ["file-name"]
+center = [
+  "position-percentage",
+  "file-name",
+  "file-modification-indicator",
+]
 right = [
-  "diagnostics",
+  "workspace-diagnostics",
   "selections",
-  "position",
   "file-encoding",
   "file-line-ending",
-  "file-type"
+  "file-type",
 ]
 separator = "│"
 
