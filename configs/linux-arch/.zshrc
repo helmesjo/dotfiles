@@ -96,7 +96,7 @@ case "$(uname -s)" in
         for cmd in "$@"; do
           # if not found in PATH, fall back to checking with .exe suffix.
           if ! (( ${+commands[$cmd]} )) && \
-               ((  ${+commands[$cmd.exe]} )); then
+               (( ${+commands[$cmd.exe]} )); then
             cmd="$cmd.exe"
           fi
           cmds+=("$cmd")
@@ -112,10 +112,10 @@ case "$(uname -s)" in
     pathappend "$HOME/AppData/Local/Microsoft/WindowsApps"
     pathappend "$(cygpath -u "$PROGRAMFILES/tre-command/bin")"
     pathappend "$(cygpath -u "$PROGRAMFILES/gsudo/Current")"
-    pathappend "/c/build2/bin"
     pathappend "$(cygpath -u "$PROGRAMFILES/Git/mingw64/bin")"
     pathappend "$(cygpath -u "$PROGRAMFILES/LLVM/bin")"
     pathappend "$HOME/.cargo/bin"
+    pathappend "/c/build2/bin"
 
     # complete hard drives in msys2
     drives=$(mount | sed -rn 's#^[A-Z]: on /([a-z]).*#\1#p' | tr '\n' ' ')

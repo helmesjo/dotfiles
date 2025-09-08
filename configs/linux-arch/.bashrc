@@ -78,10 +78,10 @@ case "$(uname -s)" in
     pathappend "$HOME/AppData/Local/Microsoft/WindowsApps"
     pathappend "$(cygpath -u "$PROGRAMFILES/tre-command/bin")"
     pathappend "$(cygpath -u "$PROGRAMFILES/gsudo/Current")"
-    pathappend "/c/build2/bin"
     pathappend "$(cygpath -u "$PROGRAMFILES/Git/mingw64/bin")"
     pathappend "$(cygpath -u "$PROGRAMFILES/LLVM/bin")"
     pathappend "$HOME/.cargo/bin"
+    pathappend "/c/build2/bin"
 
     source "$HOME/.vsdevenv.sh"
 
