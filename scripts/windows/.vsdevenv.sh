@@ -77,6 +77,9 @@ function vsdevenv_export_envars()
     if ! which cl.exe >/dev/null 2>&1; then
       $C echo "-- Failed to find cl.exe"
       return 1
+    elif ! [[ -d "$WindowsSdkVerBinPath" ]] 2>&1; then
+      $C echo "-- Failed to find WinSDK: $WindowsSdkVerBinPath"
+      return 1
     else
       # Requires elevated priviliges (accesses C:/),
       # so assume that caused the failure.
@@ -116,12 +119,17 @@ function vsdevenv_setup()
           CL_ARCH=$(cl.exe 2>&1 | $C grep "Compiler.*for" | $C awk '{print $NF}')
           if [ "$CL_ARCH" != "$TARGET_ARCH_CONV" ]; then
             REQUIRE_PROMPT=1
+          # Make sure WindowsSDK is where advertized.
+          elif [[ ! -d "$WindowsSdkVerBinPath" ]]; then
+            REQUIRE_PROMPT=1
           fi
       else
           REQUIRE_PROMPT=1
       fi
 
-      if [ $REQUIRE_PROMPT -eq 1 ]; then
+      if [ $REQUIRE_PROMPT -eq 0 ]; then
+          return 0
+      else
           # See if VS PATHs has been cached already
           if [ -f "$VS_ENVAR_CACHE" ]; then
               # Read file line by line and extract variables
@@ -275,8 +283,6 @@ function vsdevenv_setup()
             echo "-- Failed to export VS environment variables, see ${VS_ENVAR_CACHE}.failed"
             return 1
           fi
-      else
-          return 0
       fi
   fi
 }
