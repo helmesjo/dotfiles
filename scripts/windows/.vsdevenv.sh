@@ -64,6 +64,42 @@ function vsdevenv_remove_clashing_bins()
   fi
 }
 
+function is_vs_env_valid()
+{
+  local ec=0
+  command -v cl.exe >/dev/null || { echo "-- Err: Failed to find cl.exe"; ec=1; }
+
+  # list of typical VS envars we want to validate and (if stale) unset.
+  local vsvars=(
+    DevEnvDir
+    ExtensionSdkDir
+    FrameworkDir
+    FrameworkDir64
+    VCIDEInstallDir
+    VCINSTALLDIR
+    VCToolsInstallDir
+    VCToolsRedistDir
+    UniversalCRTSdkDir
+    VSINSTALLDIR
+    WindowsSdkDir
+    WindowsSdkBinPath
+    WindowsSdkVerBinPath
+  )
+  for var in ${vsvars[@]}; do
+    eval "local dir=\$$var"
+    [ -d "$dir" ] || { echo "-- Err: Stale envar detected ('$var=$dir')"; ec=1; }
+  done
+
+  # unset to make sure they get updated
+  if [[ $ec -ne 0 ]]; then
+    for var in ${vsvars[@]}; do
+      unset $var
+    done
+  fi
+
+  return $ec
+}
+
 function vsdevenv_export_envars()
 {
     # Read file line by line and extract variables
@@ -74,21 +110,9 @@ function vsdevenv_export_envars()
     fi
     $C set +o allexport
 
-    if ! which cl.exe >/dev/null 2>&1; then
-      $C echo "-- Failed to find cl.exe"
-      return 1
-    elif ! [[ -d "$WindowsSdkVerBinPath" ]] 2>&1; then
-      $C echo "-- Failed to find WinSDK: $WindowsSdkVerBinPath"
-      return 1
-    else
-      # Requires elevated priviliges (accesses C:/),
-      # so assume that caused the failure.
-      vsdevenv_remove_clashing_bins || \
-        typeset -f vsdevenv_remove_clashing_bins \
-          | gsudo bash -c '$(cat); vsdevenv_remove_clashing_bins'
-      return 0
-    fi
+    is_vs_env_valid || { echo "-- Err: Invalid cache"; return 1; }
 }
+
 function vsdevenv_find_vsvarsall_bat()
 {
   local found="$($C find "$1" -type f -name "vcvarsall.bat" -print -quit)"
@@ -119,9 +143,8 @@ function vsdevenv_setup()
           CL_ARCH=$(cl.exe 2>&1 | $C grep "Compiler.*for" | $C awk '{print $NF}')
           if [ "$CL_ARCH" != "$TARGET_ARCH_CONV" ]; then
             REQUIRE_PROMPT=1
-          # Make sure WindowsSDK is where advertized.
-          elif [[ ! -d "$WindowsSdkVerBinPath" ]]; then
-            REQUIRE_PROMPT=1
+          elif ! is_vs_env_valid; then
+              REQUIRE_PROMPT=1
           fi
       else
           REQUIRE_PROMPT=1
@@ -133,10 +156,10 @@ function vsdevenv_setup()
           # See if VS PATHs has been cached already
           if [ -f "$VS_ENVAR_CACHE" ]; then
               # Read file line by line and extract variables
-              if vsdevenv_export_envars >/dev/null; then
+              if vsdevenv_export_envars; then
                 return 0
               else
-                echo "-- Bad cache, redo..."
+                echo "-- Reload..."
                 rm -v "$VS_ENVAR_CACHE"
               fi
           fi
@@ -189,7 +212,7 @@ function vsdevenv_setup()
           VS_VARSALL="$(vsdevenv_find_vsvarsall_bat "$VSPATH_LATEST")"
 
           if [[ ! -f "$VS_VARSALL" ]]; then
-            echo "-- Failed to find 'vsvarsall.bat' in '$VSPATH_LATEST'."
+            echo "-- Err: Failed to find 'vsvarsall.bat' in '$VSPATH_LATEST'."
             return 1
           fi
 
@@ -280,7 +303,7 @@ function vsdevenv_setup()
             return 0
           else
             cp "$VS_ENVAR_CACHE" "${VS_ENVAR_CACHE}.failed"
-            echo "-- Failed to export VS environment variables, see ${VS_ENVAR_CACHE}.failed"
+            echo "-- Err: Failed to export VS environment variables, see ${VS_ENVAR_CACHE}.failed"
             return 1
           fi
       fi
