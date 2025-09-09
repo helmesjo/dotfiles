@@ -9,4 +9,5 @@
       "*.manifest": "yaml",
       "manifest": "yaml",
   },
+  "git.openRepositoryInParentFolders": "never",
 }
