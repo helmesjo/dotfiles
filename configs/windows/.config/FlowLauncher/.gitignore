@@ -1,7 +1,7 @@
 Logs
 Cache
-Settings/Plugins/Flow.Launcher.Plugin.Program/Settings.json
-Settings/History.json
-Settings/TopMostRecord.json
-Settings/UserSelectedRecord.json
+Settings/Plugins/Flow.Launcher.Plugin.*/
+Settings/*.json
 **/*.bak
+
+!Settings/Settings.json
