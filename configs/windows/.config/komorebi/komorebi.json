@@ -201,6 +201,11 @@
     {
       "kind": "class",
       "id": "UnrealWindow"
+    },
+    {
+      "kind": "Exe",
+      "id": "Zed.exe",
+      "matching_strategy": "Equals",
     }
   ]
 }
