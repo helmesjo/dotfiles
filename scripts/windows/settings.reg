@@ -11,6 +11,12 @@ Windows Registry Editor Version 5.00
 "DelayBeforeAcceptance"="0"
 "Flags"="59"
 
+; Disable LShift+CTRL language toggle
+[HKEY_CURRENT_USER\Keyboard Layout\Toggle]
+"Hotkey"="3"
+"Language Hotkey"="3"
+"Layout Hotkey"="3"
+
 ; Disable CapsLock
 [HKEY_CURRENT_USER\Control Panel\Keyboard Layout]
 "Scancode Map"=hex:00,00,00,00,00,00,00,00,02,00,00,00,00,00,3a,00,00,00,00,00
