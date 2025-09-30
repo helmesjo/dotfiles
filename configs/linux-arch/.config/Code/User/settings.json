@@ -13,4 +13,5 @@
   "security.allowedUNCHosts": [
     "wsl.localhost"
   ],
+  "editor.inlayHints.enabled": "off",
 }
