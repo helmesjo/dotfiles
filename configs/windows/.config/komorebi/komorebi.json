@@ -65,6 +65,11 @@
   "ignore_rules": [
     {
       "kind": "Exe",
+      "id": ".*[Ii]nstaller.*",
+      "matching_strategy": "Regex",
+    },
+    {
+      "kind": "Exe",
       "id": "explorer.exe",
       "matching_strategy": "Equals",
     },
