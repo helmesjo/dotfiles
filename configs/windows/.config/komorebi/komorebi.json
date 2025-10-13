@@ -211,6 +211,11 @@
       "kind": "Exe",
       "id": "Zed.exe",
       "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Title",
+      "id": "Python.+Setup",
+      "matching_strategy": "Regex",
     }
   ]
 }
