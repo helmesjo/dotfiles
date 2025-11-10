@@ -216,6 +216,11 @@
       "kind": "Title",
       "id": "Python.+Setup",
       "matching_strategy": "Regex",
-    }
+    },
+    {
+      "kind": "Exe",
+      "id": "vlc.exe",
+      "matching_strategy": "Equals",
+    },
   ]
 }
