@@ -10,4 +10,7 @@
       "manifest": "yaml",
   },
   "git.openRepositoryInParentFolders": "never",
+  "security.allowedUNCHosts": [
+    "wsl.localhost"
+  ],
 }
