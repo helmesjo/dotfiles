@@ -27,6 +27,7 @@ left = [
   "spinner",
 ]
 center = [
+  "position",
   "position-percentage",
   "file-name",
   "file-modification-indicator",
