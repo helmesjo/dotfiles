@@ -53,6 +53,7 @@
     a = add
     ap = add --patch
     ba = branch --all
+    bd = branch --delete
     # branch-prune-stale (local without remote)
     bps = "!for branch in $(git for-each-ref --format '%(refname) %(upstream:track)' refs/heads | awk '$2 == \"[gone]\" {sub(\"refs/heads/\", \"\", $1); print $1}'); do echo \"> git branch -D $branch\" && read -p \"  ^ Proceed? [Y/n]: \" -r && [[ $REPLY =~ ^[Yy]$ ]] && git branch -D $branch && echo || true; done"
     c = commit
@@ -63,22 +64,29 @@
     cop = checkout --patch
     d = diff
     dc = diff --cached
-    # log (pretty-log HEAD if not default branch, else default..HEAD/last-arg)
+    # Show commits unique to the specified ref (relative to current).
+    # With no ref, log current branch.
     l = "!f() { \
-        if [ $# -ge 1 ]; then \
-            OPTS=\"$(printf '%s ' \"${@:1:$(($#-1))}\")\"; \
-            HEAD=\"${@: -1}\"; \
-            if ! git rev-parse --verify $HEAD >/dev/null 2>&1; then \
-              OPTS=\"$OPTS $HEAD\"; \
-              HEAD=; \
-            fi; \
+      local fmt='%C(2)%cd %C(auto)%h%C(auto)%d %C(auto)%s'; \
+      local -a ARGS=(); \
+      local REF=; \
+      if [ $# -gt 0 ]; then \
+        local last=\"${@: -1}\"; \
+        if [[ \"$last\" != -* ]] && git rev-parse --verify \"$last^{commit}\" >/dev/null 2>&1; then \
+          ARGS=(\"${@:1:$(($#-1))}\"); \
+          REF=\"$last\"; \
+        else \
+          ARGS=(\"$@\"); \
         fi; \
-        HEAD=${HEAD:-$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)}; \
-        MAIN=$(git symbolic-ref refs/remotes/origin/HEAD >/dev/null 2>&1); \
-        MAIN=${MAIN:-$HEAD}; \
-        MAIN=${MAIN##*/}; \
-        COMP=$([[ $HEAD == $MAIN ]] && echo $HEAD || echo $MAIN..$HEAD); \
-        git log --pretty=format:\"%C(2)%cd %C(auto)%h%C(auto)%d %C(auto)%s\" --date=short $OPTS $COMP; \
+      fi; \
+      local CUR; \
+      CUR=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo HEAD); \
+      if [ -n \"$REF\" ]; then \
+        set -- \"${ARGS[@]}\" \"$CUR..$REF\"; \
+      else \
+        set -- \"${ARGS[@]}\"; \
+      fi; \
+      git log --pretty=format:\"$fmt\" --date=short \"$@\"; \
     }; f"
     ps = push
     psf = "!read -p \"Force push? [Y/n]: \" -r && [[ $REPLY =~ ^[Yy]$ ]] && git ps --force || true"
