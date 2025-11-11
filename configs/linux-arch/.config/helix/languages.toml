@@ -4,6 +4,15 @@ auto-format = true
 formatter = { command = 'clang-format', args = ['--style=file'] }
 
 [[language]]
+name = "cmake"
+auto-format = true
+language-servers = [{ name = "neocmakelsp" }]
+
+[language-server.neocmakelsp]
+command = "neocmakelsp"
+args = ["--stdio"]
+
+[[language]]
 name = "bash"
 file-types = [
   "sh",
