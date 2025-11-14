@@ -204,6 +204,11 @@
       "matching_strategy": "Equals",
     },
     {
+      "kind": "Exe",
+      "id": "Notepad.exe",
+      "matching_strategy": "Equals",
+    },
+    {
       "kind": "class",
       "id": "UnrealWindow"
     },
