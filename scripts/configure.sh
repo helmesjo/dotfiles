@@ -46,7 +46,11 @@ for sourcename in ${dotfiles[@]}; do
   
   echo "  - Creating symlink for '$sourcename'"
   printf "%s" "    - "
-  rm -fv "$targetpath"
+  if test -d "$targetpath"; then
+    mv -fv "$targetpath" "${targetpath}.bak"
+  else
+    rm -fv "$targetpath"
+  fi
   printf "%s" "    - "
   ln -sv $sourcepath $targetpath
 done
