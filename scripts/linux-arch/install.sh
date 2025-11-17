@@ -114,7 +114,7 @@ sudo pacman -Sy --needed --noconfirm "${pacpkgs[@]}"
 yay -Sy --needed --noconfirm "${aurpkgs[@]}"
 
 # Remove packages (if any)
-[ ${#pacpkgs_rem[@]} -gt 0 ] && sudo pacman -R --noconfirm "${pacpkgs_rem[@]}"
+[[ -n ${pacpkgs_rem:-} ]] && sudo pacman -R --noconfirm "${pacpkgs_rem[@]}"
 
 # Remove unused (orphan) packages
 pacman -Qtdq | sudo pacman -Rns --noconfirm - 2>/dev/null || true
