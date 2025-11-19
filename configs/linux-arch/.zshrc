@@ -103,6 +103,8 @@ case "$(uname -s)" in
         done
         command which ${cmds[@]}
       }
+      # always reload hash (updates $commands list)
+      hash -r
     fi
     autoload -U promptinit; promptinit
     prompt pure
