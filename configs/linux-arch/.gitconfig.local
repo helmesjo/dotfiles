@@ -1,5 +1,7 @@
-# important to first clear any previous helper
 [credential]
+    # important to first clear any previous helper
     helper =
     helper = libsecret
 
+[includeIf "hasfile:git-credential-manager.exe"]
+    path = ~/.gitconfig.wsl
