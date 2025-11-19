@@ -13,19 +13,20 @@ is_wsl=$([[ "$(uname -r)" == *WSL* ]] && echo 1 || echo 0 )
 
 pacpkgs=(
   # Base
-  net-tools
-  libnotify
+  bc
+  glfw-wayland
+  glibc-locales
   less
+  libnotify
+  lsb-release
   mesa
+  net-tools
+  pipewire-pulse
+  qt5-wayland
   wayland
   wl-clipboard
-  qt5-wayland
-  glfw-wayland
-  xorg-xwayland
   xorg-xlsclients
-  pipewire-pulse
-  bc
-  lsb-release
+  xorg-xwayland
   # Core
   alacritty
   bat              # cat replacement
