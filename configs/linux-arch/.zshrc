@@ -116,7 +116,6 @@ case "$(uname -s)" in
     pathappend "$(cygpath -u "$PROGRAMFILES/gsudo/Current")"
     pathappend "$(cygpath -u "$PROGRAMFILES/Git/mingw64/bin")"
     pathappend "$(cygpath -u "$PROGRAMFILES/LLVM/bin")"
-    pathappend "$HOME/.cargo/bin"
     pathappend "/c/build2/bin"
 
     # complete hard drives in msys2
@@ -227,3 +226,4 @@ fi
 
 # source aliases
 source ~/.bazsh_aliases
+[[ -f $HOME/.cargo/env ]] && source "$HOME/.cargo/env"

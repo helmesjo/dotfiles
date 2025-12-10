@@ -80,7 +80,6 @@ case "$(uname -s)" in
     pathappend "$(cygpath -u "$PROGRAMFILES/gsudo/Current")"
     pathappend "$(cygpath -u "$PROGRAMFILES/Git/mingw64/bin")"
     pathappend "$(cygpath -u "$PROGRAMFILES/LLVM/bin")"
-    pathappend "$HOME/.cargo/bin"
     pathappend "/c/build2/bin"
 
     source "$HOME/.vsdevenv.sh"
@@ -132,3 +131,4 @@ eval "$(fzf --bash)"
 # don't have ESC+c start fzf
 bind '"\ec": nop'
 eval "$(zoxide init bash --cmd cd)"
+[[ -f $HOME/.cargo/env ]] && source "$HOME/.cargo/env"
