@@ -1,7 +1,4 @@
 [credential]
     # important to first clear any previous helper
     helper =
-    helper = libsecret
-
-[includeIf "hasfile:git-credential-manager.exe"]
-    path = ~/.gitconfig.wsl
+    helper = "!f(){ command -v git-credential-manager.exe >/dev/null 2>&1 && exec git-credential-manager.exe \"$1\"; exec git-credential-libsecret \"$1\"; }; f"
