@@ -226,4 +226,4 @@ fi
 
 # source aliases
 source ~/.bazsh_aliases
-[[ -f $HOME/.cargo/env ]] && source "$HOME/.cargo/env"
+[[ -f $HOME/.cargo/env ]] && source "$HOME/.cargo/env" || true
