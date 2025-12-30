@@ -203,6 +203,12 @@ function vsdevenv_setup()
           VSPATH_LATEST=
           for vsdir in "${VS_VERSIONS[@]}"; do
             VSVER=$(basename "$vsdir")
+            # Starting with VS 2026 (v18) the base-dir
+            # is named by version, not year. Prefix with
+            # '99' to fix the sorting (eg. 18 -> 9918)
+            if [[ -n ${VSVER:-} ]] && [[ $VSVER -lt 1000 ]]; then
+              VSVER=99$VSVER
+            fi
             if [[ -n ${VSVER:-} ]] && [[ -z ${VSVER_LATEST} ]] || [[ $VSVER_LATEST -lt $VSVER ]]; then
               VSVER_LATEST=$VSVER
               VSPATH_LATEST="$vsdir"
