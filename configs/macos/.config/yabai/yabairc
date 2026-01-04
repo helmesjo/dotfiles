@@ -1,5 +1,13 @@
 #!/usr/bin/env sh
 
+# ignored applications
+yabai -m rule --add app='^Finder$' manage=off
+yabai -m rule --add app='^Code$' manage=off
+yabai -m rule --add app='^Zed$' manage=off
+yabai -m rule --add app='^Epic Games Launcher$' manage=off
+yabai -m rule --add app='^UnrealEditor$' manage=off
+yabai -m rule --apply
+
 #
 # for this to work you must configure sudo such that
 # it will be able to run the command without password
@@ -42,11 +50,5 @@ yabai -m config                                 \
     mouse_action1                move           \
     mouse_action2                resize         \
     mouse_drop_action            swap
-
-# ignored applications
-yabai -m rule --add app='^Code$' manage=off
-yabai -m rule --add app='^Zed$' manage=off
-yabai -m rule --add app='^Epic Games Launcher$' manage=off
-yabai -m rule --add app='^UnrealEditor$' manage=off
 
 echo "yabai configuration loaded.."
