@@ -33,31 +33,15 @@
       "workspaces": [
         {
           "name": "I",
-          "layout": "UltrawideVerticalStack"
+          "custom_layout": "$Env:KOMOREBI_CONFIG_HOME/layouts/UltrawideEvenVerticalStack.json",
         },
         {
           "name": "II",
-          "layout": "UltrawideVerticalStack"
+          "custom_layout": "$Env:KOMOREBI_CONFIG_HOME/layouts/UltrawideEvenVerticalStack.json"
         },
         {
           "name": "III",
-          "layout": "UltrawideVerticalStack"
-        },
-        {
-          "name": "IV",
-          "layout": "UltrawideVerticalStack"
-        },
-        {
-          "name": "V",
-          "layout": "UltrawideVerticalStack"
-        },
-        {
-          "name": "VI",
-          "layout": "UltrawideVerticalStack"
-        },
-        {
-          "name": "VII",
-          "layout": "UltrawideVerticalStack"
+          "custom_layout": "$Env:KOMOREBI_CONFIG_HOME/layouts/UltrawideEvenVerticalStack.json"
         }
       ]
     }
