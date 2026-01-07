@@ -2,6 +2,7 @@
 
 # ignored applications
 yabai -m rule --add app='^Finder$' manage=off
+yabai -m rule --add app='^Mail$' manage=off
 yabai -m rule --add app='^Code$' manage=off
 yabai -m rule --add app='^Zed$' manage=off
 yabai -m rule --add app='^Epic Games Launcher$' manage=off
