@@ -41,6 +41,8 @@ bindkey '^[[1;3C' forward-word                   # alt+right
 bindkey '^[[1;3D' backward-word                  # alt+left
 bindkey '^[[3~'   delete-char
 
+# PATH setup
+#
 function pathappend() {
   for arg in "$@"; do
     case ":$PATH:" in
@@ -105,6 +107,25 @@ case "$(uname -s)" in
       }
       # always reload hash (updates $commands list)
       hash -r
+
+      # Rotate PATH so entries on mounted drives come after all non-mounted entries (order preserved)
+      wsl_rotate_mounted_path_to_end() {
+        local -a keep move
+        local p
+
+        for p in "${path[@]}"; do
+          # Assume all single-letter mounted drives point to windows host
+          if [[ $p == /mnt/[A-Za-z]/* ]]; then
+            move+=("$p")
+          else
+            keep+=("$p")
+          fi
+        done
+
+        path=("${keep[@]}" "${move[@]}")
+      }
+      wsl_rotate_mounted_path_to_end
+      unset -f wsl_rotate_mounted_path_to_end
     fi
     autoload -U promptinit; promptinit
     prompt pure

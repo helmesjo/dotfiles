@@ -25,6 +25,8 @@ shopt -s histappend              # Append new history entries to the file instea
 
 PS1='[\u@\h \W]\$ '
 
+# PATH setup
+#
 function pathappend() {
   for arg in "$@"; do
     case ":$PATH:" in
@@ -71,6 +73,33 @@ case "$(uname -s)" in
         command which ${cmds[@]}
       }
       export -f which
+
+      # Rotate PATH so entries on mounted drives come after all non-mounted entries (order preserved)
+      wsl_rotate_mounted_path_to_end() {
+        local IFS=:
+        local -a parts keep move
+        local p
+        read -r -a parts <<<"$PATH"
+
+        for p in "${parts[@]}"; do
+          [ -z "$p" ] && continue
+          # Assume all single-letter mounted drives point to windows host
+          if [[ $p == /mnt/[A-Za-z]/* ]]; then
+            move+=("$p")
+          else
+            keep+=("$p")
+          fi
+        done
+
+        # join arrays with ':'
+        PATH="$(IFS=:; printf '%s' "${keep[*]}")"
+        if [ "${#move[@]}" -gt 0 ]; then
+          PATH="${PATH:+$PATH:}$(IFS=:; printf '%s' "${move[*]}")"
+        fi
+        export PATH
+      }
+      wsl_rotate_mounted_path_to_end
+      unset -f wsl_rotate_mounted_path_to_end
     fi
     ;;
   MSYS*|MINGW*|CYGWIN)
