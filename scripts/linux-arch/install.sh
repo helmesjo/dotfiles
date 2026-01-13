@@ -61,7 +61,8 @@ pacpkgs=(
   git
   git-delta        # diff tool
   helix
-  libsecret        # password storage
+  libsecret        # credentials client
+  gnome-keyring    # secret service provider
   nodejs
   python3
   vim
