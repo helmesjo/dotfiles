@@ -216,5 +216,10 @@
       "id": "vlc.exe",
       "matching_strategy": "Equals",
     },
+    {
+      "kind": "Exe",
+      "id": "RSI Launcher.exe",
+      "matching_strategy": "Equals",
+    }
   ]
 }
