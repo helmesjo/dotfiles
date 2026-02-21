@@ -220,6 +220,16 @@
       "kind": "Exe",
       "id": "RSI Launcher.exe",
       "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "StarCitizen.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "Obsidian.exe",
+      "matching_strategy": "Equals",
     }
   ]
 }
