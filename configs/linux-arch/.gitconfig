@@ -88,6 +88,7 @@
       fi; \
       git log --pretty=format:\"$fmt\" --date=short \"$@\"; \
     }; f"
+    ls = l --stat
     ps = push
     psf = "!read -p \"Force push? [Y/n]: \" -r && [[ $REPLY =~ ^[Yy]$ ]] && git ps --force || true"
     psu = "!git push --set-upstream origin \"$(git rev-parse --abbrev-ref HEAD)\""
