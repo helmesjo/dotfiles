@@ -34,7 +34,6 @@ pacpkgs=(
   fish
   fzf
   ripgrep
-  wl-clipboard     # system clipboard
   zoxide           # cd replacement
   # prompt
   zsh
@@ -89,11 +88,10 @@ aurpkgs=(
 )
 
 if [[ $is_wsl -eq 1 ]]; then
-  # WSL requires compatible win32 clipboard.
+  # WSL requires win32-compatible clipboard,
+  # so we replace wl-clipboard with win32yank.
+  # See 'curl ...' after pacman install.
   pacpkgs_rem=(wl-clipboard)
-  wingetpkgs=(
-    equalsraf.win32yank
-  )
 fi
 
 if [[ $is_laptop -eq 1 ]]; then
@@ -121,6 +119,12 @@ yay -Sy --needed --noconfirm "${aurpkgs[@]}"
 # Remove unused (orphan) packages
 pacman -Qtdq | sudo pacman -Rns --noconfirm - 2>/dev/null || true
 yay -Yc --noconfirm
+
+if [[ $is_wsl -eq 1 ]]; then
+  # download win32yank and place in PATH
+  curl -sL https://github.com/equalsraf/win32yank/releases/download/v0.1.1/win32yank-x64.zip | \
+    bsdtar -C ~/.local/bin/ -xz "win32yank.exe" && chmod +x ~/.local/bin/win32yank.exe
+fi
 
 # Setup system/package envars
 envar_file="/etc/environment"

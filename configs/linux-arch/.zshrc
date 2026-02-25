@@ -52,6 +52,7 @@ function pathappend() {
   done
 }
 
+mkdir -p "$HOME/.local/bin"
 pathappend "$HOME/.local/bin"
 case "$(uname -s)" in
   Darwin)
@@ -71,9 +72,13 @@ case "$(uname -s)" in
     ;;
   Linux)
     if [[ "$(uname -r)" == *WSL* ]]; then
-      if test -f "/mnt/c/Program Files/Git/mingw64/bin/git-credential-manager.exe"; then
-        pathappend "/mnt/c/Program Files/Git/mingw64/bin/"
+      # use windows git-credential-manager in WSL to avoid re-authenticating 
+      if test -f "$HOST___PROGRAMFILES/Git/mingw64/bin/git-credential-manager.exe"; then
+        ! command -v git-credential-manager.exe >/dev/null && \
+          rm -f ~/.local/bin/git-credential-manager.exe && \
+          ln -sv "$HOST___PROGRAMFILES/Git/mingw64/bin/git-credential-manager.exe" ~/.local/bin
       fi
+
       # when running in wsl, override 'cmd not found' handler and
       # see if there is an .exe file available to avoid explicitly
       # spelling it out each time.
@@ -136,6 +141,11 @@ case "$(uname -s)" in
     pathappend "$(cygpath -u "$PROGRAMFILES/Git/mingw64/bin")"
     pathappend "$(cygpath -u "$PROGRAMFILES/LLVM/bin")"
     pathappend "/c/build2/bin"
+
+    # forward certain envars to WSL
+    export HOST___HOME="$HOME"
+    export HOST___PROGRAMFILES="$PROGRAMFILES"
+    export WSLENV=HOST___HOME/p:HOST___PROGRAMFILES/p
 
     # complete hard drives in msys2
     drives=$(mount | sed -rn 's#^[A-Z]: on /([a-z]).*#\1#p' | tr '\n' ' ')
