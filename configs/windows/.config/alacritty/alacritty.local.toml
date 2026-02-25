@@ -14,3 +14,8 @@ args = [
     zsh --login"
   """
 ]
+# Fix Shift+Enter on Windows
+[[keyboard.bindings]]
+key = "Return"
+mods = "Shift"
+chars = "\u001b\u000a"
