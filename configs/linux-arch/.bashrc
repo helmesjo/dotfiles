@@ -40,10 +40,8 @@ pathappend "$HOME/.local/bin"
 case "$(uname -s)" in
   Linux)
     if [[ "$(uname -r)" == *WSL* ]]; then
-      if ! test -f /mnt/c/Program\ Files/Git/mingw/bin/git-credential-manager.exe; then
-        export GIT_CONFIG_COUNT=1
-        export GIT_CONFIG_KEY_0=credential.helper
-        export GIT_CONFIG_VALUE_0='/mnt/c/Program\ Files/Git/mingw64/bin/git-credential-manager.exe'
+      if test -f "/mnt/c/Program Files/Git/mingw64/bin/git-credential-manager.exe"; then
+        pathappend "/mnt/c/Program Files/Git/mingw64/bin/"
       fi
       # when running in wsl, override 'cmd not found' handler and
       # see if there is an .exe file available to avoid explicitly
