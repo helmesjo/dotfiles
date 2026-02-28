@@ -13,6 +13,7 @@
     filemode = true
     eol = lf
     longpaths = true
+    hooksPath = ~/.githooks
 
 [credential "https://dev.azure.com"]
     useHttpPath = true
