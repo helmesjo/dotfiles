@@ -99,15 +99,6 @@ if [[ $is_laptop -eq 1 ]]; then
   pacpkgs+=(tlp)
 fi
 
-if command -v winget.exe >/dev/null 2>&1; then
-  winget install --disable-interactivity \
-                 --ignore-warnings \
-                 --accept-source-agreements \
-                 --accept-package-agreements \
-                 ${wingetpkgs[@]} \
-         || true
-fi
-
 # Install packages
 sudo pacman -Sy --noconfirm archlinux-keyring && sudo pacman -Su --noconfirm
 sudo pacman -Sy --needed --noconfirm "${pacpkgs[@]}"
