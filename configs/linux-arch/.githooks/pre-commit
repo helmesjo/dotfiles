@@ -17,13 +17,27 @@ clr_def=$'\e[1;0m';
 if ! command -v clang-format >/dev/null 2>&1; then
   clr_res=$clr_warn
 else
-  STAGED_SRCS=($(git diff --name-only --cached --diff-filter=d -- '*.[hc]' '*.cc' '*.[hc]xx' '*.[hc]pp'))
+  mapfile -t STAGED_SRCS < <(git diff --name-only --cached --diff-filter=d -- '*.[hc]' '*.cc' '*.[hc]xx' '*.[hc]pp')
   if [[ ${#STAGED_SRCS[@]} -eq 0 ]]; then
     clr_res=$clr_warn
-  elif ! clang-format -i --style=file ${STAGED_SRCS[*]}; then
-    clr_res=$clr_err
   else
-    git add ${STAGED_SRCS[*]}
+    # (1) stash any unstaged changes in the staged files
+    stashed=0
+    if ! git diff --quiet -- "${STAGED_SRCS[@]}"; then
+      git stash push --keep-index --quiet --message "[hook/fmt]" -- "${STAGED_SRCS[@]}"
+      stashed=1
+    fi
+
+    # format staged files
+    if ! clang-format -i --style=file -- "${STAGED_SRCS[@]}"; then
+      clr_res=$clr_err
+    elif ! git diff --quiet --exit-code -- "${STAGED_SRCS[@]}"; then
+      # add diff; force stdin to come from the real terminal
+      git add --patch -- "${STAGED_SRCS[@]}" </dev/tty
+    fi
+
+    # (1) restore original unstaged changes
+    [[ $stashed -eq 1 ]] && git stash pop --quiet 2>/dev/null || true
   fi
 fi
 
