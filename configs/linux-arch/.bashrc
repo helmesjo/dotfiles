@@ -126,32 +126,7 @@ case "$(uname -s)" in
     ;;
 esac
 
-# alias for 'view in file manager' on various platforms
-function _open_file_explorer() {
-  local tgt_path="${1:-.}"
-  if [[ ! -e "$tgt_path" ]]; then
-    command $tgt_path
-    return $?
-  fi
-  case "$(uname -s)" in
-    Linux)
-      xdg-open "$tgt_path" 2>/dev/null || gio open "$tgt_path" 2>/dev/null || nautilus "$tgt_path" 2>/dev/null
-      ;;
-    MINGW*|MSYS*|CYGWIN*)
-      explorer "$(cygpath -w "$tgt_path")" >/dev/null 2>&1 & disown
-      ;;
-    *)
-      echo "Unsupported platform: $(uname -s)" >&2
-      return 1
-      ;;
-  esac
-}
-
-# completion function for _open_file_explorer
-function _open_file_explorer_completion() {
-  _files -/  # Completes files and directories
-}
-
+# see: .shell-aliases
 # NOTE: MacOS already has 'open' that does the right thing.
 name=open
 if ! command -v $name >/dev/null || [[ $(type -t $name) == "alias" ]]; then
