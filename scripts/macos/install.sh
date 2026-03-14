@@ -12,19 +12,18 @@ $file_dir/install-zsh-history-substring-search.sh
 
 brewpkgs=(
   # Core
-  alacritty   # terminal
+  alacritty                  # terminal
   bash
-  bat
+  bat                        # cat
   coreutils
-  eza
+  erdtree                    # tree & ls
   fzf
   git
   ripgrep
-  tre-command # tree replacement
   koekeishiya/formulae/yabai # tiling window manager
   koekeishiya/formulae/skhd  # hotkey daemon
-  zoxide      # cd replacement
-  # prompt
+  zoxide                     # cd replacement
+  # Prompt
   zsh
   zsh-completion
   # TUI/GUI
@@ -33,8 +32,7 @@ brewpkgs=(
   git-delta
   helix
   npm
-  ## Debugging
-  llvm        # lldb-vscode
+  llvm                       # lldb-vscode
   ## Languge Server Protocol
   bash-language-server
   cmake-language-server

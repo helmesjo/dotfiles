@@ -29,12 +29,11 @@ pacpkgs=(
   xorg-xwayland
   # Core
   alacritty
-  bat              # cat replacement
-  eza              # ls replacement
-  fish
+  bat              # cat
+  erdtree          # tree & ls
   fzf
   ripgrep
-  zoxide           # cd replacement
+  zoxide           # cd
   # prompt
   zsh
   zsh-completions
@@ -65,7 +64,6 @@ pacpkgs=(
   nodejs
   python3
   vim
-  ## Debugging
   lldb             # lldb-vscode
   ## Languge Server Protocol
   bash-language-server
@@ -80,7 +78,6 @@ pacpkgs=(
 aurpkgs=(
   # Core
   greetd
-  tre-command      # nicer tree alternative
   # Hardware
   bluetuith        # bluetooth device tui
   ## Languge Server Protocol

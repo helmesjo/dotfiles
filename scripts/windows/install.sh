@@ -24,10 +24,9 @@ $file_dir/install-zsh-history-substring-search.sh
 
 wingetpkgs=(
   Alacritty.Alacritty
-  eza-community.eza           # modern ls
-  sharkdp.bat                 # modern cat
-  duan.tre                    # modern tree
-  ajeetdsouza.zoxide          # modern cd
+  sharkdp.bat                 # cat
+  Solidiquis.Erdtree          # tree & ls
+  ajeetdsouza.zoxide          # cd
   Helix.Helix
   DEVCOM.JetBrainsMonoNerdFont
   junegunn.fzf

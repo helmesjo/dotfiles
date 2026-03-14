@@ -3,8 +3,13 @@ alias sudo='sudo '
 alias win32yank='win32yank --lf'
 alias cat='bat'
 alias config='git -C $dotfiles_root'
-alias ls='eza -l --color=auto'
-alias tree='tre --color=automatic'
+if [[ $OSTYPE != cygwin ]]; then
+  alias ll='erd -HI -d physical -s name -y inverted --long --no-ignore --no-progress -L 1'
+else
+  # no permission info (erd --long) on non-unix
+  alias ll='erd -HI -d physical -s name -y inverted --no-ignore --no-progress -L 1'
+fi
+alias tree='erd -HI -d physical -s name -y inverted --no-ignore --no-progress'
 alias fg1='fg %1'
 alias fg2='fg %2'
 alias fg3='fg %3'
