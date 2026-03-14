@@ -131,9 +131,6 @@ esac
 name=open
 if ! command -v $name >/dev/null || [[ $(type -t $name) == "alias" ]]; then
   alias $name="_open_file_explorer"
-  # Bind completion to the function and alias
-  complete -F _open_file_explorer_completion _open_file_explorer
-  complete -F _open_file_explorer_completion open
 fi
 
 # source aliases

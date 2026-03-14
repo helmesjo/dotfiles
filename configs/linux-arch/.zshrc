@@ -223,9 +223,6 @@ zstyle ':vcs_info:git*' formats "%b"
 name=open
 if ! command -v $name >/dev/null || [[ "$(whence -w $name)" == *": alias" ]]; then
   alias $name="_open_file_explorer"
-  # Bind completion to the function and alias
-  compdef _open_file_explorer_completion _open_file_explorer
-  compdef _open_file_explorer_completion open
 fi
 
 # source aliases

@@ -1,3 +1,4 @@
+dotfiles_root=$(dirname $(readlink -f ${BASH_SOURCE[0]:-$0}))
 # Make sudo work with other aliases
 alias sudo='sudo '
 alias win32yank='win32yank --lf'
@@ -46,11 +47,6 @@ function _open_file_explorer() {
   esac
 }
 
-# completion function for _open_file_explorer
-function _open_file_explorer_completion() {
-  _files -/  # Completes files and directories
-}
-
 ## erdtree:
 # Converts common POSIX ls/tree flags (-a, -h, -l and bundles like -lah)
 # to the equivalent erdtree short flags on the fly.
@@ -94,3 +90,19 @@ else
   alias ll='_erdtree -HI -d physical -s name -y inverted --no-ignore --no-progress -L 1 "$@"'
 fi
 alias tree='_erdtree -HI -d physical -s name -y inverted --no-progress'
+
+## File completion for aliases
+#
+
+# completion function for _open_file_explorer
+function _files_completion() {
+  _files -/  # Completes files and directories
+}
+
+if [[ -n "$ZSH_VERSION" ]]; then
+  compdef _files_completion _open_file_explorer
+  compdef _files_completion _erdtree
+else
+  complete -F _files_completion _open_file_explorer
+  complete -F _files_completion _erdtree
+fi
