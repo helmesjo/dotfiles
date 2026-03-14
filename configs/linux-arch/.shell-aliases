@@ -3,13 +3,6 @@ alias sudo='sudo '
 alias win32yank='win32yank --lf'
 alias cat='bat'
 alias config='git -C $dotfiles_root'
-if [[ $OSTYPE != cygwin ]]; then
-  alias ll='erd -HI -d physical -s name -y inverted --long --no-ignore --no-progress -L 1'
-else
-  # no permission info (erd --long) on non-unix
-  alias ll='erd -HI -d physical -s name -y inverted --no-ignore --no-progress -L 1'
-fi
-alias tree='erd -HI -d physical -s name -y inverted --no-ignore --no-progress'
 alias fg1='fg %1'
 alias fg2='fg %2'
 alias fg3='fg %3'
@@ -57,3 +50,47 @@ function _open_file_explorer() {
 function _open_file_explorer_completion() {
   _files -/  # Completes files and directories
 }
+
+## erdtree:
+# Converts common POSIX ls/tree flags (-a, -h, -l and bundles like -lah)
+# to the equivalent erdtree short flags on the fly.
+function _erdtree() {
+  local -a newargs=()
+  local arg flags f
+
+  for arg in "$@"; do
+    # === Handle bundled POSIX short flags (e.g. -lah, -al, -Lah, etc.) ===
+    if [[ $arg =~ ^-[a-zA-Z]+$ && ${#arg} -gt 2 ]]; then
+      flags="${arg#-}"
+      while [[ -n $flags ]]; do
+        # Extract first character (portable in Bash + Zsh)
+        f="${flags%%${flags#?}}"
+        case "$f" in
+          a) newargs+=("-.") ;;   # -a → -.
+          h) newargs+=("-H") ;;   # -h → -H
+          l) newargs+=("-l") ;;   # -l → -l
+          *) newargs+=("-$f") ;;  # everything else unchanged
+        esac
+        flags="${flags#?}"        # remove first character
+      done
+      continue
+    fi
+
+    # === Handle standalone common POSIX flags ===
+    case "$arg" in
+      -a) newargs+=("-.") ;;
+      -h) newargs+=("-H") ;;
+      -l) newargs+=("-l") ;;
+      *)  newargs+=("$arg") ;;  # paths, -L 5, --help, etc. untouched
+    esac
+  done
+
+  command erd "${newargs[@]}"
+}
+if [[ $OSTYPE != cygwin ]]; then
+  alias ll='_erdtree -HI -d physical -s name -y inverted --long --no-ignore --no-progress -L 1'
+else
+  # no permission info (erd --long) on non-unix
+  alias ll='_erdtree -HI -d physical -s name -y inverted --no-ignore --no-progress -L 1 "$@"'
+fi
+alias tree='_erdtree -HI -d physical -s name -y inverted --no-progress'
