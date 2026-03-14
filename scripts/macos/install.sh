@@ -28,6 +28,7 @@ brewpkgs=(
   zsh-completion
   # TUI/GUI
   gitui
+  yazi                       # file manager
   # Dev
   git-delta
   helix
@@ -38,9 +39,8 @@ brewpkgs=(
   cmake-language-server
   lua-language-server
   yaml-language-server
-  taplo                  # toml
-  marksman               # markdown (code assist)
-  markdown-oxide         # markdown (lsp)
+  taplo                      # toml
+  markdown-oxide             # markdown
   # Fonts
   font-jetbrains-mono
 )

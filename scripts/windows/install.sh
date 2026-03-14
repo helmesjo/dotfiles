@@ -38,11 +38,11 @@ wingetpkgs=(
   Flow-Launcher.Flow-Launcher # app launcher
   BurntSushi.ripgrep.MSVC
   python3
+  sxyazi.yazi                 # file manager
   # language servers
   LuaLS.lua-language-server
   tamasfe.taplo               # toml
-  marksman                    # markdown (code assist)
-  markdown-oxide              # markdown (lsp)
+  markdown-oxide              # markdown
 )
 pacmanpkgs=(
   zsh

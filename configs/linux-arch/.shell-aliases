@@ -20,6 +20,18 @@ alias fg7='fg %7'
 alias fg8='fg %8'
 alias fg9='fg %9'
 
+## y=yazi:
+# changes the current working
+# directory when exiting yazi
+function _yazi() {
+  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+  command yazi "$@" --cwd-file="$tmp"
+  IFS= read -r -d '' cwd < "$tmp"
+  [ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd"
+  rm -f -- "$tmp"
+}
+alias y=_yazi
+
 # alias for 'view in file manager' on various platforms
 function _open_file_explorer() {
   local tgt_path="${1:-.}"

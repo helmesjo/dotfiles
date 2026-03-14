@@ -54,6 +54,7 @@ pacpkgs=(
   udisks2          # Auto-mount removable devices
   udiskie          # udisks2 notifications
   waybar
+  yazi             # file manager
   # Dev
   perf             # performance profiler
   git
@@ -71,7 +72,7 @@ pacpkgs=(
   python-lsp-server
   yaml-language-server
   taplo-cli              # toml
-  marksman               # markdown (code assist)
+  markdown-oxide         # markdown
   # Misc
   firefox
 )
@@ -80,8 +81,6 @@ aurpkgs=(
   greetd
   # Hardware
   bluetuith        # bluetooth device tui
-  ## Languge Server Protocol
-  markdown-oxide   # markdown (lsp)
 )
 
 if [[ $is_wsl -eq 1 ]]; then
