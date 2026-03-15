@@ -2,9 +2,8 @@
 set -eu -o pipefail
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  PAIR=$(cat /etc/*-release | grep "^DISTRIB_ID=" || true)
-  PAIR=${PAIR:-$(cat /etc/*-release | grep "^ID_LIKE=")}
-  DISTRO=$(echo $PAIR | awk -F'=' '{print $2}' | tr '[:upper:]' '[:lower:]' | xargs)
+  source /etc/os-release 2>/dev/null || true
+  DISTRO=$(echo ${ID_LIKE:-$ID} | tr '[:upper:]' '[:lower:]' | xargs)
   OS="linux-$DISTRO"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
   OS="macos"
