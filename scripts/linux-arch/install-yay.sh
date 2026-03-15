@@ -12,6 +12,6 @@ if ! command -v yay >/dev/null 2>&1; then
   echo "Installing $NAME $BRANCH (temp dir: $DIR)..."
   sudo pacman -S --needed git base-devel
   git clone --quiet --depth=1 $URL $DIR >/dev/null
-  (cd $DIR && makepkg -si --noconfirm)
+  (cd $DIR && makepkg -sir --noconfirm)
   rm -rf $DIR
 fi
