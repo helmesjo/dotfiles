@@ -3,7 +3,7 @@ name = "cpp"
 auto-format = true
 ## helix will fall back to lsp (clangd) if formatter isn't specified, which
 #  should behave more accurately (clangd will invoke its clang-format).
-# formatter = { command = 'clang-format', args = ['--style=file', '--assume-filename=%{buffer_name}'] }
+formatter = { command = 'clang-format', args = ['--style=file', '--assume-filename=%{buffer_name}'] }
 
 [[language]]
 name = "cmake"
