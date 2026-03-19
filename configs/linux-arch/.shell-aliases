@@ -81,13 +81,29 @@ function _erdtree() {
     esac
   done
 
-  command erd "${newargs[@]}"
+  if [[ -d "${@: -1}" || ! -f "${@: -1}" ]]; then
+    command erd "${newargs[@]}"
+  else # deal with non-dir path
+    local last="${newargs[-1]}"
+    local dir="${last%/*}"
+    local base="${last##*/}"
+    # fix relative base paths
+    [[ "$last" == "$base" || -z "$dir" || "$dir" == "$last" ]] && dir="."
+
+    if [[ $OSTYPE != cygwin ]]; then
+      newargs=("${newargs[@]:0:${#newargs[@]}-1}" --pattern "${base}" "$dir")
+    else
+      # handle implied extension
+      newargs=("${newargs[@]:0:${#newargs[@]}-1}" --pattern "${base}(?:\..+)?$" "$dir")
+    fi
+    command erd "${newargs[@]}"
+  fi
 }
 if [[ $OSTYPE != cygwin ]]; then
-  alias ll='_erdtree -HI -d physical -s name -y inverted --long --no-ignore --no-progress -L 1'
+  alias ll='_erdtree -HI -d physical -s name -y inverted --long --no-ignore --no-progress -L1'
 else
   # no permission info (erd --long) on non-unix
-  alias ll='_erdtree -HI -d physical -s name -y inverted --no-ignore --no-progress -L 1 "$@"'
+  alias ll='_erdtree -HI -d physical -s name -y inverted --no-ignore --no-progress -L1 "$@"'
 fi
 alias tree='_erdtree -HI -d physical -s name -y inverted --no-progress'
 
