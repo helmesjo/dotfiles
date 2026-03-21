@@ -51,6 +51,7 @@ pacpkgs=(
   swaybg
   swayidle
   swaylock
+  television       # multi-purpose fuzzy finder
   udisks2          # Auto-mount removable devices
   udiskie          # udisks2 notifications
   waybar
@@ -79,6 +80,7 @@ pacpkgs=(
 aurpkgs=(
   # Core
   greetd
+  tlrc-bin         # man
   # Hardware
   bluetuith        # bluetooth device tui
 )

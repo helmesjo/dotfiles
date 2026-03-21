@@ -27,6 +27,8 @@ wingetpkgs=(
   sharkdp.bat                 # cat
   Solidiquis.Erdtree          # tree & ls
   ajeetdsouza.zoxide          # cd
+  alexpasmantier.television   # multi-purpose fuzzy finder
+  tldr-pages.tlrc             # man
   Helix.Helix
   DEVCOM.JetBrainsMonoNerdFont
   junegunn.fzf

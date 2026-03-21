@@ -19,6 +19,7 @@ brewpkgs=(
   erdtree                    # tree & ls
   fzf
   git
+  tldr                       # man
   ripgrep
   koekeishiya/formulae/yabai # tiling window manager
   koekeishiya/formulae/skhd  # hotkey daemon
@@ -29,6 +30,7 @@ brewpkgs=(
   # TUI/GUI
   gitui
   yazi                       # file manager
+  television                 # multi-purpose fuzzy finder
   # Dev
   git-delta
   helix
