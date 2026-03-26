@@ -77,7 +77,7 @@ ${CMD_EXE[@]} "C:/msys64/msys2_shell.cmd -defterm -here -no-start -ucrt64 -shell
                     bash -c 'pacman --noconfirm -Syu' \
                     || exit 0"
 ${CMD_EXE[@]} "C:/msys64/msys2_shell.cmd -defterm -here -no-start -ucrt64 -shell \
-                    bash -c 'pacman --noconfirm -S ${pacmanpkgs[*]}' \
+                    bash -c 'pacman --noconfirm --needed -S ${pacmanpkgs[*]}' \
                     || exit 0"
 
 # vc++ build tools (if not already available in path or installed):
