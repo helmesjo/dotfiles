@@ -93,6 +93,10 @@ if ! $file_dir/.vsdevenv.sh &>/dev/null; then
                  "
 fi
 
-winget upgrade --accept-source-agreements \
+# upgrade only those that aren't 'pinned' (otherwise the command fails).
+wingetpinned=($(winget pin list | awk 'NR>2 {print $2}' | tr '\n' ' '))
+wingetupgrade=($(printf '%s\n' "${wingetpkgs[@]}" | grep -v -Fxf <(echo ${wingetpinned[@]})))
+winget upgrade --ignore-warnings \
+               --accept-source-agreements \
                --accept-package-agreements \
-               ${wingetpkgs[@]}
+               ${wingetupgrade[@]}
