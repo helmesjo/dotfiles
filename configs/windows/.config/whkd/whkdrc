@@ -9,7 +9,7 @@ alt + shift + o         : komorebic stop --whkd --bar; cmd.exe /c "start /b komo
 # The apps will be focused if open, or launched if not open
 # alt + f                 : if ($wshell.AppActivate('Firefox') -eq $False) { start firefox }
 # alt + b                 : if ($wshell.AppActivate('Chrome') -eq $False) { start chrome }
-alt + return            : start alacritty.exe
+alt + return            : explorer.exe "C:\Program Files\Alacritty\alacritty.exe"
 
 alt + q                 : komorebic close
 alt + shift + q         : powershell -executionpolicy bypass -File "$env:KOMOREBI_CONFIG_HOME/quit-focused-app.ps1"
