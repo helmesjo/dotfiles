@@ -41,20 +41,18 @@ pacpkgs=(
   noto-fonts-emoji
   ttf-jetbrains-mono-nerd
   # TUI/GUI
-  bemenu-wayland   # application runner
   bottom           # system monitor
+  brightnessctl    # brightness control (shell dependency)
+  cliphist         # clipboard history (shell launcher)
   easyeffects      # audio controller
   gitui
   grim slurp       # screen grab tools
-  mako             # notifications
-  sway
-  swaybg
-  swayidle
-  swaylock
+  niri
+  ly               # display manager
+  wlsunset         # night light
   television       # multi-purpose fuzzy finder
   udisks2          # Auto-mount removable devices
   udiskie          # udisks2 notifications
-  waybar
   yazi             # file manager
   # Dev
   perf             # performance profiler
@@ -74,15 +72,28 @@ pacpkgs=(
   yaml-language-server
   taplo-cli              # toml
   markdown-oxide         # markdown
+  # Theming
+  adw-gtk-theme    # gtk theme (shell dependency)
+  nwg-look         # gtk settings tool
+  qt5ct            # qt theming tool (shell dependency)
+  qt6ct            # qt theming tool (shell dependency)
+  # DMS dependencies
+  accountsservice          # user account info (lock screen)
+  xdg-desktop-portal-gtk  # XDG portal backend (file picker, screen share)
   # Misc
   firefox
 )
 aurpkgs=(
   # Core
-  greetd
   tlrc-bin         # man
+  # DMS dependencies
+  dms-shell-bin        # dank desktop shell
+  quickshell           # compositor shell (DMS runtime)
+  xwayland-satellite   # rootful XWayland for niri (DMS XWayland support)
+  matugen              # material theme generator (DMS theming)
+  dgop                 # on-screen display overlays (DMS OSD)
   # Hardware
-  bluetuith        # bluetooth device tui
+  bluetuith        # bluetooth TUI
 )
 
 if [[ $is_wsl -eq 1 ]]; then
@@ -121,7 +132,9 @@ envars=(
   # Firefox
   MOZ_ENABLE_WAYLAND=1
   # Qt
+  QT_QPA_PLATFORM=wayland
   QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+  QT_QPA_PLATFORMTHEME=qt6ct
 )
 echo "Setting up environment variables in '$envar_file'..."
 for envar in ${envars[@]}; do
@@ -145,7 +158,7 @@ groups=(
 
 services=(
   bluetooth.service
-  greetd.service
+  ly@tty2.service
 )
 # Laptop only
 if [ "$is_laptop" == "true" ]; then

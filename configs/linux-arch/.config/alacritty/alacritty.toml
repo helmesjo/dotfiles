@@ -1,6 +1,14 @@
-general.import = ["~/.config/alacritty/alacritty.local.toml"]
+[general]
+import = [
+  "~/.config/alacritty/alacritty.local.toml",
+  "~/.config/alacritty/dank-theme.toml"
+]
 
-# NOTE: Not pixels.
+[window]
+decorations = "None"
+padding = { x = 8, y = 8 }
+opacity = 0.96
+
 [window.dimensions]
 columns = 160
 lines = 80
