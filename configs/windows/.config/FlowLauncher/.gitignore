@@ -4,4 +4,7 @@ Settings/Plugins/Flow.Launcher.Plugin.*/
 Settings/*.json
 **/*.bak
 
-!Settings/Settings.json
+# This just keeps modifying for random things
+# like window positions etc. Already checked
+# in the useful stuff.
+Settings/Settings.json
