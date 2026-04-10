@@ -26,6 +26,20 @@
       }
     }
   ],
+  "center_widgets": [
+    {
+      "Time": {
+        "enable": true,
+        "format": "TwentyFourHour"
+      }
+    },
+    {
+      "Keyboard": {
+        "enable": true,
+        "data_refresh_interval": 1
+      }
+    }
+  ],
   "right_widgets": [
     {
       "Media": {
@@ -56,20 +70,8 @@
       }
     },
     {
-      "Time": {
-        "enable": true,
-        "format": "TwentyFourHour"
-      }
-    },
-    {
       "Battery": {
         "enable": true
-      }
-    },
-    {
-      "Keyboard": {
-        "enable": true,
-        "data_refresh_interval": 1
       }
     }
   ]
