@@ -46,8 +46,8 @@ for sourcename in ${dotfiles[@]}; do
   
   echo "  - Creating symlink for '$sourcename'"
   printf "%s" "    - "
-  if [[  -d "$targetpath" && ! -L "$targetpath"  ]]; then
-    mv -fv "$targetpath" "${targetpath}.bak"
+  if [[ -d "$targetpath" && ! -L "$targetpath"  ]]; then
+    mv -fv "$targetpath" "${targetpath}.$(date +%Y%m%d_%H%M%S).bak"
   else
     rm -fv "$targetpath"
   fi
@@ -60,6 +60,6 @@ echo "Custom config..."
 # os specific configuration
 configs=$(ls $root_dir/scripts/$os | grep "configure-" --include .sh) # grab the list
 for script in ${configs[@]}; do
-  echo "  - Running '$os/$script'..."
+  echo "  Running '$os/$script'..."
   $root_dir/scripts/$os/$script
 done
