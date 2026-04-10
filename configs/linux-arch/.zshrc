@@ -45,6 +45,8 @@ bindkey '^[[3~'   delete-char
 _zle_shift_enter() { LBUFFER+=$'\n' }
 zle -N _zle_shift_enter
 bindkey $'\e[13;2u' _zle_shift_enter
+bindkey '\e^J' undefined-key  # disable built-in newline insertion on Alt+Enter (ESC+LF)
+bindkey '\e^M' undefined-key  # same, covers both sequences terminals may send (ESC+CR)
 
 # PATH setup
 #
