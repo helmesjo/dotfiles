@@ -1,4 +1,4 @@
-.githooks     symlink=dir
 appdata/Code  symlink=dir
 appdata/fish  symlink=dir
+appdata/git   symlink=dir
 appdata/helix symlink=dir

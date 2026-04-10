@@ -13,7 +13,8 @@
     filemode = true
     eol = lf
     longpaths = true
-    hooksPath = ~/.githooks
+    hooksPath = ~/.config/git/hooks
+    excludesFile = ~/.config/git/ignore
 
 [credential "https://dev.azure.com"]
     useHttpPath = true
