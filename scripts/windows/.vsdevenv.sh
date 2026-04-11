@@ -127,7 +127,8 @@ function vsdevenv_find_vsvarsall_bat()
 function vsdevenv_setup()
 {
   # If on windows and not in developer prompt (or with wrong architecture), try to set it up
-  if [[ "$(uname -o)" == Msys ]] || [[ "$(uname -o)" == Cygwin ]]; then
+  local _uname_o="$(uname -o)"
+  if [[ "$_uname_o" == Msys ]] || [[ "$_uname_o" == Cygwin ]]; then
       if [ ! -n "${HOST_ARCH-}" ]; then
           HOST_ARCH=$(uname -m)
       fi
@@ -135,7 +136,23 @@ function vsdevenv_setup()
           TARGET_ARCH=$(uname -m)
       fi
 
-      TARGET_ARCH_CONV=$($C echo -e "$CL_ARCH_TABLE" | $C tr -d ' ' | $C grep "^$HOST_ARCH-$TARGET_ARCH:" | $C awk -F':' '{print $2}')
+      case "$HOST_ARCH-$TARGET_ARCH" in
+        x86_64-x86)    TARGET_ARCH_CONV="x64_x86"  ;;
+        x86_64-x86_64) TARGET_ARCH_CONV="x64"       ;;
+        x86_64-arm64)  TARGET_ARCH_CONV="x64_arm64" ;;
+        x86_64-arm32)  TARGET_ARCH_CONV="x64_arm"   ;;
+        *) TARGET_ARCH_CONV=$($C echo -e "$CL_ARCH_TABLE" | $C tr -d ' ' | $C grep "^$HOST_ARCH-$TARGET_ARCH:" | $C awk -F':' '{print $2}') ;;
+      esac
+
+      # Fast path: load from cache before attempting any cl.exe detection
+      if [ -f "$VS_ENVAR_CACHE" ]; then
+          if vsdevenv_export_envars; then
+            return 0
+          else
+            echo "-- Reload..."
+            rm -v "$VS_ENVAR_CACHE"
+          fi
+      fi
 
       REQUIRE_PROMPT=0
       if cl.exe >/dev/null 2>&1; then
@@ -153,165 +170,157 @@ function vsdevenv_setup()
       if [ $REQUIRE_PROMPT -eq 0 ]; then
           return 0
       else
-          # See if VS PATHs has been cached already
-          if [ -f "$VS_ENVAR_CACHE" ]; then
-              # Read file line by line and extract variables
-              if vsdevenv_export_envars; then
-                return 0
-              else
-                echo "-- Reload..."
-                rm -v "$VS_ENVAR_CACHE"
-              fi
-          fi
+          # Cache missing or invalid — fall through to full setup below
+          true
+      fi
 
-          VS_DEFAULT_SEARCH_DIRS=(
-          "$(cygpath -m "$PROGRAMFILES/Microsoft Visual Studio")"
-          "$(cygpath -m "$(printenv "ProgramFiles(x86)")/Microsoft Visual Studio")"
-          )
+      VS_DEFAULT_SEARCH_DIRS=(
+      "$(cygpath -m "$PROGRAMFILES/Microsoft Visual Studio")"
+      "$(cygpath -m "$(printenv "ProgramFiles(x86)")/Microsoft Visual Studio")"
+      )
 
-          VS_VERSIONS=()
-          for ((i = 0; i < ${#VS_DEFAULT_SEARCH_DIRS[@]}; i++))
-          do
-            echo "-- Search: ${VS_DEFAULT_SEARCH_DIRS[$i]}"
-            vsdir=$(cygpath -m "${VS_DEFAULT_SEARCH_DIRS[$i]}")
+      VS_VERSIONS=()
+      for ((i = 0; i < ${#VS_DEFAULT_SEARCH_DIRS[@]}; i++))
+      do
+        echo "-- Search: ${VS_DEFAULT_SEARCH_DIRS[$i]}"
+        vsdir=$(cygpath -m "${VS_DEFAULT_SEARCH_DIRS[$i]}")
 
-            if [[ -d "$vsdir" ]]; then
-              vsdirversions=($($C ls "$vsdir"))
-              # loop over all existing versions
-              for vsdirver in ${vsdirversions[@]}; do
-                if [[ ! "$vsdirver" =~ ^[0-9]+$ ]]; then
-                  continue
-                fi
-
-                # see if this is a newer version
-                VSDIR="$vsdir/$vsdirver"
-                if vsdevenv_find_vsvarsall_bat "$VSDIR" >/dev/null; then
-                  echo "--- Found: $(vsdevenv_find_vsvarsall_bat "$VSDIR")"
-                  VS_VERSIONS+=("$VSDIR")
-                fi
-              done
-            fi
-          done
-
-          if [[ -z ${VS_VERSIONS:-} ]]; then
-            echo "-- Found no installed versions in:"
-            printf '%s\n' "${VS_DEFAULT_SEARCH_DIRS[@]}"
-            return 1
-          fi
-
-          VSVER_LATEST=
-          VSPATH_LATEST=
-          for vsdir in "${VS_VERSIONS[@]}"; do
-            VSVER=$(basename "$vsdir")
-            # Starting with VS 2026 (v18) the base-dir
-            # is named by version, not year. Prefix with
-            # '99' to fix the sorting (eg. 18 -> 9918)
-            if [[ -n ${VSVER:-} ]] && [[ $VSVER -lt 1000 ]]; then
-              VSVER=99$VSVER
-            fi
-            if [[ -n ${VSVER:-} ]] && [[ -z ${VSVER_LATEST} ]] || [[ $VSVER_LATEST -lt $VSVER ]]; then
-              VSVER_LATEST=$VSVER
-              VSPATH_LATEST="$vsdir"
-            fi
-          done
-
-          VS_VARSALL="$(vsdevenv_find_vsvarsall_bat "$VSPATH_LATEST")"
-
-          if [[ ! -f "$VS_VARSALL" ]]; then
-            echo "-- Err: Failed to find 'vsvarsall.bat' in '$VSPATH_LATEST'."
-            return 1
-          fi
-
-          echo "-- Latest: $VS_VARSALL"
-          echo "-- Setting up developer prompt ($TARGET_ARCH_CONV) for '$VSPATH_LATEST'"
-
-          # Msys: Deal with '/' being parsed as path & not cmd flag
-          CMD_EXE=($(dir.exe $(which cmd.exe)))
-          case "$(uname -s)" in
-              MINGW*) CMD_EXE+=(start //wait cmd //C);;
-              *)      CMD_EXE+=(start /wait cmd /C);;
-          esac
-
-          # Inside dev prompt, export all envars (using 'export -p'),
-          # then extract only the unique envars & 'PATH' values.
-          VS_ENVARS_CACHE_BAK="${VS_ENVAR_CACHE}.bak"
-          test -f "$VS_ENVAR_CACHE" \
-            && rm -f "$VS_ENVARS_CACHE_BAK" \
-            && cp "$VS_ENVAR_CACHE" "$VS_ENVARS_CACHE_BAK"
-
-          # Run varsall.bat in a subshell & extract new envars specified by devprompt.
-          # NOTE: Below is such a pain in the ass to get right, so avoid modifying.
-          BASH_PATH="$(vsdevenv_retard_path "$(cygpath -m "$(which bash)")")"
-          VS_VARSALL="$(vsdevenv_retard_path "$(cygpath -m "$VS_VARSALL")")"
-          VS_ENVARS_TMP="$(cygpath -m "$(mktemp)")"
-          ${CMD_EXE[@]} " "$VS_VARSALL" $TARGET_ARCH_CONV >NUL 2>&1 && "$BASH_PATH" -c 'export -p' " >$VS_ENVARS_TMP
-
-          # Clear cache then fill with diff (that is, only the VS stuff).
-          # Deal specifically with 'PATH' to subtract the current PATH. Store result in 'VCPATHS'.
-          >"$VS_ENVAR_CACHE"
-          while read -r line; do
-            # Clean up path separators (sometimes double or even quad backslashes in paths)
-            line="${line//\\\\\\\\//}"
-            line="${line//\\\\//}"
-
-            VAR="${line%%=*}"           # Remove from first '=' to end of string
-            VAR="${VAR#'declare -x '*}" # Keep everything from '*' to end of string
-            VAL="${line#*=}"            # Remove from (including) first '=' to start of string
-            VAL="${VAL#\"}"             # Removes leading "
-            VAL="${VAL%\"}"             # Removes trailing "
-
-            if    [[ "$VAR"   == "$line" ]] \
-               || [[ "$VAL" == "$line" ]] \
-               || [[ "$VAR"   == "_" ]]; then
-              # echo "-- SKIPPED envar: $VAR=\"$VAL\""
+        if [[ -d "$vsdir" ]]; then
+          vsdirversions=($($C ls "$vsdir"))
+          # loop over all existing versions
+          for vsdirver in ${vsdirversions[@]}; do
+            if [[ ! "$vsdirver" =~ ^[0-9]+$ ]]; then
               continue
             fi
 
-            if [[ $VAR == 'PATH' ]]; then
-              # Split VAL into an array using ':' as the delimiter
-              # note: zsh (even in emulated ksh mode) doesn't support
-              #       '-a' ("read into array")
-              if [[ -n $ZSH_VERSION ]]; then
-                  VCPATH_EXPORTED=("${(s/:/)VAL}")
-              else
-                  IFS=: read -ra VCPATH_EXPORTED <<< "$VAL"
-              fi
-              VCPATHS=""
-              # Loop through each path in devprompt exported PATH and add it to VCPATHS if it's not in PATH
-              for p in "${VCPATH_EXPORTED[@]}"; do
-                  if [[ ":$PATH:" != *":$p:"* ]]; then
-                      VCPATHS="${VCPATHS:+$VCPATHS:}$p"
-                  fi
-              done
-              echo "export VCPATHS=\"$VCPATHS\"" >>"$VS_ENVAR_CACHE"
-              # echo "-- Added envar: $VCPATHS=\"$VCPATHS\""
-            else
-              # Only add if it doesn't already exist and has a value assigned.
-              if [[ -z "$(eval echo \$$VAR 2>/dev/null)" ]]; then
-                echo "export $VAR=\"$VAL\"" >> $VS_ENVAR_CACHE
-                # echo "-- Added envar: $VAR=\"$VAL\""
-              else
-                true
-                # echo "-- Skipped envar: $VAR=$VAL"
-                # echo "---- Already have: $VAR=$(eval echo \$$VAR)"
-              fi
+            # see if this is a newer version
+            VSDIR="$vsdir/$vsdirver"
+            if vsdevenv_find_vsvarsall_bat "$VSDIR" >/dev/null; then
+              echo "--- Found: $(vsdevenv_find_vsvarsall_bat "$VSDIR")"
+              VS_VERSIONS+=("$VSDIR")
             fi
-          done <$VS_ENVARS_TMP
+          done
+        fi
+      done
 
-          rm -f "${VS_ENVAR_CACHE}.failed"
-          if vsdevenv_export_envars; then
-            rm -f "$VS_ENVARS_TMP"
-            rm -f "$VS_ENVARS_CACHE_BAK"
+      if [[ -z ${VS_VERSIONS:-} ]]; then
+        echo "-- Found no installed versions in:"
+        printf '%s\n' "${VS_DEFAULT_SEARCH_DIRS[@]}"
+        return 1
+      fi
 
-            echo "-- $(cl 2>&1 >/dev/null | head -n 1)"
-            echo "-- Cached VS envars: $(cygpath -m $VS_ENVAR_CACHE)"
-            rm -f "$VS_ENVARS_CACHE_BAK"
-            return 0
+      VSVER_LATEST=
+      VSPATH_LATEST=
+      for vsdir in "${VS_VERSIONS[@]}"; do
+        VSVER=$(basename "$vsdir")
+        # Starting with VS 2026 (v18) the base-dir
+        # is named by version, not year. Prefix with
+        # '99' to fix the sorting (eg. 18 -> 9918)
+        if [[ -n ${VSVER:-} ]] && [[ $VSVER -lt 1000 ]]; then
+          VSVER=99$VSVER
+        fi
+        if [[ -n ${VSVER:-} ]] && [[ -z ${VSVER_LATEST} ]] || [[ $VSVER_LATEST -lt $VSVER ]]; then
+          VSVER_LATEST=$VSVER
+          VSPATH_LATEST="$vsdir"
+        fi
+      done
+
+      VS_VARSALL="$(vsdevenv_find_vsvarsall_bat "$VSPATH_LATEST")"
+
+      if [[ ! -f "$VS_VARSALL" ]]; then
+        echo "-- Err: Failed to find 'vsvarsall.bat' in '$VSPATH_LATEST'."
+        return 1
+      fi
+
+      echo "-- Latest: $VS_VARSALL"
+      echo "-- Setting up developer prompt ($TARGET_ARCH_CONV) for '$VSPATH_LATEST'"
+
+      # Msys: Deal with '/' being parsed as path & not cmd flag
+      CMD_EXE=($(dir.exe $(which cmd.exe)))
+      case "$(uname -s)" in
+          MINGW*) CMD_EXE+=(start //wait cmd //C);;
+          *)      CMD_EXE+=(start /wait cmd /C);;
+      esac
+
+      # Inside dev prompt, export all envars (using 'export -p'),
+      # then extract only the unique envars & 'PATH' values.
+      VS_ENVARS_CACHE_BAK="${VS_ENVAR_CACHE}.bak"
+      test -f "$VS_ENVAR_CACHE" \
+        && rm -f "$VS_ENVARS_CACHE_BAK" \
+        && cp "$VS_ENVAR_CACHE" "$VS_ENVARS_CACHE_BAK"
+
+      # Run varsall.bat in a subshell & extract new envars specified by devprompt.
+      # NOTE: Below is such a pain in the ass to get right, so avoid modifying.
+      BASH_PATH="$(vsdevenv_retard_path "$(cygpath -m "$(which bash)")")"
+      VS_VARSALL="$(vsdevenv_retard_path "$(cygpath -m "$VS_VARSALL")")"
+      VS_ENVARS_TMP="$(cygpath -m "$(mktemp)")"
+      ${CMD_EXE[@]} " "$VS_VARSALL" $TARGET_ARCH_CONV >NUL 2>&1 && "$BASH_PATH" -c 'export -p' " >$VS_ENVARS_TMP
+
+      # Clear cache then fill with diff (that is, only the VS stuff).
+      # Deal specifically with 'PATH' to subtract the current PATH. Store result in 'VCPATHS'.
+      >"$VS_ENVAR_CACHE"
+      while read -r line; do
+        # Clean up path separators (sometimes double or even quad backslashes in paths)
+        line="${line//\\\\\\\\//}"
+        line="${line//\\\\//}"
+
+        VAR="${line%%=*}"           # Remove from first '=' to end of string
+        VAR="${VAR#'declare -x '*}" # Keep everything from '*' to end of string
+        VAL="${line#*=}"            # Remove from (including) first '=' to start of string
+        VAL="${VAL#\"}"             # Removes leading "
+        VAL="${VAL%\"}"             # Removes trailing "
+
+        if    [[ "$VAR"   == "$line" ]] \
+           || [[ "$VAL" == "$line" ]] \
+           || [[ "$VAR"   == "_" ]]; then
+          # echo "-- SKIPPED envar: $VAR=\"$VAL\""
+          continue
+        fi
+
+        if [[ $VAR == 'PATH' ]]; then
+          # Split VAL into an array using ':' as the delimiter
+          # note: zsh (even in emulated ksh mode) doesn't support
+          #       '-a' ("read into array")
+          if [[ -n $ZSH_VERSION ]]; then
+              VCPATH_EXPORTED=("${(s/:/)VAL}")
           else
-            cp "$VS_ENVAR_CACHE" "${VS_ENVAR_CACHE}.failed"
-            echo "-- Err: Failed to export VS environment variables, see ${VS_ENVAR_CACHE}.failed"
-            return 1
+              IFS=: read -ra VCPATH_EXPORTED <<< "$VAL"
           fi
+          VCPATHS=""
+          # Loop through each path in devprompt exported PATH and add it to VCPATHS if it's not in PATH
+          for p in "${VCPATH_EXPORTED[@]}"; do
+              if [[ ":$PATH:" != *":$p:"* ]]; then
+                  VCPATHS="${VCPATHS:+$VCPATHS:}$p"
+              fi
+          done
+          echo "export VCPATHS=\"$VCPATHS\"" >>"$VS_ENVAR_CACHE"
+          # echo "-- Added envar: $VCPATHS=\"$VCPATHS\""
+        else
+          # Only add if it doesn't already exist and has a value assigned.
+          if [[ -z "$(eval echo \$$VAR 2>/dev/null)" ]]; then
+            echo "export $VAR=\"$VAL\"" >> $VS_ENVAR_CACHE
+            # echo "-- Added envar: $VAR=\"$VAL\""
+          else
+            true
+            # echo "-- Skipped envar: $VAR=$VAL"
+            # echo "---- Already have: $VAR=$(eval echo \$$VAR)"
+          fi
+        fi
+      done <$VS_ENVARS_TMP
+
+      rm -f "${VS_ENVAR_CACHE}.failed"
+      if vsdevenv_export_envars; then
+        rm -f "$VS_ENVARS_TMP"
+        rm -f "$VS_ENVARS_CACHE_BAK"
+
+        echo "-- $(cl 2>&1 >/dev/null | head -n 1)"
+        echo "-- Cached VS envars: $(cygpath -m $VS_ENVAR_CACHE)"
+        rm -f "$VS_ENVARS_CACHE_BAK"
+        return 0
+      else
+        cp "$VS_ENVAR_CACHE" "${VS_ENVAR_CACHE}.failed"
+        echo "-- Err: Failed to export VS environment variables, see ${VS_ENVAR_CACHE}.failed"
+        return 1
       fi
   fi
 }
