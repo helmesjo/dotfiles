@@ -1,19 +1,27 @@
 {
-  "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/v0.1.32/schema.json",
+  "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/v0.1.40/schema.json",
   "app_specific_configuration_path": "$Env:KOMOREBI_CONFIG_HOME/applications.json",
   "window_hiding_behaviour": "Cloak",
   "mouse_follows_focus": false,
   "cross_monitor_move_behaviour": "Insert",
+  "animation": {
+    "enabled": { "movement": true },
+    "duration": 150,
+    "style": "EaseOutExpo"
+  },
   "default_workspace_padding": 0,
-  "default_container_padding": 0,
+  "default_container_padding": -1,
   "border": true,
-  "border_width": 4,
-  "border_offset": -1,
-  "theme": {
-    "palette": "Base16",
-    "name": "Ashes",
-    "unfocused_border": "Base03",
-    "bar_accent": "Base0D"
+  "border_style": "System",
+  "border_width": 3,
+  "border_offset": 0,
+  "border_colours": {
+    "single":            "#4385be",
+    "stack":             "#4385be",
+    "monocle":           "#4385be",
+    "floating":          "#4385be",
+    "unfocused":         "#575653",
+    "unfocused_locked":  "#575653"
   },
   "stackbar": {
     "height": 24,
@@ -33,15 +41,36 @@
       "workspaces": [
         {
           "name": "I",
-          "custom_layout": "$Env:KOMOREBI_CONFIG_HOME/layouts/UltrawideEvenVerticalStack.json",
+          "layout": "Scrolling",
+          "layout_options":
+          {
+            "scrolling":
+            {
+              "columns": 3
+            }
+          }
         },
         {
           "name": "II",
-          "custom_layout": "$Env:KOMOREBI_CONFIG_HOME/layouts/UltrawideEvenVerticalStack.json"
+          "layout": "Scrolling",
+          "layout_options":
+          {
+            "scrolling":
+            {
+              "columns": 3
+            }
+          }
         },
         {
           "name": "III",
-          "custom_layout": "$Env:KOMOREBI_CONFIG_HOME/layouts/UltrawideEvenVerticalStack.json"
+          "layout": "Scrolling",
+          "layout_options":
+          {
+            "scrolling":
+            {
+              "columns": 3
+            }
+          }
         }
       ]
     }
