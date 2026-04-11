@@ -53,7 +53,8 @@ pacpkgs=(
   television       # multi-purpose fuzzy finder
   udisks2          # Auto-mount removable devices
   udiskie          # udisks2 notifications
-  yazi             # file manager
+  yazi             # file manager (TUI)
+  pcmanfm          # file manager (GUI)
   # Dev
   perf             # performance profiler
   git
