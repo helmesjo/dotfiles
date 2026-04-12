@@ -2,3 +2,4 @@ appdata/Code  symlink=dir
 appdata/fish  symlink=dir
 appdata/git   symlink=dir
 appdata/helix symlink=dir
+appdata/zen   symlink=dir
