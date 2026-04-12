@@ -74,15 +74,13 @@ pacpkgs=(
   taplo-cli              # toml
   markdown-oxide         # markdown
   # Theming
-  adw-gtk-theme    # gtk theme (shell dependency)
-  nwg-look         # gtk settings tool
-  qt5ct            # qt theming tool (shell dependency)
-  qt6ct            # qt theming tool (shell dependency)
+  adw-gtk-theme          # gtk theme (shell dependency)
+  nwg-look               # gtk settings tool
+  qt5ct                  # qt theming tool (shell dependency)
+  qt6ct                  # qt theming tool (shell dependency)
   # DMS dependencies
-  accountsservice          # user account info (lock screen)
-  xdg-desktop-portal-gtk  # XDG portal backend (file picker, screen share)
-  # Misc
-  firefox
+  accountsservice        # user account info (lock screen)
+  xdg-desktop-portal-gtk # XDG portal backend (file picker, screen share)
 )
 aurpkgs=(
   # Core
@@ -94,7 +92,9 @@ aurpkgs=(
   matugen              # material theme generator (DMS theming)
   dgop                 # on-screen display overlays (DMS OSD)
   # Hardware
-  bluetuith        # bluetooth TUI
+  bluetuith            # bluetooth TUI
+  # Misc
+  zen-browser-bin
 )
 
 if [[ $is_wsl -eq 1 ]]; then

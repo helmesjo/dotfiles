@@ -45,6 +45,7 @@ wingetpkgs=(
   LuaLS.lua-language-server
   tamasfe.taplo               # toml
   markdown-oxide              # markdown
+  Zen-Team.Zen-Browser
 )
 pacmanpkgs=(
   zsh

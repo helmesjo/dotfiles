@@ -48,6 +48,7 @@ brewpkgs=(
 )
 brewcasks=(
   git-credential-manager
+  zen
 )
 
 # pkginpkgs=(
