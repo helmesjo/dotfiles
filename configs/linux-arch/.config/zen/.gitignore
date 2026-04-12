@@ -1,4 +1,6 @@
 */*
-*
+*.*/*
+*.ini
+!profiles.ini
 !userChrome.css
 !user.js
