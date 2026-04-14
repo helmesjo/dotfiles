@@ -15,6 +15,7 @@
     longpaths = true
     hooksPath = ~/.config/git/hooks
     excludesFile = ~/.config/git/ignore
+    attributesFile = ~/.config/git/attributes
 
 [credential "https://dev.azure.com"]
     useHttpPath = true
@@ -103,3 +104,6 @@
     rs = restore --staged
     s = status
     ui = !gitui
+
+[advice]
+    detachedHead = false
