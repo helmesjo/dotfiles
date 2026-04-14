@@ -26,17 +26,7 @@ setopt HIST_SAVE_NO_DUPS       # Exclude duplicates when saving history to file.
 setopt IGNORE_EOF   # don't kill session on Ctrl+D
 setopt rmstarsilent # don't prompt [y/n] on rm -rf
 
-# fpaths
-(( ! ${fpath[(Ie)$HOME/.zsh/pure]} )) && fpath+=($HOME/.zsh/pure)
-
-# Plugins
-source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
-# source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-source ~/.zsh/zsh-history-substring-search/zsh-history-substring-search.zsh
-
 # Bindings
-bindkey '^[[A'    history-substring-search-up    # arrow-up
-bindkey '^[[B'    history-substring-search-down  # arrow-down
 bindkey '^[[1;3C' forward-word                   # alt+right
 bindkey '^[[1;3D' backward-word                  # alt+left
 bindkey '^[[3~'   delete-char                    # 'Del' key
@@ -72,8 +62,6 @@ case "$(uname -s)" in
       fpath+=($brew_path/share/zsh-completions)
 
     chmod -R go-w "$(brew --prefix)/share"
-    autoload -U promptinit; promptinit
-    prompt pure
 
     unset brew_path
     ;;
@@ -137,8 +125,6 @@ case "$(uname -s)" in
       wsl_rotate_mounted_path_to_end
       unset -f wsl_rotate_mounted_path_to_end
     fi
-    autoload -U promptinit; promptinit
-    prompt pure
     ;;
   MSYS*|MINGW*|CYGWIN*)
     pathappend "$HOME/AppData/Local/Microsoft/WinGet/Links"
@@ -161,12 +147,6 @@ case "$(uname -s)" in
 
     alias sudo=gsudo
 
-    # pure:
-    # manual handling required because msys2 does not understand plain
-    # 'pure.zsh' as "source with zsh", it falls back to sourcing with sh.
-    # see ~/.zsh/pure/prompt_pure_setup
-    source "$HOME/.zsh/pure/async.zsh"
-    source "$HOME/.zsh/pure/pure.zsh"
     source "$HOME/.vsdevenv.sh"
 
     alias reboot='powershell.exe -command restart-computer'
@@ -174,12 +154,39 @@ case "$(uname -s)" in
     ;;
 esac
 
+# Plugins
+if command -v antidote &>/dev/null; then
+  if [[ -f ~/.zsh_plugins.txt ]]; then
+    # Re-bundle when the plugin list changes or missing bundle.
+    if [[ ( ! -f ~/.zsh_plugins.sh || \
+            ~/.zsh_plugins.txt -nt ~/.zsh_plugins.sh ) \
+       ]]; then
+      antidote bundle < ~/.zsh_plugins.txt > ~/.zsh_plugins.sh
+    fi
+
+    # load plugins
+    source ~/.zsh_plugins.sh
+    eval "$(fzf --zsh)"
+
+    # customize plugin behavior
+    ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+    bindkey '^[[A' history-substring-search-up    # up arrow
+    bindkey '^[[B' history-substring-search-down  # down arrow
+    bindkey -s '\ec' ''  # don't have ESC+c start fzf
+
+    # hook the custom precmd function
+    add-zsh-hook precmd prompt_pure_precmd
+    add-zsh-hook preexec prompt_pure_postprompt
+  else
+    echo "WARN: '~/.zsh_plugins.txt' missing" >&2
+  fi
+else
+  echo "WARN: 'antidote' not found" >&2
+fi
+
 # load fpath completion functions
 autoload -Uz bashcompinit compinit; bashcompinit; compinit
 
-eval "$(fzf --zsh)"
-# don't have ESC+c start fzf
-bindkey -s '\ec' ''
 eval "$(zoxide init zsh --cmd cd)"
 
 # custom prompt (single-line)
@@ -215,10 +222,6 @@ function prompt_pure_postprompt()
 {
   unset -v PROMPT
 }
-
-# hook the custom precmd function
-add-zsh-hook precmd prompt_pure_precmd
-add-zsh-hook preexec prompt_pure_postprompt
 
 # ensure vcs_info is loaded for git status
 autoload -Uz vcs_info

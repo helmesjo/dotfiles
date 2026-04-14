@@ -1,0 +1,1 @@
+../linux-arch/install-zsh-antidote.sh

@@ -1,0 +1,4 @@
+zsh-users/zsh-autosuggestions          # ghost-text completions from history
+zsh-users/zsh-history-substring-search # arrow-up/down prefix search
+sindresorhus/pure kind:fpath           # minimal async prompt
+romkatv/zsh-no-ps2                     # incomplete continuation in same buffer

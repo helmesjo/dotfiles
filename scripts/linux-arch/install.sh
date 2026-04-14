@@ -2,10 +2,7 @@
 set -eu -o pipefail
 
 file_dir=`dirname $(readlink -f $BASH_SOURCE)`
-$file_dir/install-zsh-pure.sh
-$file_dir/install-zsh-autosuggestions.sh
-$file_dir/install-zsh-syntax-highlighting.sh
-$file_dir/install-zsh-history-substring-search.sh
+$file_dir/install-zsh-antidote.sh
 $file_dir/install-yay.sh
 
 is_laptop=$(cat /sys/class/dmi/id/chassis_type 2>/dev/null | grep "\b9\b" > /dev/null && echo 1 || echo 0)
