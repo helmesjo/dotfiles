@@ -154,41 +154,6 @@ case "$(uname -s)" in
     ;;
 esac
 
-# Plugins
-if command -v antidote &>/dev/null; then
-  if [[ -f ~/.zsh_plugins.txt ]]; then
-    # Re-bundle when the plugin list changes or missing bundle.
-    if [[ ( ! -f ~/.zsh_plugins.sh || \
-            ~/.zsh_plugins.txt -nt ~/.zsh_plugins.sh ) \
-       ]]; then
-      antidote bundle < ~/.zsh_plugins.txt > ~/.zsh_plugins.sh
-    fi
-
-    # load plugins
-    source ~/.zsh_plugins.sh
-    eval "$(fzf --zsh)"
-
-    # customize plugin behavior
-    ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-    bindkey '^[[A' history-substring-search-up    # up arrow
-    bindkey '^[[B' history-substring-search-down  # down arrow
-    bindkey -s '\ec' ''  # don't have ESC+c start fzf
-
-    # hook the custom precmd function
-    add-zsh-hook precmd prompt_pure_precmd
-    add-zsh-hook preexec prompt_pure_postprompt
-  else
-    echo "WARN: '~/.zsh_plugins.txt' missing" >&2
-  fi
-else
-  echo "WARN: 'antidote' not found" >&2
-fi
-
-# load fpath completion functions
-autoload -Uz bashcompinit compinit; bashcompinit; compinit
-
-eval "$(zoxide init zsh --cmd cd)"
-
 # custom prompt (single-line)
 function prompt_pure_precmd() {
   local last_command_exit=$?
@@ -222,6 +187,42 @@ function prompt_pure_postprompt()
 {
   unset -v PROMPT
 }
+
+# Plugins
+if command -v antidote &>/dev/null; then
+  if [[ -f ~/.zsh_plugins.txt ]]; then
+    # Re-bundle when the plugin list changes or missing bundle.
+    if [[ ( ! -f ~/.zsh_plugins.sh || \
+            ~/.zsh_plugins.txt -nt ~/.zsh_plugins.sh ) \
+       ]]; then
+      antidote bundle < ~/.zsh_plugins.txt > ~/.zsh_plugins.sh
+    fi
+
+    # load plugins
+    source ~/.zsh_plugins.sh
+    eval "$(fzf --zsh)"
+
+    # customize plugin behavior
+    FAST_HIGHLIGHT[use_async]=1
+    ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+    bindkey '^[[A' history-substring-search-up    # up arrow
+    bindkey '^[[B' history-substring-search-down  # down arrow
+    bindkey -s '\ec' ''  # don't have ESC+c start fzf
+
+    # hook the custom precmd function
+    add-zsh-hook precmd prompt_pure_precmd
+    add-zsh-hook preexec prompt_pure_postprompt
+  else
+    echo "WARN: '~/.zsh_plugins.txt' missing" >&2
+  fi
+else
+  echo "WARN: 'antidote' not found" >&2
+fi
+
+# load fpath completion functions
+autoload -Uz bashcompinit compinit; bashcompinit; compinit
+
+eval "$(zoxide init zsh --cmd cd)"
 
 # ensure vcs_info is loaded for git status
 autoload -Uz vcs_info
