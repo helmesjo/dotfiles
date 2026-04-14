@@ -23,7 +23,7 @@ shopt -s histappend              # Append new history entries to the file instea
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-PS1='[\u@\h \W]\$ '
+PS1='[\u@\h \W]> '
 
 # PATH setup
 #
