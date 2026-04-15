@@ -13,7 +13,7 @@ rem                       safe when the terminal is already a ConPTY host (e.g. 
 rem                       Windows programs attach to the terminal's ConPTY directly, so MSYS2's
 rem                       secondary bridge is redundant. would break native programs under terminals
 rem                       that are not ConPTY hosts (e.g. mintty).
-set "MSYS=winsymlinks:native disable_pcon"
+set "MSYS=winsymlinks:nativestrict disable_pcon"
 
 IF EXIST "C:\msys64\msys2_shell.cmd" (
   C:\msys64\msys2_shell.cmd %*
