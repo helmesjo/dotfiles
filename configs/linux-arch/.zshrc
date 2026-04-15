@@ -204,7 +204,7 @@ if command -v antidote &>/dev/null; then
 
     # customize plugin behavior
     (( ${+functions[fast-theme]} )) && {
-      FAST_HIGHLIGHT[use_async]=1
+      FAST_HIGHLIGHT[use_async]=0 # if fact just slower/glitchier
       FAST_HIGHLIGHT_STYLES[command]=none
       FAST_HIGHLIGHT_STYLES[precommand]=none
       FAST_HIGHLIGHT_STYLES[hashed-command]=none
