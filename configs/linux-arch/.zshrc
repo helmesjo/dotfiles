@@ -208,6 +208,7 @@ if command -v antidote &>/dev/null; then
       FAST_HIGHLIGHT_STYLES[command]=none
       FAST_HIGHLIGHT_STYLES[precommand]=none
       FAST_HIGHLIGHT_STYLES[hashed-command]=none
+      FAST_HIGHLIGHT[git-cmsg-len]=9999
     }
     (( ${+functions[_zsh_autosuggest_start]} )) && {
       ZSH_AUTOSUGGEST_STRATEGY=(history completion)
