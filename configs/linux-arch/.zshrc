@@ -203,11 +203,22 @@ if command -v antidote &>/dev/null; then
     eval "$(fzf --zsh)"
 
     # customize plugin behavior
-    FAST_HIGHLIGHT[use_async]=1
-    ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-    bindkey '^[[A' history-substring-search-up    # up arrow
-    bindkey '^[[B' history-substring-search-down  # down arrow
-    bindkey -s '\ec' ''  # don't have ESC+c start fzf
+    (( ${+functions[fast-theme]} )) && {
+      FAST_HIGHLIGHT[use_async]=1
+      FAST_HIGHLIGHT_STYLES[command]=none
+      FAST_HIGHLIGHT_STYLES[precommand]=none
+      FAST_HIGHLIGHT_STYLES[hashed-command]=none
+    }
+    (( ${+functions[_zsh_autosuggest_start]} )) && {
+      ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+    }
+    (( ${+widgets[history-substring-search-up]} )) && {
+      bindkey '^[[A' history-substring-search-up    # up arrow
+      bindkey '^[[B' history-substring-search-down  # down arrow
+    }
+    (( ${+widgets[fzf-cd-widget]} )) && {
+      bindkey -s '\ec' ''  # don't have ESC+c start fzf
+    }
 
     # hook the custom precmd function
     add-zsh-hook precmd prompt_pure_precmd
