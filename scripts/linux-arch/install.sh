@@ -95,9 +95,8 @@ aurpkgs=(
 )
 
 if [[ $is_wsl -eq 1 ]]; then
-  # WSL requires win32-compatible clipboard,
-  # so we replace wl-clipboard with win32yank.
-  # See 'curl ...' after pacman install.
+  # WSL requires win32-compatible clipboard, wl-clipboard won't work —
+  # win32yank is used instead (see install-win32yank.sh).
   pacpkgs_rem=(wl-clipboard)
 fi
 
@@ -117,12 +116,6 @@ yay -Sy --needed --noconfirm "${aurpkgs[@]}"
 # Remove unused (orphan) packages
 pacman -Qtdq | sudo pacman -Rns --noconfirm - 2>/dev/null || true
 yay -Yc --noconfirm
-
-if [[ $is_wsl -eq 1 ]]; then
-  # download win32yank and place in PATH
-  curl -sL https://github.com/equalsraf/win32yank/releases/download/v0.1.1/win32yank-x64.zip | \
-    bsdtar -C ~/.local/bin/ -xz "win32yank.exe" && chmod +x ~/.local/bin/win32yank.exe
-fi
 
 # Setup system/package envars
 envar_file="/etc/environment"
