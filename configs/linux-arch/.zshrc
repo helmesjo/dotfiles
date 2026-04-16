@@ -203,13 +203,6 @@ if command -v antidote &>/dev/null; then
     eval "$(fzf --zsh)"
 
     # customize plugin behavior
-    (( ${+functions[fast-theme]} )) && {
-      FAST_HIGHLIGHT[use_async]=1
-      FAST_HIGHLIGHT_STYLES[command]=none
-      FAST_HIGHLIGHT_STYLES[precommand]=none
-      FAST_HIGHLIGHT_STYLES[hashed-command]=none
-      FAST_HIGHLIGHT[git-cmsg-len]=9999
-    }
     (( ${+functions[_zsh_autosuggest_start]} )) && {
       ZSH_AUTOSUGGEST_STRATEGY=(history completion)
     }
