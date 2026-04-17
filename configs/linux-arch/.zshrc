@@ -2,11 +2,7 @@
 # ~/.zshrc
 #
 
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
-export VISUAL=hx
-export EDITOR="$VISUAL"
-export COLORTERM=truecolor
+[[ -f "$HOME/.env" ]] && { set -a; source "$HOME/.env"; set +a; }
 
 # Enable shared history
 touch ~/.zsh_history
@@ -134,11 +130,6 @@ case "$(uname -s)" in
     pathappend "$(cygpath -u "$PROGRAMFILES/Git/mingw64/bin")"
     pathappend "$(cygpath -u "$PROGRAMFILES/LLVM/bin")"
     pathappend "/c/build2/bin"
-
-    # forward certain envars to WSL
-    export HOST___HOME="$HOME"
-    export HOST___PROGRAMFILES="$PROGRAMFILES"
-    export WSLENV=HOST___HOME/p:HOST___PROGRAMFILES/p
 
     # complete hard drives in msys2
     drives=$(mount | sed -rn 's#^[A-Z]: on /([a-z]).*#\1#p' | tr '\n' ' ')
