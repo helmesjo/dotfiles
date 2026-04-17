@@ -34,33 +34,8 @@ bindkey $'\e[13;2u' _zle_shift_enter
 bindkey '\e^J' undefined-key  # disable built-in newline insertion on Alt+Enter (ESC+LF)
 bindkey '\e^M' undefined-key  # same, covers both sequences terminals may send (ESC+CR)
 
-# PATH setup
-#
-function pathappend() {
-  for arg in "$@"; do
-    case ":$PATH:" in
-      *":$arg:"*) ;;
-      *) PATH="$PATH${PATH:+:}$arg" ;;
-    esac
-  done
-}
-
-mkdir -p "$HOME/.local/bin"
-pathappend "$HOME/.local/bin"
+# zsh-specific platform setup
 case "$(uname -s)" in
-  Darwin)
-    brew_path=$(brew --prefix)
-
-    pathappend "$brew_path/bin"
-    pathappend "$brew_path/opt/llvm/bin"
-
-    (( ! ${fpath[(Ie)$brew_path/share/zsh-completions]} )) && \
-      fpath+=($brew_path/share/zsh-completions)
-
-    chmod -R go-w "$(brew --prefix)/share"
-
-    unset brew_path
-    ;;
   Linux)
     if [[ "$(uname -r)" == *WSL* ]]; then
       # use windows git-credential-manager in WSL to avoid re-authenticating
@@ -101,36 +76,9 @@ case "$(uname -s)" in
       }
       # always reload hash (updates $commands list)
       hash -r
-
-      # Rotate PATH so entries on mounted drives come after all non-mounted entries (order preserved)
-      wsl_rotate_mounted_path_to_end() {
-        local -a keep move
-        local p
-
-        for p in "${path[@]}"; do
-          # Assume all single-letter mounted drives point to windows host
-          if [[ $p == /mnt/[A-Za-z]/* ]]; then
-            move+=("$p")
-          else
-            keep+=("$p")
-          fi
-        done
-
-        path=("${keep[@]}" "${move[@]}")
-      }
-      wsl_rotate_mounted_path_to_end
-      unset -f wsl_rotate_mounted_path_to_end
     fi
     ;;
   MSYS*|MINGW*|CYGWIN*)
-    pathappend "$HOME/AppData/Local/Microsoft/WinGet/Links"
-    pathappend "$HOME/AppData/Local/Microsoft/WindowsApps"
-    pathappend "$(cygpath -u "$PROGRAMFILES/tre-command/bin")"
-    pathappend "$(cygpath -u "$PROGRAMFILES/gsudo/Current")"
-    pathappend "$(cygpath -u "$PROGRAMFILES/Git/mingw64/bin")"
-    pathappend "$(cygpath -u "$PROGRAMFILES/LLVM/bin")"
-    pathappend "/c/build2/bin"
-
     # complete hard drives in msys2
     drives=$(mount | sed -rn 's#^[A-Z]: on /([a-z]).*#\1#p' | tr '\n' ' ')
     zstyle ':completion:*' fake-files /: "/:$drives"
