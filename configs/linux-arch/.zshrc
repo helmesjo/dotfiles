@@ -10,11 +10,11 @@ chmod 600 ~/.zsh_history  # user-only read/write permission.
 HISTFILE=~/.zsh_history
 HISTSIZE=50000
 SAVEHIST=50000
-setopt INC_APPEND_HISTORY_TIME # Add commands to history file immediately as they’re entered.
+setopt INC_APPEND_HISTORY_TIME # Add commands to history file immediately as they're entered.
 setopt HIST_EXPIRE_DUPS_FIRST  # Remove duplicate commands first when history size limit is reached.
-setopt HIST_IGNORE_DUPS        # Don’t save consecutive duplicate commands in history.
+setopt HIST_IGNORE_DUPS        # Don't save consecutive duplicate commands in history.
 setopt HIST_IGNORE_ALL_DUPS    # Remove all duplicates from history, even non-consecutive ones.
-setopt HIST_IGNORE_SPACE       # Don’t save commands starting with a space in history.
+setopt HIST_IGNORE_SPACE       # Don't save commands starting with a space in history.
 setopt HIST_FIND_NO_DUPS       # Show only unique commands when searching history.
 setopt HIST_SAVE_NO_DUPS       # Exclude duplicates when saving history to file.
 
@@ -63,7 +63,7 @@ case "$(uname -s)" in
     ;;
   Linux)
     if [[ "$(uname -r)" == *WSL* ]]; then
-      # use windows git-credential-manager in WSL to avoid re-authenticating 
+      # use windows git-credential-manager in WSL to avoid re-authenticating
       if test -f "$HOST___PROGRAMFILES/Git/mingw64/bin/git-credential-manager.exe"; then
         ! command -v git-credential-manager.exe >/dev/null && \
           rm -f ~/.local/bin/git-credential-manager.exe && \
@@ -145,85 +145,8 @@ case "$(uname -s)" in
     ;;
 esac
 
-# custom prompt (single-line)
-function prompt_pure_precmd() {
-  local last_command_exit=$?
-  local dir="%~"
-
-  # git information
-  vcs_info
-  local git_info="${vcs_info_msg_0_:+$vcs_info_msg_0_ }"
-
-  if [ $last_command_exit -ne 0 -a $last_command_exit -ne 145 ]; then
-    # if the last command failed (and not from ctrl+z),
-    # show the error code
-    local error_code="%F{red}[$last_command_exit]%f "
-  else
-    local error_code=""
-  fi
-
-  # use pure's prompt_symbol configuration
-  local prompt_symbol=${PURE_PROMPT_SYMBOL:-'>'}
-
-  # set the prompt (single line)
-  PROMPT="%F{blue}${dir}%f %F{magenta}${git_info}%f${error_code}${prompt_symbol} "
-
-  # clear any existing right prompt
-  RPROMPT=""
-}
-# unset before executing commands (but after rendered)
-# to not pollute subprocesses (eg. cmd.exe)
-# cmd.exe as a subprocess can't read zsh color markers %{%}
-function prompt_pure_postprompt()
-{
-  unset -v PROMPT
-}
-
-# Plugins
-if command -v antidote &>/dev/null; then
-  if [[ -f ~/.zsh_plugins.txt ]]; then
-    # Re-bundle when the plugin list changes or missing bundle.
-    if [[ ( ! -f ~/.zsh_plugins.sh || \
-            ~/.zsh_plugins.txt -nt ~/.zsh_plugins.sh ) \
-       ]]; then
-      antidote bundle < ~/.zsh_plugins.txt > ~/.zsh_plugins.sh
-    fi
-
-    # load plugins
-    source ~/.zsh_plugins.sh
-    eval "$(fzf --zsh)"
-
-    # customize plugin behavior
-    (( ${+functions[_zsh_autosuggest_start]} )) && {
-      ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-    }
-    (( ${+widgets[history-substring-search-up]} )) && {
-      bindkey '^[[A' history-substring-search-up    # up arrow
-      bindkey '^[[B' history-substring-search-down  # down arrow
-    }
-    (( ${+widgets[fzf-cd-widget]} )) && {
-      bindkey -s '\ec' ''  # don't have ESC+c start fzf
-    }
-
-    # hook the custom precmd function
-    add-zsh-hook precmd prompt_pure_precmd
-    add-zsh-hook preexec prompt_pure_postprompt
-  else
-    echo "WARN: '~/.zsh_plugins.txt' missing" >&2
-  fi
-else
-  echo "WARN: 'antidote' not found" >&2
-fi
-
-# load fpath completion functions
-autoload -Uz bashcompinit compinit; bashcompinit; compinit
-
-eval "$(zoxide init zsh --cmd cd)"
-
-# ensure vcs_info is loaded for git status
-autoload -Uz vcs_info
-zstyle ':vcs_info:*' enable git
-zstyle ':vcs_info:git*' formats "%b"
+# Load drop-in configs
+for f in ~/.zsh.d/*.zsh(N); do source "$f"; done
 
 # see: .shell-aliases
 # NOTE: MacOS already has 'open' that does the right thing.
@@ -234,4 +157,3 @@ fi
 
 # source aliases
 source ~/.bazsh_aliases
-[[ -f $HOME/.cargo/env ]] && source "$HOME/.cargo/env" || true

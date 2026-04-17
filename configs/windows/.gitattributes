@@ -1,3 +1,5 @@
+.zsh.d        symlink=dir
+
 appdata/Code  symlink=dir
 appdata/fish  symlink=dir
 appdata/git   symlink=dir
