@@ -45,37 +45,6 @@ case "$(uname -s)" in
           ln -sv "$HOST___PROGRAMFILES/Git/mingw64/bin/git-credential-manager.exe" ~/.local/bin
       fi
 
-      # when running in wsl, override 'cmd not found' handler and
-      # see if there is an .exe file available to avoid explicitly
-      # spelling it out each time.
-      export command_not_found_handler() {
-        local cmd="$1"
-        shift
-        # Skip if cmd is a shell function
-        if [[ -n "$(typeset -f "$cmd" 2>/dev/null)" ]]; then
-          return 127
-        elif [[ -x "$(command -v "$cmd.exe")" ]]; then
-          "$cmd.exe" "$@"
-          return $?
-        else
-          echo "$cmd: command not found" >&2
-          return 127
-        fi
-      }
-      export which() {
-        local cmds=()
-        for cmd in "$@"; do
-          # if not found in PATH, fall back to checking with .exe suffix.
-          if ! (( ${+commands[$cmd]} )) && \
-               (( ${+commands[$cmd.exe]} )); then
-            cmd="$cmd.exe"
-          fi
-          cmds+=("$cmd")
-        done
-        command which ${cmds[@]}
-      }
-      # always reload hash (updates $commands list)
-      hash -r
     fi
     ;;
   MSYS*|MINGW*|CYGWIN*)
