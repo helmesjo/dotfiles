@@ -26,10 +26,9 @@ case "$(uname -s)" in
   Linux)
     if [[ "$(uname -r)" == *WSL* ]]; then
       # use windows git-credential-manager in WSL to avoid re-authenticating
-      if test -f "$HOST___PROGRAMFILES/Git/mingw64/bin/git-credential-manager.exe"; then
-        ! command -v git-credential-manager.exe >/dev/null && \
-          rm -f ~/.local/bin/git-credential-manager.exe && \
-          ln -sv "$HOST___PROGRAMFILES/Git/mingw64/bin/git-credential-manager.exe" ~/.local/bin
+      if test -f "$HOST___PROGRAMFILES/Git/mingw64/bin/git-credential-manager.exe" && \
+         ! test -L ~/.local/bin/git-credential-manager.exe >/dev/null; then
+        ln -sv "$HOST___PROGRAMFILES/Git/mingw64/bin/git-credential-manager.exe" ~/.local/bin
       fi
 
     fi
