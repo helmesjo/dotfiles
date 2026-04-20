@@ -1,4 +1,5 @@
 _backup
+*.DS_Store
 .config/pulse/
 mozilla/
 dconf/
