@@ -95,9 +95,12 @@ aurpkgs=(
 )
 
 if [[ $is_wsl -eq 1 ]]; then
-  # WSL requires win32-compatible clipboard, wl-clipboard won't work —
-  # win32yank is used instead (see install-win32yank.sh).
-  pacpkgs_rem=(wl-clipboard)
+  # WSL requires win32-compatible clipboard, so wl-clipboard won't work and
+  # win32yank is used instead. It's a Windows native executable that accesses
+  # the Win32 clipboard API, so WSL interop runs it as a real Windows process,
+  # giving it access to the shared Windows host clipboard.
+  pacpkgs_rem=(cliphist wl-clipboard)
+  $file_dir/install-win32yank.sh
 fi
 
 if [[ $is_laptop -eq 1 ]]; then
