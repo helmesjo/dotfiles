@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<!-- Zen Browser: use existing profile instead of creating a new one on first launch. -->
+<dict>
+    <key>Label</key>
+    <string>org.user.zen-env</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/sh</string>
+        <string>-c</string>
+        <string>launchctl setenv XRE_PROFILE_PATH "$HOME/.config/zen/13pmdhsh.fho"; launchctl setenv XRE_PROFILE_LOCAL_PATH "$HOME/Library/Caches/zen/profile"</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+</dict>
+</plist>
