@@ -9,7 +9,7 @@
     <array>
         <string>/bin/sh</string>
         <string>-c</string>
-        <string>launchctl setenv XRE_PROFILE_PATH "$HOME/.config/zen/13pmdhsh.fho"; launchctl setenv XRE_PROFILE_LOCAL_PATH "$HOME/Library/Caches/zen/profile"</string>
+        <string>launchctl setenv XRE_PROFILE_PATH "$HOME/.config/zen/13pmdhsh.fho"; launchctl setenv XRE_PROFILE_LOCAL_PATH "$HOME/Library/Caches/zen/profile"; launchctl setenv MOZ_LEGACY_PROFILES 1</string>
     </array>
     <key>RunAtLoad</key>
     <true/>

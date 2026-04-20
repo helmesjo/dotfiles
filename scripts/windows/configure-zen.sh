@@ -14,3 +14,4 @@ reg_set() {
 
 reg_set "HKCU\Environment" XRE_PROFILE_PATH       REG_EXPAND_SZ '%USERPROFILE%\.config\zen\13pmdhsh.fho'
 reg_set "HKCU\Environment" XRE_PROFILE_LOCAL_PATH REG_EXPAND_SZ '%USERPROFILE%\.cache\zen\profile'
+reg_set "HKCU\Environment" MOZ_LEGACY_PROFILES    REG_SZ        '1'
