@@ -56,28 +56,26 @@ winget install --accept-source-agreements \
                --no-upgrade \
                  ${wingetpkgs[@]}
 
-# execute Msys stuff in separate terminal since it
-# needs to "restart" after install.
-CMD_EXE=($(dir.exe $(which cmd.exe)))
-case "$(uname -s)" in
-    MINGW*) CMD_EXE+=(start //wait cmd //C);;
-    *)      CMD_EXE+=(start /wait cmd /C);;
-esac
+# Run a command in a new mintty window and wait for it to finish.
+# mintty --hold never closes the window immediately on exit so the
+# wait below can detect completion rather than hanging indefinitely.
+function run_in_mintty {
+  mintty --hold never -e bash -lc "$*" &
+  wait $! || true
+}
+
+# MSYS2's installer shuts down running MSYS2 sessions, so run it in a
+# separate cmd window that survives the shutdown and wait for it to finish.
 if ! winget list | grep 'MSYS2' >/dev/null; then
-  ${CMD_EXE[@]} "winget install --disable-interactivity \
-                                     --ignore-warnings \
-                                     MSYS2.MSYS2 \
-                     || exit 0"
+  cmd.exe //c "start /wait winget install --disable-interactivity --ignore-warnings --accept-source-agreements --accept-package-agreements MSYS2.MSYS2"
+# Upgrading msys2-runtime terminates the running shell mid-upgrade, so a
+# second pass is required to finish. Check before starting so we only pay
+# the cost when the runtime actually needs upgrading.
+elif pacman -Qu 2>/dev/null | grep -q '^msys2-runtime '; then
+  run_in_mintty 'pacman --noconfirm -Syu'
 fi
 
-# finish up MSYS2 install, again in a separate process since it'll
-# terminate the shell the first time (to wrap up the install).
-${CMD_EXE[@]} "C:/msys64/msys2_shell.cmd -defterm -here -no-start -ucrt64 -shell \
-                    bash -c 'pacman --noconfirm -Syu' \
-                    || exit 0"
-${CMD_EXE[@]} "C:/msys64/msys2_shell.cmd -defterm -here -no-start -ucrt64 -shell \
-                    bash -c 'pacman --noconfirm --needed -S ${pacmanpkgs[*]}' \
-                    || exit 0"
+pacman --noconfirm -Syu ${pacmanpkgs[*]}
 
 # vc++ build tools (if not already available in path or installed):
 if ! $file_dir/.vsdevenv.sh &>/dev/null; then
