@@ -31,7 +31,7 @@ for sourcename in ${dotfiles[@]}; do
       continue ;;
     .git | .gitignore | .gitattributes)
       continue ;;
-    .config/)
+    .config | .config/)
       continue ;;
     .config/*)
       ;;
