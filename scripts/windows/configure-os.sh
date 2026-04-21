@@ -60,5 +60,6 @@ for sourcename in ${dotfiles[@]}; do
     rm -fv "$targetpath"
   fi
   printf "%s" "    - "
+  while [[ -L "$sourcepath" ]]; do sourcepath=$(readlink -f "$sourcepath"); done
   ln -sv "$sourcepath" "$targetpath"
 done
