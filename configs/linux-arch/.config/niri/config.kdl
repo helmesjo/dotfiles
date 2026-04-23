@@ -12,6 +12,9 @@ gestures {
     }
 }
 
+// Shell startup
+spawn-at-startup "dms" "run"
+
 // Input device configuration.
 // Find the full list of options on the wiki:
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Input

@@ -158,9 +158,7 @@ if [[ $is_wsl -eq 0 ]]; then
     bluetooth.service
     ly@tty2.service
   )
-  user_services=(
-    dms.service
-  )
+  user_services=()
   if [ "$is_laptop" == "true" ]; then
     services+=(tlp.service)
   fi
