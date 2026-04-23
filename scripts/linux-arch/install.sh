@@ -174,12 +174,12 @@ if [[ $is_wsl -eq 0 ]]; then
   echo "Enabling services..."
   for service in ${services[@]}; do
     echo "  - $service"
-    sudo systemctl enable --now $service
+    sudo systemctl enable $service
   done
 
   for service in ${user_services[@]}; do
     echo "  - $service"
-    systemctl --user enable --now $service
+    systemctl --user enable $service
   done
 
   # Laptop only
