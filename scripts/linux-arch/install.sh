@@ -158,6 +158,9 @@ if [[ $is_wsl -eq 0 ]]; then
     bluetooth.service
     ly@tty2.service
   )
+  user_services=(
+    dms.service
+  )
   if [ "$is_laptop" == "true" ]; then
     services+=(tlp.service)
   fi
@@ -171,7 +174,12 @@ if [[ $is_wsl -eq 0 ]]; then
   echo "Enabling services..."
   for service in ${services[@]}; do
     echo "  - $service"
-    sudo systemctl enable $service
+    sudo systemctl enable --now $service
+  done
+
+  for service in ${user_services[@]}; do
+    echo "  - $service"
+    systemctl --user enable --now $service
   done
 
   # Laptop only
