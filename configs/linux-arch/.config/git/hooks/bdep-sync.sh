@@ -1,6 +1,6 @@
 # bdep-sync: suspend/resume bdep packages when switching git branches.
 #
-# requires: bdep, bpkg
+# requires: bdep, bpkg, bash >=4.3
 #
 # OVERVIEW
 #   Keeps bdep/bpkg databases and out-tree markers consistent with
@@ -89,12 +89,56 @@ _bdep_sync_cfg_dirs() {
   done < <(bdep config list --directory "$1" 2>/dev/null)
 }
 
+_bdep_sync_loc_diff() {
+  # Compute removed/added locations between $1 (prev commit) and the current
+  # packages.manifest under project root $2.  Results stored in the caller
+  # variables named by $3 (removed) and $4 (added) via namerefs.
+  local _prev="$1" _root="$2"
+  local -n _removed="$3" _added="$4"
+  local _prev_locs _curr_locs
+  _prev_locs=$(_bdep_sync_parse_locs <(git show "$_prev:packages.manifest" 2>/dev/null))
+  if [[ -f "$_root/packages.manifest" ]]; then
+    _curr_locs=$(_bdep_sync_parse_locs "$_root/packages.manifest")
+  else
+    _curr_locs=""
+  fi
+  _removed=$(comm -23 <(sort <<<"$_prev_locs") <(sort <<<"$_curr_locs"))
+  _added=$(comm -13   <(sort <<<"$_prev_locs") <(sort <<<"$_curr_locs"))
+}
+
+_bdep_sync_cleanup() {
+  # Restore packages.manifest and remove git-restored source trees created
+  # during the suspend phase.  Registered as EXIT trap for early exits and
+  # called explicitly at suspend end.  Accesses _bdep_sync_hook locals
+  # (bak, root, restored_locs, prev_head, _manifest_swapped) via dynamic scoping.
+  trap - EXIT
+  if [[ "${_manifest_swapped:-0}" -eq 1 ]]; then
+    if [[ -n "${bak:-}" ]]; then
+      mv "$bak" "$root/packages.manifest"
+    else
+      rm -f "$root/packages.manifest"
+    fi
+  fi
+  local _loc _rel _f
+  for _loc in "${restored_locs[@]}"; do
+    _rel="${_loc#"$root/"}"
+    if [[ -n "${BDEP_SYNC_AUTO_CLEAN-}" ]]; then
+      rm -rf "$_loc"
+    else
+      while IFS= read -r _f; do
+        rm -f "$root/$_f"
+      done < <(git -C "$root" ls-tree -r --name-only "$prev_head" -- "$_rel" 2>/dev/null)
+      find "$_loc" -depth -type d -empty -delete 2>/dev/null
+    fi
+  done
+}
+
 _bdep_sync_hook() {
   local prev_head="$1" new_head="$2" is_branch="$3"
   local clr_ok=$'\e[1;32m' clr_warn=$'\e[1;33m' clr_err=$'\e[1;31m' clr_def=$'\e[1;0m'
-  local clr_res="" root="" prev_locs curr_locs removed added
-  local cfg loc pkg src bak suspend resumed _err _loc _rel _f err_out="" _ok _status
-  local restored_locs=()
+  local clr_res="" root="" removed="" added=""
+  local cfg loc pkg src bak="" _manifest_swapped=0 suspend resumed _err err_out="" _ok _status
+  local -a cfg_dirs restored_locs=()
 
   # Guard: only act on branch switches
   [[ "$is_branch" != "1" || "$prev_head" == "$new_head" ]] && clr_res=$clr_warn
@@ -116,64 +160,38 @@ _bdep_sync_hook() {
     clr_res=$clr_warn
   fi
 
-  # Compute location diff between branches
   if [[ -z "$clr_res" ]]; then
-    prev_locs=$(_bdep_sync_parse_locs <(git show "$prev_head:packages.manifest" 2>/dev/null))
-    if [[ -f "$root/packages.manifest" ]]; then
-      curr_locs=$(_bdep_sync_parse_locs "$root/packages.manifest")
-    else
-      curr_locs=""
-    fi
-    removed=$(comm -23 <(sort <<<"$prev_locs") <(sort <<<"$curr_locs"))
-    added=$(comm -13   <(sort <<<"$prev_locs") <(sort <<<"$curr_locs"))
+    _bdep_sync_loc_diff "$prev_head" "$root" removed added
     [[ -z "$removed" && -z "$added" ]] && clr_res=$clr_warn
   fi
 
   if [[ -z "$clr_res" ]]; then
-    local -a cfg_dirs
     mapfile -t cfg_dirs < <(_bdep_sync_cfg_dirs "$root")
 
     # == SUSPEND removed packages ==============================================
     if [[ -n "$removed" ]]; then
-      # 1. Backup new-branch manifest (if present); 2. restore previous-branch
-      #    manifest.  When the new branch has no packages.manifest (e.g. an
-      #    early commit predating package addition), skip the backup and remove
-      #    the temporary manifest at the end instead of restoring it.
       if [[ -f "$root/packages.manifest" ]]; then
         bak="$root/packages.manifest.bdep-sync-bak"
         cp "$root/packages.manifest" "$bak"
-      else
-        bak=""
       fi
       git show "$prev_head:packages.manifest" > "$root/packages.manifest"
-      # Single EXIT trap — $bak is expanded now (path or empty).
-      #   bak set  -> [[ -f '$bak' ]] true  -> restore backup
-      #   bak unset -> [[ -f '' ]] false    -> remove the temp manifest we created
-      trap "[[ -f '$bak' ]] && mv '$bak' '$root/packages.manifest' || rm -f '$root/packages.manifest'" EXIT
+      _manifest_swapped=1
+      trap _bdep_sync_cleanup EXIT
 
-      # 3. Restore ALL removed package sources from git before any deinit.
-      #    bdep load_package_names reads every location listed in packages.manifest
-      #    in a single pass, so all sources must exist simultaneously.
-      #    Using the real source tree (not stubs) ensures build2 can properly
-      #    bootstrap all subprojects during bdep deinit on forward configurations.
-      #    src-root.build must remain in the out-tree until after bdep deinit.
+      # Restore ALL removed sources before any deinit; bdep load_package_names
+      # reads every location in packages.manifest in one pass so all must exist.
       while IFS= read -r loc; do
         [[ -z "$loc" ]] && continue
         git -C "$root" restore --quiet --source="$prev_head" --worktree -- "$loc" 2>/dev/null
         restored_locs+=("$root/$loc")
       done <<<"$removed"
 
-      # 4. Per removed pkg: deinit from bdep DB, then disfigure/purge from bpkg
-      #    and save the suspend marker.  Both operations are done together per
-      #    package: deinit requires src-root.build present (forward bootstrap);
-      #    src-root.build is renamed to .suspend only after deinit completes.
       while IFS= read -r loc; do
         [[ -z "$loc" ]] && continue
         pkg=$(_bdep_sync_pkg_name "$root/$loc/manifest")
         printf 'deinitializing package %s\n' "$pkg"
         if ! bdep deinit --force --all --directory "$root" "$pkg"; then
-          clr_res=$clr_err
-          continue
+          clr_res=$clr_err; continue
         fi
         for cfg in "${cfg_dirs[@]}"; do
           [[ -d "$cfg" ]] || continue
@@ -198,26 +216,7 @@ _bdep_sync_hook() {
         done
       done <<<"$removed"
 
-      # 5. Restore new-branch manifest; 6. remove restored source trees.
-      if [[ -n "$bak" ]]; then
-        mv "$bak" "$root/packages.manifest"
-      else
-        rm -f "$root/packages.manifest"
-      fi
-      trap - EXIT
-      for _loc in "${restored_locs[@]}"; do
-        _rel="${_loc#"$root/"}"
-        if [[ -n "${BDEP_SYNC_AUTO_CLEAN-}" ]]; then
-          rm -rf "$_loc"
-        else
-          # Remove only tracked files we restored; leave git-left untracked
-          # content.
-          while IFS= read -r _f; do
-            rm -f "$root/$_f"
-          done < <(git -C "$root" ls-tree -r --name-only "$prev_head" -- "$_rel" 2>/dev/null)
-          find "$_loc" -depth -type d -empty -delete 2>/dev/null
-        fi
-      done
+      _bdep_sync_cleanup
     fi
 
     # == RESUME reappearing packages ===========================================
@@ -251,5 +250,5 @@ _bdep_sync_hook() {
 
 _bdep_sync_hook "$@"
 _bdep_sync_rc=$?
-unset -f _bdep_sync_hook _bdep_sync_parse_locs _bdep_sync_cfg_dirs _bdep_sync_pkg_name
+unset -f _bdep_sync_hook _bdep_sync_cleanup _bdep_sync_loc_diff _bdep_sync_parse_locs _bdep_sync_cfg_dirs _bdep_sync_pkg_name
 exit $_bdep_sync_rc
