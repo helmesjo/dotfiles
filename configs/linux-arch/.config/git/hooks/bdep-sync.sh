@@ -104,8 +104,10 @@ _bdep_sync_hook() {
     root=$(git rev-parse --show-toplevel 2>/dev/null) || clr_res=$clr_warn
   fi
 
-  # Guard: must be a bdep project
-  if [[ -z "$clr_res" ]] && [[ ! -f "$root/packages.manifest" || ! -d "$root/.bdep" ]]; then
+  # Guard: must be a bdep project (.bdep/ required for database operations;
+  # packages.manifest may be absent on the new branch — that is handled below
+  # by treating curr_locs as empty, causing all prev packages to be suspended).
+  if [[ -z "$clr_res" ]] && [[ ! -d "$root/.bdep" ]]; then
     clr_res=$clr_warn
   fi
 
@@ -117,7 +119,11 @@ _bdep_sync_hook() {
   # Compute location diff between branches
   if [[ -z "$clr_res" ]]; then
     prev_locs=$(_bdep_sync_parse_locs <(git show "$prev_head:packages.manifest" 2>/dev/null))
-    curr_locs=$(_bdep_sync_parse_locs "$root/packages.manifest")
+    if [[ -f "$root/packages.manifest" ]]; then
+      curr_locs=$(_bdep_sync_parse_locs "$root/packages.manifest")
+    else
+      curr_locs=""
+    fi
     removed=$(comm -23 <(sort <<<"$prev_locs") <(sort <<<"$curr_locs"))
     added=$(comm -13   <(sort <<<"$prev_locs") <(sort <<<"$curr_locs"))
     [[ -z "$removed" && -z "$added" ]] && clr_res=$clr_warn
@@ -129,12 +135,21 @@ _bdep_sync_hook() {
 
     # == SUSPEND removed packages ==============================================
     if [[ -n "$removed" ]]; then
-      bak="$root/packages.manifest.bdep-sync-bak"
-      trap "[[ -f '$bak' ]] && mv '$bak' '$root/packages.manifest'" EXIT
-
-      # 1. Backup new-branch manifest; 2. restore previous-branch manifest.
-      cp "$root/packages.manifest" "$bak"
+      # 1. Backup new-branch manifest (if present); 2. restore previous-branch
+      #    manifest.  When the new branch has no packages.manifest (e.g. an
+      #    early commit predating package addition), skip the backup and remove
+      #    the temporary manifest at the end instead of restoring it.
+      if [[ -f "$root/packages.manifest" ]]; then
+        bak="$root/packages.manifest.bdep-sync-bak"
+        cp "$root/packages.manifest" "$bak"
+      else
+        bak=""
+      fi
       git show "$prev_head:packages.manifest" > "$root/packages.manifest"
+      # Single EXIT trap — $bak is expanded now (path or empty).
+      #   bak set  -> [[ -f '$bak' ]] true  -> restore backup
+      #   bak unset -> [[ -f '' ]] false    -> remove the temp manifest we created
+      trap "[[ -f '$bak' ]] && mv '$bak' '$root/packages.manifest' || rm -f '$root/packages.manifest'" EXIT
 
       # 3. Restore ALL removed package sources from git before any deinit.
       #    bdep load_package_names reads every location listed in packages.manifest
@@ -184,7 +199,11 @@ _bdep_sync_hook() {
       done <<<"$removed"
 
       # 5. Restore new-branch manifest; 6. remove restored source trees.
-      mv "$bak" "$root/packages.manifest"
+      if [[ -n "$bak" ]]; then
+        mv "$bak" "$root/packages.manifest"
+      else
+        rm -f "$root/packages.manifest"
+      fi
       trap - EXIT
       for _loc in "${restored_locs[@]}"; do
         _rel="${_loc#"$root/"}"
