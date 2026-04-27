@@ -1,54 +1,68 @@
 # bdep-sync: suspend/resume bdep packages when switching git branches.
 #
-# REQUIRES
-#   bdep, bpkg
+# requires: bdep, bpkg
 #
 # OVERVIEW
-#   build2 out-tree configurations record the source root via a single marker
-#   file:
-#     <cfg-dir>/<pkg>/build/bootstrap/src-root.build
-#   This file makes build2 treat the out-tree directory as a valid out-root.
-#   When a branch is checked out that does not contain a package present on the
-#   previous branch, its source directory disappears from the worktree but its
-#   out-tree build artefacts and bpkg/bdep database entries remain and become
-#   stale.
+#   Keeps bdep/bpkg databases and out-tree markers consistent with
+#   packages.manifest when a branch checkout adds or removes packages.
 #
-#   This hook keeps both sides in sync by saving/restoring src-root.build
-#   (renamed to .suspend) and updating the bdep/bpkg databases whenever
-#   packages.manifest changes between branches.
+#   suspend  bdep deinit + bpkg cleanup + rename src-root.build -> .suspend
+#   resume   rename .suspend -> src-root.build + bdep init --no-sync
 #
-# INVARIANTS
-#   - ALL removed package sources must be restored via `git restore` BEFORE
-#     any `bdep deinit` is issued: bdep reads every location listed in
-#     packages.manifest in a single pass when resolving package names.
-#   - src-root.build must be present DURING `bdep deinit`: deinit on a
-#     forward configuration calls `b disfigure: src@out,forward`, which
-#     bootstraps the out-root via src-root.build.
-#   - src-root.build is renamed to .suspend only AFTER `bdep deinit` for
-#     that package completes.
+#   The package name (read from each package's manifest `name:` field) is used
+#   for all bdep/bpkg calls and to locate the out-tree at <cfg-dir>/<name>/.
+#
+# SUSPEND SEQUENCE
+#   packages.manifest is temporarily replaced with the previous-branch version
+#   so bdep can resolve all package names in one pass.  All removed sources are
+#   git-restored before any deinit so every manifest listed there exists.
+#
+#   For each removed package:
+#     1. bdep deinit --force --all
+#          On forward configs this calls b disfigure:src@out,forward (needs
+#          src-root.build to bootstrap the out-root; no-op when the source has
+#          no out-root.build, which is typical for git-managed trees).
+#          On failure: leave this package completely intact and skip steps 2-3.
+#     2. bpkg cleanup per configuration:
+#          configured -> pkg-disfigure --keep-out --keep-config -> pkg-purge
+#          unpacked   -> pkg-purge only  (out_root already null; no b invocation)
+#          other      -> no bpkg action
+#          Rename src-root.build -> src-root.build.suspend regardless of whether
+#          a bpkg op failed (deinit already committed; .suspend needed for resume).
+#     3. Restore new-branch packages.manifest; remove git-restored source trees.
 #
 # SCENARIOS
 #
-#   Condition                    Steps
+#   Condition                    Action
 #   ===========================  ==============================================
 #   not a branch checkout        skip (warn)
 #   same commit on both sides    skip (warn)
 #   not a bdep project           skip (warn)
 #   bdep not on PATH             skip (warn)
-#   packages.manifest identical  skip (warn)
-#   pkg removed (suspend)        git restore src; bdep deinit; bpkg disfigure;
-#                                bpkg purge; mv src-root.build -> .suspend;
-#                                rm restored src
-#   pkg added (resume)           mv .suspend→src-root.build; bdep init --no-sync
-#   both removed and added       suspend all removed (order above); then resume
-#                                all added
+#   packages.manifest unchanged  skip (warn)
+#   pkg removed                  SUSPEND SEQUENCE above
+#   pkg added, .suspend found    .suspend -> src-root.build; bdep init --no-sync
+#   pkg added, no .suspend       skip (never had an out-tree here; needs manual init)
+#   both removed and added       suspend all first, then resume all
 #
 # ENVIRONMENT
 #   BDEP_SYNC_AUTO_CLEAN  When set, suspended source trees are removed with
 #                         `rm -rf`. Default: remove only git-tracked files,
-#                         leaving any untracked content (build artefacts, etc.)
+#                         leaving untracked content (build artefacts, etc.)
 #                         in place.
 #
+
+_bdep_sync_pkg_name() {
+  # Print the package name from the manifest file at $1.
+  local _line
+  while IFS= read -r _line; do
+    [[ "$_line" == name:* ]] || continue
+    _line="${_line#name:}"
+    _line="${_line#"${_line%%[! ]*}"}"  # ltrim spaces
+    printf '%s\n' "$_line"
+    return
+  done < "$1"
+}
 
 _bdep_sync_parse_locs() {
   # Print package locations from the packages.manifest file at path $1.
@@ -79,7 +93,7 @@ _bdep_sync_hook() {
   local prev_head="$1" new_head="$2" is_branch="$3"
   local clr_ok=$'\e[1;32m' clr_warn=$'\e[1;33m' clr_err=$'\e[1;31m' clr_def=$'\e[1;0m'
   local clr_res="" root="" prev_locs curr_locs removed added
-  local cfg loc pkg src bak suspend resumed _err _loc _rel _f err_out=""
+  local cfg loc pkg src bak suspend resumed _err _loc _rel _f err_out="" _ok _status
   local restored_locs=()
 
   # Guard: only act on branch switches
@@ -140,20 +154,26 @@ _bdep_sync_hook() {
       #    src-root.build is renamed to .suspend only after deinit completes.
       while IFS= read -r loc; do
         [[ -z "$loc" ]] && continue
-        pkg="${loc##*/}"
+        pkg=$(_bdep_sync_pkg_name "$root/$loc/manifest")
         printf 'deinitializing package %s\n' "$pkg"
         if ! bdep deinit --force --all --directory "$root" "$pkg"; then
           clr_res=$clr_err
+          continue
         fi
         for cfg in "${cfg_dirs[@]}"; do
           [[ -d "$cfg" ]] || continue
           src="$cfg/$pkg/build/bootstrap/src-root.build"
           [[ -f "$src" ]] || continue
-          if [[ "$(bpkg pkg-status --directory "$cfg" "$pkg" 2>/dev/null)" == *configured* ]]; then
+          _status=$(bpkg pkg-status --directory "$cfg" "$pkg" 2>/dev/null)
+          _ok=1
+          if [[ "$_status" == *configured* ]]; then
             if ! _err=$(bpkg pkg-disfigure --directory "$cfg" --keep-out --keep-config "$pkg" 2>&1); then
               err_out+="[bpkg disfigure $pkg @ ${cfg##*/}]: $_err"$'\n'
-              clr_res=$clr_err
-            elif ! _err=$(bpkg pkg-purge --directory "$cfg" "$pkg" 2>&1); then
+              clr_res=$clr_err; _ok=0
+            fi
+          fi
+          if [[ $_ok -eq 1 && ( "$_status" == *configured* || "$_status" == *unpacked* ) ]]; then
+            if ! _err=$(bpkg pkg-purge --directory "$cfg" "$pkg" 2>&1); then
               err_out+="[bpkg purge $pkg @ ${cfg##*/}]: $_err"$'\n'
               clr_res=$clr_err
             fi
@@ -185,7 +205,7 @@ _bdep_sync_hook() {
     if [[ -n "$added" ]]; then
       while IFS= read -r loc; do
         [[ -z "$loc" ]] && continue
-        pkg="${loc##*/}"
+        pkg=$(_bdep_sync_pkg_name "$root/$loc/manifest")
         resumed=0
         for cfg in "${cfg_dirs[@]}"; do
           [[ -d "$cfg" ]] || continue
@@ -212,5 +232,5 @@ _bdep_sync_hook() {
 
 _bdep_sync_hook "$@"
 _bdep_sync_rc=$?
-unset -f _bdep_sync_hook _bdep_sync_parse_locs _bdep_sync_cfg_dirs
+unset -f _bdep_sync_hook _bdep_sync_parse_locs _bdep_sync_cfg_dirs _bdep_sync_pkg_name
 exit $_bdep_sync_rc
