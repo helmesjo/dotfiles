@@ -18,18 +18,21 @@
 #   git-restored before any deinit so every manifest listed there exists.
 #
 #   For each removed package:
-#     1. bdep deinit --force --all
+#     1. Skip if no src-root.build exists in any configuration (never initialized;
+#        no build state to preserve and bdep deinit would fail on the package).
+#     2. bdep deinit --force --all
 #          On forward configs this calls b disfigure:src@out,forward (needs
 #          src-root.build to bootstrap the out-root; no-op when the source has
 #          no out-root.build, which is typical for git-managed trees).
-#          On failure: leave this package completely intact and skip steps 2-3.
-#     2. bpkg cleanup per configuration:
+#          "not initialized in any" is non-fatal: bdep db is already clean, so
+#          fall through to bpkg/filesystem cleanup (the two databases are independent).
+#          Other failures: leave this package intact and skip steps 3-4.
+#     3. bpkg cleanup per configuration (skipped when no src-root.build):
 #          configured -> pkg-disfigure --keep-out --keep-config -> pkg-purge
 #          unpacked   -> pkg-purge only  (out_root already null; no b invocation)
 #          other      -> no bpkg action
-#          Rename src-root.build -> src-root.build.suspend regardless of whether
-#          a bpkg op failed (deinit already committed; .suspend needed for resume).
-#     3. Restore new-branch packages.manifest; remove git-restored source trees.
+#     4. Rename src-root.build -> src-root.build.suspend.
+#     5. Restore new-branch packages.manifest; remove git-restored source trees.
 #
 # SCENARIOS
 #
@@ -40,7 +43,8 @@
 #   not a bdep project           skip (warn)
 #   bdep not on PATH             skip (warn)
 #   packages.manifest unchanged  skip (warn)
-#   pkg removed                  SUSPEND SEQUENCE above
+#   pkg removed, initialized     SUSPEND SEQUENCE above
+#   pkg removed, never init-ed   skip (no out-tree to preserve)
 #   pkg added, .suspend found    .suspend -> src-root.build; bdep init --no-sync
 #   pkg added, no .suspend       skip (never had an out-tree here; needs manual init)
 #   both removed and added       suspend all first, then resume all
@@ -95,15 +99,26 @@ _bdep_sync_loc_diff() {
   # variables named by $3 (removed) and $4 (added) via namerefs.
   local _prev="$1" _root="$2"
   local -n _removed="$3" _added="$4"
-  local _prev_locs _curr_locs
-  _prev_locs=$(_bdep_sync_parse_locs <(git show "$_prev:packages.manifest" 2>/dev/null))
+  local -A _prev_set=() _curr_set=()
+  local _loc
+
+  while IFS= read -r _loc; do
+    [[ -n "$_loc" ]] && _prev_set["$_loc"]=1
+  done < <(_bdep_sync_parse_locs <(git show "$_prev:packages.manifest" 2>/dev/null))
+
   if [[ -f "$_root/packages.manifest" ]]; then
-    _curr_locs=$(_bdep_sync_parse_locs "$_root/packages.manifest")
-  else
-    _curr_locs=""
+    while IFS= read -r _loc; do
+      [[ -n "$_loc" ]] && _curr_set["$_loc"]=1
+    done < <(_bdep_sync_parse_locs "$_root/packages.manifest")
   fi
-  _removed=$(comm -23 <(sort <<<"$_prev_locs") <(sort <<<"$_curr_locs"))
-  _added=$(comm -13   <(sort <<<"$_prev_locs") <(sort <<<"$_curr_locs"))
+
+  _removed="" _added=""
+  for _loc in "${!_prev_set[@]}"; do
+    [[ -z "${_curr_set[$_loc]+x}" ]] && _removed+="${_loc}"$'\n'
+  done
+  for _loc in "${!_curr_set[@]}"; do
+    [[ -z "${_prev_set[$_loc]+x}" ]] && _added+="${_loc}"$'\n'
+  done
 }
 
 _bdep_sync_cleanup() {
@@ -137,29 +152,18 @@ _bdep_sync_hook() {
   local prev_head="$1" new_head="$2" is_branch="$3"
   local clr_ok=$'\e[1;32m' clr_warn=$'\e[1;33m' clr_err=$'\e[1;31m' clr_def=$'\e[1;0m'
   local clr_res="" root="" removed="" added=""
-  local cfg loc pkg src bak="" _manifest_swapped=0 suspend _err err_out="" _ok _status _deinit_ok
+  local cfg loc pkg src bak="" _manifest_swapped=0 suspend _err err_out="" _ok _status _deinit_ok _any
   local -a cfg_dirs restored_locs=() _resume_cfgs
 
-  # Guard: only act on branch switches
+  # Guards: skip unless this is a branch switch with actual manifest changes
   [[ "$is_branch" != "1" || "$prev_head" == "$new_head" ]] && clr_res=$clr_warn
-
-  # Guard: resolve project root
   if [[ -z "$clr_res" ]]; then
     root=$(git rev-parse --show-toplevel 2>/dev/null) || clr_res=$clr_warn
   fi
-
-  # Guard: must be a bdep project (.bdep/ required for database operations;
-  # packages.manifest may be absent on the new branch — that is handled below
-  # by treating curr_locs as empty, causing all prev packages to be suspended).
-  if [[ -z "$clr_res" ]] && [[ ! -d "$root/.bdep" ]]; then
-    clr_res=$clr_warn
+  if [[ -z "$clr_res" ]]; then
+    [[ -d "$root/.bdep" ]] || clr_res=$clr_warn
+    command -v bdep >/dev/null 2>&1 || clr_res=$clr_warn
   fi
-
-  # Guard: require bdep on PATH
-  if [[ -z "$clr_res" ]] && ! command -v bdep >/dev/null 2>&1; then
-    clr_res=$clr_warn
-  fi
-
   if [[ -z "$clr_res" ]]; then
     _bdep_sync_loc_diff "$prev_head" "$root" removed added
     [[ -z "$removed" && -z "$added" ]] && clr_res=$clr_warn
@@ -189,26 +193,27 @@ _bdep_sync_hook() {
       while IFS= read -r loc; do
         [[ -z "$loc" ]] && continue
         pkg=$(_bdep_sync_pkg_name "$root/$loc/manifest")
-        # Skip if the package has no build state in any configuration (never initialized).
+
+        # Skip if no out-tree exists in any configuration: the package was never
+        # initialized, so bdep deinit would fail and there is nothing to suspend.
         _any=0
         for cfg in "${cfg_dirs[@]}"; do
-          [[ -d "$cfg" ]] || continue
           [[ -f "$cfg/$pkg/build/bootstrap/src-root.build" ]] && { _any=1; break; }
-          _st=$(bpkg pkg-status --directory "$cfg" "$pkg" 2>/dev/null)
-          [[ "$_st" == *configured* || "$_st" == *unpacked* ]] && { _any=1; break; }
         done
         [[ $_any -eq 0 ]] && continue
+
         printf 'deinitializing package %s\n' "$pkg"
         _deinit_ok=1
         _err=$(bdep deinit --force --all --directory "$root" "$pkg" 2>&1) || _deinit_ok=0
         if [[ $_deinit_ok -eq 0 ]]; then
-          if [[ "$_err" == *"not initialized in any"* ]]; then
-            : # not in bdep db — still clean bpkg/filesystem state below
-          else
+          # "not initialized in any" means the bdep db is already clean; still
+          # run bpkg/filesystem cleanup below (bdep and bpkg dbs are independent).
+          if [[ "$_err" != *"not initialized in any"* ]]; then
             err_out+="[bdep deinit $pkg]: $_err"$'\n'
             clr_res=$clr_err; continue
           fi
         fi
+
         for cfg in "${cfg_dirs[@]}"; do
           [[ -d "$cfg" ]] || continue
           src="$cfg/$pkg/build/bootstrap/src-root.build"
@@ -227,8 +232,7 @@ _bdep_sync_hook() {
               clr_res=$clr_err
             fi
           fi
-          cp "$src" "${src}.suspend"
-          rm "$src"
+          mv "$src" "${src}.suspend"
         done
       done <<<"$removed"
 
@@ -249,6 +253,8 @@ _bdep_sync_hook() {
           _resume_cfgs+=("$cfg")
         done
         [[ ${#_resume_cfgs[@]} -eq 0 ]] && continue
+        # Init only in the cfgs that had .suspend — passing --all would conflict
+        # when multiple forwarded configurations exist in the project.
         if ! bdep init --no-sync "${_resume_cfgs[@]}" -d "$root/$loc"; then
           clr_res=$clr_err
         fi
@@ -259,9 +265,7 @@ _bdep_sync_hook() {
   [[ -n "$err_out" ]] && printf '%s' "$err_out" >&2
   local res=${clr_res:+no}
   printf '[hook/%s]:%b%s%b\n' "bdep-sync" ${clr_res:-$clr_ok} ${res:-ok} $clr_def
-  if [[ "${clr_res:-$clr_ok}" == "$clr_err" ]]; then
-    return 1
-  fi
+  [[ "${clr_res:-$clr_ok}" != "$clr_err" ]]
 }
 
 _bdep_sync_hook "$@"
