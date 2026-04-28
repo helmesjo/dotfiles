@@ -137,8 +137,8 @@ _bdep_sync_hook() {
   local prev_head="$1" new_head="$2" is_branch="$3"
   local clr_ok=$'\e[1;32m' clr_warn=$'\e[1;33m' clr_err=$'\e[1;31m' clr_def=$'\e[1;0m'
   local clr_res="" root="" removed="" added=""
-  local cfg loc pkg src bak="" _manifest_swapped=0 suspend resumed _err err_out="" _ok _status
-  local -a cfg_dirs restored_locs=()
+  local cfg loc pkg src bak="" _manifest_swapped=0 suspend _err err_out="" _ok _status _deinit_ok
+  local -a cfg_dirs restored_locs=() _resume_cfgs
 
   # Guard: only act on branch switches
   [[ "$is_branch" != "1" || "$prev_head" == "$new_head" ]] && clr_res=$clr_warn
@@ -189,9 +189,25 @@ _bdep_sync_hook() {
       while IFS= read -r loc; do
         [[ -z "$loc" ]] && continue
         pkg=$(_bdep_sync_pkg_name "$root/$loc/manifest")
+        # Skip if the package has no build state in any configuration (never initialized).
+        _any=0
+        for cfg in "${cfg_dirs[@]}"; do
+          [[ -d "$cfg" ]] || continue
+          [[ -f "$cfg/$pkg/build/bootstrap/src-root.build" ]] && { _any=1; break; }
+          _st=$(bpkg pkg-status --directory "$cfg" "$pkg" 2>/dev/null)
+          [[ "$_st" == *configured* || "$_st" == *unpacked* ]] && { _any=1; break; }
+        done
+        [[ $_any -eq 0 ]] && continue
         printf 'deinitializing package %s\n' "$pkg"
-        if ! bdep deinit --force --all --directory "$root" "$pkg"; then
-          clr_res=$clr_err; continue
+        _deinit_ok=1
+        _err=$(bdep deinit --force --all --directory "$root" "$pkg" 2>&1) || _deinit_ok=0
+        if [[ $_deinit_ok -eq 0 ]]; then
+          if [[ "$_err" == *"not initialized in any"* ]]; then
+            : # not in bdep db — still clean bpkg/filesystem state below
+          else
+            err_out+="[bdep deinit $pkg]: $_err"$'\n'
+            clr_res=$clr_err; continue
+          fi
         fi
         for cfg in "${cfg_dirs[@]}"; do
           [[ -d "$cfg" ]] || continue
@@ -224,16 +240,16 @@ _bdep_sync_hook() {
       while IFS= read -r loc; do
         [[ -z "$loc" ]] && continue
         pkg=$(_bdep_sync_pkg_name "$root/$loc/manifest")
-        resumed=0
+        _resume_cfgs=()
         for cfg in "${cfg_dirs[@]}"; do
           [[ -d "$cfg" ]] || continue
           suspend="$cfg/$pkg/build/bootstrap/src-root.build.suspend"
           [[ -f "$suspend" ]] || continue
           mv "$suspend" "${suspend%.suspend}"
-          resumed=1
+          _resume_cfgs+=("$cfg")
         done
-        [[ $resumed -eq 0 ]] && continue
-        if ! bdep init --no-sync --all -d "$root/$loc"; then
+        [[ ${#_resume_cfgs[@]} -eq 0 ]] && continue
+        if ! bdep init --no-sync "${_resume_cfgs[@]}" -d "$root/$loc"; then
           clr_res=$clr_err
         fi
       done <<<"$added"
