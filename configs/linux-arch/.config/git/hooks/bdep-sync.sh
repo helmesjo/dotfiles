@@ -17,22 +17,24 @@
 #   so bdep can resolve all package names in one pass.  All removed sources are
 #   git-restored before any deinit so every manifest listed there exists.
 #
-#   For each removed package:
-#     1. Skip if no src-root.build exists in any configuration (never initialized;
-#        no build state to preserve and bdep deinit would fail on the package).
-#     2. bdep deinit --force --all
-#          On forward configs this calls b disfigure:src@out,forward (needs
-#          src-root.build to bootstrap the out-root; no-op when the source has
-#          no out-root.build, which is typical for git-managed trees).
-#          "not initialized in any" is non-fatal: bdep db is already clean, so
-#          fall through to bpkg/filesystem cleanup (the two databases are independent).
-#          Other failures: leave this package intact and skip steps 3-4.
-#     3. bpkg cleanup per configuration (skipped when no src-root.build):
-#          configured -> pkg-disfigure --keep-out --keep-config -> pkg-purge
-#          unpacked   -> pkg-purge only  (out_root already null; no b invocation)
-#          other      -> no bpkg action
-#     4. Rename src-root.build -> src-root.build.suspend.
-#     5. Restore new-branch packages.manifest; remove git-restored source trees.
+#   Phase 1 — bdep deinit:
+#     Packages that have no src-root.build in any configuration are skipped
+#     (never initialized; bdep deinit would fail and nothing to preserve).
+#     All remaining packages are deinited in a single bdep call; bdep resolves
+#     dependency order internally.  --force skips bpkg drop, leaving the bpkg
+#     DB for Phase 2.  "not initialized in" is non-fatal (bdep DB already
+#     clean).  Any other failure aborts Phase 2 for all packages.
+#
+#   Phase 2 — bpkg cleanup + filesystem rename:
+#     One bpkg pkg-status call per configuration (no per-package calls) yields
+#     packages in dependency order.  Reversing gives dependents-first order so
+#     pkg-disfigure never hits "still has dependents":
+#       configured -> pkg-disfigure --keep-out --keep-config -> pkg-purge
+#       unpacked   -> pkg-purge only  (out_root already null; no b invocation)
+#       other/absent -> no bpkg action (bdep DB was already clean)
+#     src-root.build -> src-root.build.suspend is always renamed last.
+#
+#   Cleanup: restore new-branch packages.manifest; remove git-restored trees.
 #
 # SCENARIOS
 #
@@ -152,8 +154,8 @@ _bdep_sync_hook() {
   local prev_head="$1" new_head="$2" is_branch="$3"
   local clr_ok=$'\e[1;32m' clr_warn=$'\e[1;33m' clr_err=$'\e[1;31m' clr_def=$'\e[1;0m'
   local clr_res="" root="" removed="" added=""
-  local cfg loc pkg src bak="" _manifest_swapped=0 suspend _err err_out="" _ok _status _deinit_ok _any _found _pname
-  local -a cfg_dirs restored_locs=() _resume_cfgs _suspend_pkgs _bdep_order _ordered
+  local cfg loc pkg src bak="" _manifest_swapped=0 suspend _err err_out="" _ok _any _found_any
+  local -a cfg_dirs restored_locs=() _suspend_pkgs
 
   # Guards: skip unless this is a branch switch with actual manifest changes
   [[ "$is_branch" != "1" || "$prev_head" == "$new_head" ]] && clr_res=$clr_warn
@@ -190,121 +192,129 @@ _bdep_sync_hook() {
         restored_locs+=("$root/$loc")
       done <<<"$removed"
 
-      # Capture build-order from bdep (dependencies-first) now, while packages
-      # are still initialized.  Non-indented lines in 'bdep status --immediate'
-      # output are project packages in manifest/dependency order; reversing them
-      # gives the correct disfigure order (dependents first) for Phase 2.
-      _bdep_order=()
-      while IFS= read -r _pname; do
-        [[ "${_pname:0:1}" == ' ' || -z "$_pname" ]] && continue
-        _bdep_order+=("${_pname%% *}")
-      done < <(bdep status --immediate --directory "$root" 2>/dev/null)
-
-      # Phase 1: bdep deinit (cleans bdep DB) and collect packages with out-trees.
-      # bdep deinit --force skips bpkg drop, so the bpkg DB is cleaned separately
-      # in phase 2.  Packages that fail deinit for reasons other than "not
-      # initialized in any" are skipped entirely.
+      # Collect packages that have an out-tree and need suspension.
+      # Packages never initialized (no src-root.build anywhere) are skipped:
+      # bdep deinit would fail on them and there is nothing to preserve.
       _suspend_pkgs=()
       while IFS= read -r loc; do
         [[ -z "$loc" ]] && continue
         pkg=$(_bdep_sync_pkg_name "$root/$loc/manifest")
-
-        # Skip if no out-tree exists in any configuration: the package was never
-        # initialized, so bdep deinit would fail and there is nothing to suspend.
         _any=0
         for cfg in "${cfg_dirs[@]}"; do
           [[ -f "$cfg/$pkg/build/bootstrap/src-root.build" ]] && { _any=1; break; }
         done
         [[ $_any -eq 0 ]] && continue
-
-        printf 'deinitializing package %s\n' "$pkg"
-        _deinit_ok=1
-        _err=$(bdep deinit --force --all --directory "$root" "$pkg" 2>&1) || _deinit_ok=0
-        if [[ $_deinit_ok -eq 0 ]]; then
-          # "not initialized in any" means the bdep db is already clean; still
-          # run bpkg/filesystem cleanup below (bdep and bpkg dbs are independent).
-          if [[ "$_err" != *"not initialized in any"* ]]; then
-            err_out+="[bdep deinit $pkg]: $_err"$'\n'
-            clr_res=$clr_err; continue
-          fi
-        fi
-
         _suspend_pkgs+=("$pkg")
       done <<<"$removed"
 
-      # Phase 2: bpkg cleanup + filesystem rename in disfigure order.
-      # Reverse the bdep build-order (dependencies-first) to get dependents-first
-      # order so pkg-disfigure never encounters "still has dependents" errors.
-      _ordered=()
-      for (( i=${#_bdep_order[@]}-1; i>=0; i-- )); do
-        pkg="${_bdep_order[$i]}"
-        _found=0
-        for _pname in "${_suspend_pkgs[@]}"; do
-          [[ "$_pname" == "$pkg" ]] && { _found=1; break; }
-        done
-        [[ $_found -eq 0 ]] && continue
-        _found=0
-        for _pname in "${_ordered[@]}"; do
-          [[ "$_pname" == "$pkg" ]] && { _found=1; break; }
-        done
-        [[ $_found -eq 0 ]] && _ordered+=("$pkg")
-      done
-      # Append any packages absent from bdep output (e.g. not initialized).
-      for pkg in "${_suspend_pkgs[@]}"; do
-        _found=0
-        for _pname in "${_ordered[@]}"; do
-          [[ "$_pname" == "$pkg" ]] && { _found=1; break; }
-        done
-        [[ $_found -eq 0 ]] && _ordered+=("$pkg")
-      done
+      if [[ ${#_suspend_pkgs[@]} -gt 0 ]]; then
+        # Phase 1: single bdep deinit call for all packages.
+        # bdep resolves dependency order internally; --force skips bpkg drop so
+        # the bpkg DB is left for Phase 2 cleanup.
+        printf 'deinitializing package %s\n' "${_suspend_pkgs[@]}"
+        if ! _err=$(bdep deinit --force --all --directory "$root" \
+                      "${_suspend_pkgs[@]}" 2>&1); then
+          # "not initialized in" means the bdep DB is already clean; proceed
+          # with Phase 2 (bpkg DB and bdep DB are independent).
+          # Any other failure is hard: skip bpkg+filesystem cleanup for all.
+          if [[ "$_err" != *"not initialized in"* ]]; then
+            err_out+="[bdep deinit]: $_err"$'\n'
+            clr_res=$clr_err
+            _suspend_pkgs=()
+          fi
+        fi
 
-      for pkg in "${_ordered[@]}"; do
+        # Phase 2: bpkg cleanup + filesystem rename in dependents-first order.
+        # One bpkg pkg-status call per cfg (no package filter) yields all
+        # packages in dependency order; reversing gives the correct disfigure
+        # order so pkg-disfigure never hits "still has dependents".
         for cfg in "${cfg_dirs[@]}"; do
           [[ -d "$cfg" ]] || continue
-          src="$cfg/$pkg/build/bootstrap/src-root.build"
-          [[ -f "$src" ]] || continue
-          _status=$(bpkg pkg-status --directory "$cfg" "$pkg" 2>/dev/null)
-          _ok=1
-          if [[ "$_status" == *configured* ]]; then
-            if ! _err=$(bpkg pkg-disfigure --directory "$cfg" \
-                          --keep-out --keep-config "$pkg" 2>&1); then
-              err_out+="[bpkg disfigure $pkg @ ${cfg##*/}]: $_err"$'\n'
-              clr_res=$clr_err; _ok=0
+          local -a _bpkg_order=() _process_order=()
+          local -A _bpkg_state=()
+          local _line _pname
+          while IFS= read -r _line; do
+            _pname="${_line#!}"; _pname="${_pname%% *}"
+            [[ -z "$_pname" ]] && continue
+            for pkg in "${_suspend_pkgs[@]}"; do
+              [[ "$pkg" != "$_pname" ]] && continue
+              _bpkg_order+=("$_pname")
+              if   [[ "$_line" == *configured* ]]; then _bpkg_state["$_pname"]=configured
+              elif [[ "$_line" == *unpacked*   ]]; then _bpkg_state["$_pname"]=unpacked
+              fi
+              break
+            done
+          done < <(bpkg pkg-status --directory "$cfg" 2>/dev/null)
+          # Reverse for dependents-first disfigure order.
+          for (( i=${#_bpkg_order[@]}-1; i>=0; i-- )); do
+            _process_order+=("${_bpkg_order[$i]}")
+          done
+          # Append packages absent from bpkg output (bdep DB was already clean;
+          # no bpkg action needed, still rename the marker).
+          for pkg in "${_suspend_pkgs[@]}"; do
+            [[ -n "${_bpkg_state[$pkg]+x}" ]] && continue
+            [[ -f "$cfg/$pkg/build/bootstrap/src-root.build" ]] && _process_order+=("$pkg")
+          done
+
+          for pkg in "${_process_order[@]}"; do
+            src="$cfg/$pkg/build/bootstrap/src-root.build"
+            [[ -f "$src" ]] || continue
+            _ok=1
+            if [[ "${_bpkg_state[$pkg]:-}" == configured ]]; then
+              if ! _err=$(bpkg pkg-disfigure --directory "$cfg" \
+                            --keep-out --keep-config "$pkg" 2>&1); then
+                err_out+="[bpkg disfigure $pkg @ ${cfg##*/}]: $_err"$'\n'
+                clr_res=$clr_err; _ok=0
+              fi
             fi
-          fi
-          if [[ $_ok -eq 1 && ( "$_status" == *configured* || "$_status" == *unpacked* ) ]]; then
-            if ! _err=$(bpkg pkg-purge --directory "$cfg" "$pkg" 2>&1); then
-              err_out+="[bpkg purge $pkg @ ${cfg##*/}]: $_err"$'\n'
-              clr_res=$clr_err
+            if [[ $_ok -eq 1 ]] && \
+               [[ "${_bpkg_state[$pkg]:-}" == configured || \
+                  "${_bpkg_state[$pkg]:-}" == unpacked ]]; then
+              if ! _err=$(bpkg pkg-purge --directory "$cfg" "$pkg" 2>&1); then
+                err_out+="[bpkg purge $pkg @ ${cfg##*/}]: $_err"$'\n'
+                clr_res=$clr_err
+              fi
             fi
-          fi
-          mv "$src" "${src}.suspend"
+            mv "$src" "${src}.suspend"
+          done
         done
-      done
+      fi
 
       _bdep_sync_cleanup
     fi
 
     # == RESUME reappearing packages ===========================================
     if [[ -n "$added" ]]; then
+      # First pass: rename markers and collect cfg union + package dirs.
+      local -a _resume_pkg_dirs=() _resume_cfgs=()
+      local -A _resume_seen_cfg=()
       while IFS= read -r loc; do
         [[ -z "$loc" ]] && continue
         pkg=$(_bdep_sync_pkg_name "$root/$loc/manifest")
-        _resume_cfgs=()
+        _found_any=0
         for cfg in "${cfg_dirs[@]}"; do
           [[ -d "$cfg" ]] || continue
           suspend="$cfg/$pkg/build/bootstrap/src-root.build.suspend"
           [[ -f "$suspend" ]] || continue
           mv "$suspend" "${suspend%.suspend}"
-          _resume_cfgs+=("$cfg")
+          _found_any=1
+          if [[ -z "${_resume_seen_cfg[$cfg]+x}" ]]; then
+            _resume_seen_cfg["$cfg"]=1
+            _resume_cfgs+=("$cfg")
+          fi
         done
-        [[ ${#_resume_cfgs[@]} -eq 0 ]] && continue
-        # Init only in the cfgs that had .suspend — passing --all would conflict
-        # when multiple forwarded configurations exist in the project.
-        if ! bdep init --no-sync "${_resume_cfgs[@]}" -d "$root/$loc"; then
+        [[ $_found_any -eq 0 ]] && continue
+        printf 'initializing package %s\n' "$pkg"
+        _resume_pkg_dirs+=( "-d" "$root/$loc" )
+      done <<<"$added"
+      # Single bdep init call for all resumed packages across the cfg union.
+      # All packages in _resume_pkg_dirs have src-root.build in every cfg in
+      # _resume_cfgs (the union of cfgs that held .suspend markers).
+      if [[ ${#_resume_pkg_dirs[@]} -gt 0 ]]; then
+        if ! bdep init --no-sync "${_resume_cfgs[@]}" "${_resume_pkg_dirs[@]}"; then
           clr_res=$clr_err
         fi
-      done <<<"$added"
+      fi
     fi
   fi
 
