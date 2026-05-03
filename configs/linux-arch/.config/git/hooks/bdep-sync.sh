@@ -28,11 +28,11 @@
 #   Phase 2 — bpkg cleanup + filesystem rename:
 #     One bpkg pkg-status call per configuration (no per-package calls) yields
 #     packages in dependency order.  Reversing gives dependents-first order so
-#     pkg-disfigure never hits "still has dependents":
-#       configured -> pkg-disfigure --keep-out --keep-config -> pkg-purge
+#     pkg-disfigure never hits "still has dependents".
+#     src-root.build is renamed to .suspend only when all bpkg ops succeed.
+#       configured -> pkg-disfigure --keep-out --keep-config -> pkg-purge -> rename
 #       unpacked   -> pkg-purge only  (out_root already null; no b invocation)
-#       other/absent -> no bpkg action (bdep DB was already clean)
-#     src-root.build -> src-root.build.suspend is always renamed last.
+#       other/absent -> no bpkg action (bdep DB already clean); rename still done
 #
 #   Cleanup: restore new-branch packages.manifest; remove git-restored trees.
 #
@@ -264,7 +264,8 @@ _bdep_sync_hook() {
               if ! _err=$(bpkg pkg-disfigure --directory "$cfg" \
                             --keep-out --keep-config "$pkg" 2>&1); then
                 err_out+="[bpkg disfigure $pkg @ ${cfg##*/}]: $_err"$'\n'
-                clr_res=$clr_err; _ok=0
+                clr_res=$clr_err
+                _ok=0
               fi
             fi
             if [[ $_ok -eq 1 ]] && \
@@ -273,9 +274,10 @@ _bdep_sync_hook() {
               if ! _err=$(bpkg pkg-purge --directory "$cfg" "$pkg" 2>&1); then
                 err_out+="[bpkg purge $pkg @ ${cfg##*/}]: $_err"$'\n'
                 clr_res=$clr_err
+                _ok=0
               fi
             fi
-            mv "$src" "${src}.suspend"
+            [[ $_ok -eq 1 ]] && mv "$src" "${src}.suspend"
           done
         done
       fi
