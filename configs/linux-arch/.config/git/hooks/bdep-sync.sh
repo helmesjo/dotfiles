@@ -26,11 +26,14 @@
 #     clean).  Any other failure aborts Phase 2 for all packages.
 #
 #   Phase 2 — bpkg cleanup + filesystem rename:
-#     One bpkg pkg-status call per configuration (no per-package calls) yields
-#     packages in dependency order.  Reversing gives dependents-first order so
-#     pkg-disfigure never hits "still has dependents".
-#     src-root.build is renamed to .suspend only when all bpkg ops succeed.
-#       configured -> pkg-disfigure --keep-out --keep-config -> pkg-purge -> rename
+#     One bpkg pkg-status call per configuration captures state for all packages.
+#     Multi-pass disfigure handles arbitrary ordering.  If suspended packages are
+#     blocked by configured kept packages (K depends on S being suspended), the
+#     disfigure set is extended once to ALL configured packages in the cfg so
+#     blockers are cleared.  Extended packages are left unpacked (not purged or
+#     renamed); bdep sync re-configures them.  Purge and rename apply only to
+#     the suspended packages.
+#       configured -> [extended] pkg-disfigure --keep-out --keep-config -> pkg-purge -> rename
 #       unpacked   -> pkg-purge only  (out_root already null; no b invocation)
 #       other/absent -> no bpkg action (bdep DB already clean); rename still done
 #
@@ -184,12 +187,19 @@ _bdep_sync_hook() {
       _manifest_swapped=1
       trap _bdep_sync_cleanup EXIT
 
-      # Restore ALL removed sources before any deinit; bdep load_package_names
-      # reads every location in packages.manifest in one pass so all must exist.
+      # Restore removed sources so bdep can read all package manifests in one
+      # pass.  Use the manifest file as the presence test: if $loc/manifest is
+      # tracked in the new HEAD the source is properly present (removed from
+      # packages.manifest but kept in the git tree); skip restore so cleanup
+      # never deletes those files.  When only an empty skeleton (e.g. committed
+      # out-root.build artifacts) or nothing is tracked, restore from prev HEAD
+      # and schedule the location for cleanup.
       while IFS= read -r loc; do
         [[ -z "$loc" ]] && continue
-        git -C "$root" restore --quiet --source="$prev_head" --worktree -- "$loc" 2>/dev/null
-        restored_locs+=("$root/$loc")
+        if [[ -z "$(git -C "$root" ls-tree "$new_head" "$loc/manifest" 2>/dev/null)" ]]; then
+          git -C "$root" restore --quiet --source="$prev_head" --worktree -- "$loc" 2>/dev/null
+          restored_locs+=("$root/$loc")
+        fi
       done <<<"$removed"
 
       # Collect packages that have an out-tree and need suspension.
@@ -224,60 +234,96 @@ _bdep_sync_hook() {
           fi
         fi
 
-        # Phase 2: bpkg cleanup + filesystem rename in dependents-first order.
-        # One bpkg pkg-status call per cfg (no package filter) yields all
-        # packages in dependency order; reversing gives the correct disfigure
-        # order so pkg-disfigure never hits "still has dependents".
+        # Phase 2: bpkg cleanup + filesystem rename.
+        # Capture bpkg state for ALL packages (one call per cfg); multi-pass
+        # disfigure retries "still has dependents" failures.  If no progress,
+        # extend disfigure to every configured package in the cfg so that kept
+        # packages that depend on suspended ones no longer block.  Only the
+        # suspended packages (_cfg_pkgs) are purged and renamed; extended kept
+        # packages are left unpacked and re-configured by the next bdep sync.
         for cfg in "${cfg_dirs[@]}"; do
           [[ -d "$cfg" ]] || continue
-          local -a _bpkg_order=() _process_order=()
-          local -A _bpkg_state=()
+          local -A _bpkg_state=() _bpkg_failed=()
           local _line _pname
           while IFS= read -r _line; do
             _pname="${_line#!}"; _pname="${_pname%% *}"
             [[ -z "$_pname" ]] && continue
-            for pkg in "${_suspend_pkgs[@]}"; do
-              [[ "$pkg" != "$_pname" ]] && continue
-              _bpkg_order+=("$_pname")
-              if   [[ "$_line" == *configured* ]]; then _bpkg_state["$_pname"]=configured
-              elif [[ "$_line" == *unpacked*   ]]; then _bpkg_state["$_pname"]=unpacked
-              fi
-              break
-            done
+            if   [[ "$_line" == *configured* ]]; then _bpkg_state["$_pname"]=configured
+            elif [[ "$_line" == *unpacked*   ]]; then _bpkg_state["$_pname"]=unpacked
+            fi
           done < <(bpkg pkg-status --directory "$cfg" 2>/dev/null)
-          # Reverse for dependents-first disfigure order.
-          for (( i=${#_bpkg_order[@]}-1; i>=0; i-- )); do
-            _process_order+=("${_bpkg_order[$i]}")
-          done
-          # Append packages absent from bpkg output (bdep DB was already clean;
-          # no bpkg action needed, still rename the marker).
+
+          # Suspended packages with a build marker in this cfg.
+          local -a _cfg_pkgs=()
           for pkg in "${_suspend_pkgs[@]}"; do
-            [[ -n "${_bpkg_state[$pkg]+x}" ]] && continue
-            [[ -f "$cfg/$pkg/build/bootstrap/src-root.build" ]] && _process_order+=("$pkg")
+            [[ -f "$cfg/$pkg/build/bootstrap/src-root.build" ]] && _cfg_pkgs+=("$pkg")
           done
 
-          for pkg in "${_process_order[@]}"; do
-            src="$cfg/$pkg/build/bootstrap/src-root.build"
-            [[ -f "$src" ]] || continue
-            _ok=1
-            if [[ "${_bpkg_state[$pkg]:-}" == configured ]]; then
+          # Disfigure Phase: multi-pass retry; extend once on stall.
+          local -a _to_disfigure=()
+          for pkg in "${_cfg_pkgs[@]}"; do
+            [[ "${_bpkg_state[$pkg]:-}" == configured ]] && _to_disfigure+=("$pkg")
+          done
+          local _extended=0
+          while [[ "${#_to_disfigure[@]}" -gt 0 ]]; do
+            local _pass_progress=0
+            local -a _retry=()
+            for pkg in "${_to_disfigure[@]}"; do
               if ! _err=$(bpkg pkg-disfigure --directory "$cfg" \
                             --keep-out --keep-config "$pkg" 2>&1); then
-                err_out+="[bpkg disfigure $pkg @ ${cfg##*/}]: $_err"$'\n'
-                clr_res=$clr_err
-                _ok=0
+                if [[ "$_err" == *"still has dependents"* ]]; then
+                  _retry+=("$pkg")
+                else
+                  err_out+="[bpkg disfigure $pkg @ ${cfg##*/}]: $_err"$'\n'
+                  clr_res=$clr_err
+                  _bpkg_failed["$pkg"]=1
+                fi
+              else
+                _bpkg_state["$pkg"]=unpacked
+                _pass_progress=1
               fi
+            done
+            _to_disfigure=("${_retry[@]}")
+
+            # Stalled: extend to all configured packages (kept blockers) once.
+            if [[ $_pass_progress -eq 0 && $_extended -eq 0 ]]; then
+              _extended=1
+              for _pname in "${!_bpkg_state[@]}"; do
+                [[ "${_bpkg_state[$_pname]}" == configured ]] || continue
+                [[ -n "${_bpkg_failed[$_pname]+x}" ]] && continue
+                local _skip=0
+                for q in "${_to_disfigure[@]}"; do
+                  [[ "$q" == "$_pname" ]] && _skip=1 && break
+                done
+                [[ $_skip -eq 0 ]] && _to_disfigure+=("$_pname")
+              done
+              [[ "${#_to_disfigure[@]}" -gt 0 ]] && _pass_progress=1
             fi
-            if [[ $_ok -eq 1 ]] && \
-               [[ "${_bpkg_state[$pkg]:-}" == configured || \
-                  "${_bpkg_state[$pkg]:-}" == unpacked ]]; then
-              if ! _err=$(bpkg pkg-purge --directory "$cfg" "$pkg" 2>&1); then
-                err_out+="[bpkg purge $pkg @ ${cfg##*/}]: $_err"$'\n'
-                clr_res=$clr_err
-                _ok=0
-              fi
+            [[ $_pass_progress -eq 0 ]] && break
+          done
+          for pkg in "${_to_disfigure[@]}"; do
+            err_out+="[bpkg disfigure $pkg @ ${cfg##*/}]: stuck (circular deps?)"$'\n'
+            clr_res=$clr_err
+            _bpkg_failed["$pkg"]=1
+          done
+
+          # Purge Phase: only suspended packages (not extended kept packages).
+          for pkg in "${_cfg_pkgs[@]}"; do
+            [[ -n "${_bpkg_failed[$pkg]+x}" ]] && continue
+            [[ "${_bpkg_state[$pkg]:-}" == configured || \
+               "${_bpkg_state[$pkg]:-}" == unpacked ]] || continue
+            if ! _err=$(bpkg pkg-purge --directory "$cfg" "$pkg" 2>&1); then
+              err_out+="[bpkg purge $pkg @ ${cfg##*/}]: $_err"$'\n'
+              clr_res=$clr_err
+              _bpkg_failed["$pkg"]=1
             fi
-            [[ $_ok -eq 1 ]] && mv "$src" "${src}.suspend"
+          done
+
+          # Rename Phase: src-root.build -> .suspend for succeeded suspend pkgs.
+          for pkg in "${_cfg_pkgs[@]}"; do
+            [[ -n "${_bpkg_failed[$pkg]+x}" ]] && continue
+            src="$cfg/$pkg/build/bootstrap/src-root.build"
+            [[ -f "$src" ]] && mv "$src" "${src}.suspend"
           done
         done
       fi
