@@ -36,7 +36,8 @@
     {
       "Keyboard": {
         "enable": true,
-        "data_refresh_interval": 1
+        "data_refresh_interval": 1,
+        "label_prefix": "Icon"
       }
     }
   ],
