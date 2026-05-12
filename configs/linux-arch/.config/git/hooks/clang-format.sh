@@ -12,31 +12,51 @@
 clr_ok=$'\e[1;32m';clr_warn=$'\e[1;33m';clr_err=$'\e[1;31m'
 clr_def=$'\e[1;0m';
 
+# Skip if no clang-format exe.
 if ! command -v clang-format >/dev/null 2>&1; then
   clr_res=$clr_warn
-else
+fi
+
+# Skip if no .clang-format config.
+if [[ -z "$clr_res" ]]; then
+  _dir=$(git rev-parse --show-toplevel)
+  while [[ -n "$_dir" ]]; do
+    [[ -f "$_dir/.clang-format" || -f "$_dir/_clang-format" ]] && break
+    _parent="${_dir%/*}"
+    [[ "$_parent" == "$_dir" ]] && { _dir=""; break; }
+    _dir="$_parent"
+  done
+  [[ -z "$_dir" ]] && clr_res=$clr_warn
+fi
+
+# Skip if no C/C++ changes.
+if [[ -z "$clr_res" ]]; then
   mapfile -t STAGED_SRCS < <(git diff --name-only --cached --diff-filter=d -- '*.[hc]' '*.cc' '*.[hc]xx' '*.[hc]pp')
-  if [[ ${#STAGED_SRCS[@]} -eq 0 ]]; then
-    clr_res=$clr_warn
-  else
-    # (1) stash any unstaged changes in the staged files
-    stashed=0
-    if ! git diff --quiet -- "${STAGED_SRCS[@]}"; then
-      git stash push --keep-index --quiet --message "[hook/fmt]" -- "${STAGED_SRCS[@]}"
-      stashed=1
-    fi
+  [[ ${#STAGED_SRCS[@]} -eq 0 ]] && clr_res=$clr_warn
+fi
 
-    # format staged files
-    if ! clang-format -i --style=file -- "${STAGED_SRCS[@]}"; then
-      clr_res=$clr_err
-    elif ! git diff --quiet --exit-code -- "${STAGED_SRCS[@]}"; then
-      # add diff; force stdin to come from the real terminal
-      git add --patch -- "${STAGED_SRCS[@]}" </dev/tty
-    fi
-
-    # (1) restore original unstaged changes
-    [[ $stashed -eq 1 ]] && git stash pop --quiet 2>/dev/null || true
+if [[ -z "$clr_res" ]]; then
+  # (1) stash any unstaged changes in the staged files
+  stashed=0
+  if ! git diff --quiet -- "${STAGED_SRCS[@]}"; then
+    git stash push --keep-index --quiet --message "[hook/fmt]" -- "${STAGED_SRCS[@]}"
+    stashed=1
   fi
+
+  # format staged files
+  if ! clang-format -i --style=file -- "${STAGED_SRCS[@]}"; then
+    clr_res=$clr_err
+  elif ! git diff --quiet --exit-code -- "${STAGED_SRCS[@]}"; then
+    # add diff interactively if a TTY is available, otherwise stage all changes
+    if [[ -e /dev/tty ]]; then
+      git add --patch -- "${STAGED_SRCS[@]}" </dev/tty
+    else
+      git add -- "${STAGED_SRCS[@]}"
+    fi
+  fi
+
+  # (1) restore original unstaged changes
+  [[ $stashed -eq 1 ]] && git stash pop --quiet 2>/dev/null || true
 fi
 
 res=${clr_res:+no}
