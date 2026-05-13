@@ -1,6 +1,6 @@
 # bdep-sync: suspend/resume bdep packages when switching git branches.
 #
-# requires: bdep, bpkg, bash >=4.3
+# requires: bdep, bpkg, bash >=3.2
 #
 # OVERVIEW
 #   Keeps bdep/bpkg databases and out-tree markers consistent with
@@ -104,27 +104,36 @@ _bdep_sync_loc_diff() {
   # packages.manifest under project root $2.  Results stored in the caller
   # variables named by $3 (removed) and $4 (added) via namerefs.
   local _prev="$1" _root="$2"
-  local -n _removed="$3" _added="$4"
-  local -A _prev_set=() _curr_set=()
-  local _loc
+  local _removed_var="$3" _added_var="$4"
+  local _prev_locs="" _curr_locs="" _loc
 
   while IFS= read -r _loc; do
-    [[ -n "$_loc" ]] && _prev_set["$_loc"]=1
+    [[ -n "$_loc" ]] && _prev_locs+="$_loc"$'\n'
   done < <(_bdep_sync_parse_locs <(git show "$_prev:packages.manifest" 2>/dev/null))
 
   if [[ -f "$_root/packages.manifest" ]]; then
     while IFS= read -r _loc; do
-      [[ -n "$_loc" ]] && _curr_set["$_loc"]=1
+      [[ -n "$_loc" ]] && _curr_locs+="$_loc"$'\n'
     done < <(_bdep_sync_parse_locs "$_root/packages.manifest")
   fi
 
-  _removed="" _added=""
-  for _loc in "${!_prev_set[@]}"; do
-    [[ -z "${_curr_set[$_loc]+x}" ]] && _removed+="${_loc}"$'\n'
-  done
-  for _loc in "${!_curr_set[@]}"; do
-    [[ -z "${_prev_set[$_loc]+x}" ]] && _added+="${_loc}"$'\n'
-  done
+  local _removed="" _added=""
+  while IFS= read -r _loc; do
+    [[ -n "$_loc" ]] || continue
+    if ! printf '%s\n' "$_curr_locs" | grep -Fxq -- "$_loc" 2>/dev/null; then
+      _removed+="$_loc"$'\n'
+    fi
+  done <<<"$_prev_locs"
+
+  while IFS= read -r _loc; do
+    [[ -n "$_loc" ]] || continue
+    if ! printf '%s\n' "$_prev_locs" | grep -Fxq -- "$_loc" 2>/dev/null; then
+      _added+="$_loc"$'\n'
+    fi
+  done <<<"$_curr_locs"
+
+  printf -v "$_removed_var" '%s' "$_removed"
+  printf -v "$_added_var" '%s' "$_added"
 }
 
 _bdep_sync_cleanup() {
@@ -176,7 +185,10 @@ _bdep_sync_hook() {
   fi
 
   if [[ -z "$clr_res" ]]; then
-    mapfile -t cfg_dirs < <(_bdep_sync_cfg_dirs "$root")
+    cfg_dirs=()
+    while IFS= read -r _line; do
+      cfg_dirs+=("$_line")
+    done < <(_bdep_sync_cfg_dirs "$root")
 
     # == SUSPEND removed packages ==============================================
     if [[ -n "$removed" ]]; then
@@ -253,27 +265,30 @@ _bdep_sync_hook() {
           [[ "${#_cfg_pkgs[@]}" -eq 0 ]] && continue
 
           # Check bpkg state once.
-          local -A _bpkg_state=() _bpkg_failed=() _saved_srb=() _suspended_set=()
-          local _line _pname
+          local -a _bpkg_pkgs=()
+          local _line _pname _bpkg_failed_str="" _suspended_list=" ${_cfg_pkgs[*]} "
           while IFS= read -r _line; do
             _pname="${_line#!}"; _pname="${_pname%% *}"
             [[ -z "$_pname" ]] && continue
-            if   [[ "$_line" == *configured* ]]; then _bpkg_state["$_pname"]=configured
-            elif [[ "$_line" == *unpacked*   ]]; then _bpkg_state["$_pname"]=unpacked
+            _bpkg_pkgs+=("$_pname")
+            if   [[ "$_line" == *configured* ]]; then 
+              printf -v "_bpkg_state_$_pname" '%s' "configured"
+            elif [[ "$_line" == *unpacked*   ]]; then 
+              printf -v "_bpkg_state_$_pname" '%s' "unpacked"
             fi
           done < <(bpkg pkg-status --directory "$cfg" 2>/dev/null)
 
           # Save src-root.build content for all configured packages and mark
           # which are being suspended.
-          for _pname in "${!_bpkg_state[@]}"; do
+          for _pname in "${_bpkg_pkgs[@]}"; do
             src="$cfg/$_pname/build/bootstrap/src-root.build"
-            [[ -f "$src" ]] && _saved_srb["$_pname"]=$(<"$src")
+            [[ -f "$src" ]] && printf -v "_saved_srb_$_pname" '%s' "$(<"$src")"
           done
           for pkg in "${_cfg_pkgs[@]}"; do
-            _suspended_set["$pkg"]=1
-            [[ -v "_saved_srb[$pkg]" ]] && continue
+            local saved_var="_saved_srb_$pkg"
+            [[ -n "${!saved_var+set}" ]] && continue
             src="$cfg/$pkg/build/bootstrap/src-root.build"
-            [[ -f "$src" ]] && _saved_srb["$pkg"]=$(<"$src")
+            [[ -f "$src" ]] && printf -v "_saved_srb_$pkg" '%s' "$(<"$src")"
           done
 
           # Disfigure Phase: one pkg-drop call handles suspended pkgs + any kept
@@ -281,46 +296,52 @@ _bdep_sync_hook() {
           local -a _to_disfigure=()
           local _disfigure_ok=1
           for pkg in "${_cfg_pkgs[@]}"; do
-            [[ "${_bpkg_state[$pkg]:-}" == configured ]] && _to_disfigure+=("$pkg")
+            local state_var="_bpkg_state_$pkg"
+            [[ "${!state_var:-}" == configured ]] && _to_disfigure+=("$pkg")
           done
           if [[ "${#_to_disfigure[@]}" -gt 0 ]]; then
             if ! _err=$(bpkg pkg-drop --drop-dependent --disfigure-only --yes \
                           --directory "$cfg" "${_to_disfigure[@]}" 2>&1); then
               err_out+="[bpkg drop/disfigure @ ${cfg##*/}]: $_err"$'\n'
               clr_res=$clr_err
-              for pkg in "${_to_disfigure[@]}"; do _bpkg_failed["$pkg"]=1; done
+              for pkg in "${_to_disfigure[@]}"; do
+                _bpkg_failed_str="$_bpkg_failed_str $pkg "
+              done
               _disfigure_ok=0
             fi
           fi
 
           # Purge Phase: only suspended packages (kept dependents stay unpacked).
           for pkg in "${_cfg_pkgs[@]}"; do
-            [[ -n "${_bpkg_failed[$pkg]+x}" ]] && continue
-            [[ "${_bpkg_state[$pkg]:-}" == configured || \
-               "${_bpkg_state[$pkg]:-}" == unpacked ]] || continue
+            [[ " $_bpkg_failed_str " == *" $pkg "* ]] && continue
+            local state_var="_bpkg_state_$pkg"
+            [[ "${!state_var:-}" == configured || "${!state_var:-}" == unpacked ]] || continue
             if ! _err=$(bpkg pkg-purge --directory "$cfg" "$pkg" 2>&1); then
               err_out+="[bpkg purge $pkg @ ${cfg##*/}]: $_err"$'\n'
               clr_res=$clr_err
-              _bpkg_failed["$pkg"]=1
+              _bpkg_failed_str="$_bpkg_failed_str $pkg "
             fi
           done
 
           # Write .suspend markers for suspended packages from saved content.
           for pkg in "${_cfg_pkgs[@]}"; do
-            [[ -n "${_bpkg_failed[$pkg]+x}" ]] && continue
-            [[ -v "_saved_srb[$pkg]" ]] || continue
+            [[ " $_bpkg_failed_str " == *" $pkg "* ]] && continue
+            local saved_var="_saved_srb_$pkg"
+            [[ -n "${!saved_var+set}" ]] || continue
             local srb_dir="$cfg/$pkg/build/bootstrap"
             mkdir -p "$srb_dir"
-            printf '%s\n' "${_saved_srb[$pkg]}" > "$srb_dir/src-root.build.suspend"
+            printf '%s\n' "${!saved_var}" > "$srb_dir/src-root.build.suspend"
           done
 
           # Restore src-root.build for kept packages disfigured as dependents.
           [[ $_disfigure_ok -eq 0 ]] && continue
-          for _pname in "${!_saved_srb[@]}"; do
-            [[ -n "${_suspended_set[$_pname]+x}" ]] && continue
+          for _pname in "${_bpkg_pkgs[@]}"; do
+            [[ " $_suspended_list " == *" $_pname "* ]] && continue
+            local saved_var="_saved_srb_$_pname"
+            [[ -n "${!saved_var+set}" ]] || continue
             srb_dir="$cfg/$_pname/build/bootstrap"
             mkdir -p "$srb_dir"
-            printf '%s\n' "${_saved_srb[$_pname]}" > "$srb_dir/src-root.build"
+            printf '%s\n' "${!saved_var}" > "$srb_dir/src-root.build"
           done
         done
       fi
@@ -332,7 +353,7 @@ _bdep_sync_hook() {
     if [[ -n "$added" ]]; then
       # First pass: rename markers and collect cfg union + package dirs.
       local -a _resume_pkg_dirs=() _resume_cfgs=()
-      local -A _resume_seen_cfg=()
+      local _resume_seen=""
       while IFS= read -r loc; do
         [[ -z "$loc" ]] && continue
         pkg=$(_bdep_sync_pkg_name "$root/$loc/manifest")
@@ -343,8 +364,8 @@ _bdep_sync_hook() {
           [[ -f "$suspend" ]] || continue
           mv "$suspend" "${suspend%.suspend}"
           _found_any=1
-          if [[ -z "${_resume_seen_cfg[$cfg]+x}" ]]; then
-            _resume_seen_cfg["$cfg"]=1
+          if [[ " $_resume_seen " != *" $cfg "* ]]; then
+            _resume_seen="$_resume_seen $cfg "
             _resume_cfgs+=("$cfg")
           fi
         done
