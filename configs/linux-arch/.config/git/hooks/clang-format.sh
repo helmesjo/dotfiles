@@ -1,6 +1,6 @@
 # clang-format staged C++ files and re-add to commit.
 #
-# requires: clang-format
+# requires: clang-format, bash >=3.2
 #
 # To enable this hook, rename this file to "pre-commit" and
 # place it in .git/hooks (or at your "core.hooksPath" dir).
@@ -31,7 +31,10 @@ fi
 
 # Skip if no C/C++ changes.
 if [[ -z "$clr_res" ]]; then
-  mapfile -t STAGED_SRCS < <(git diff --name-only --cached --diff-filter=d -- '*.[hc]' '*.cc' '*.[hc]xx' '*.[hc]pp')
+  STAGED_SRCS=()
+  while IFS= read -r _line; do
+    STAGED_SRCS+=("$_line")
+  done < <(git diff --name-only --cached --diff-filter=d -- '*.[hc]' '*.cc' '*.[hc]xx' '*.[hc]pp')
   [[ ${#STAGED_SRCS[@]} -eq 0 ]] && clr_res=$clr_warn
 fi
 

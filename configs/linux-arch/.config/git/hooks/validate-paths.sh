@@ -18,7 +18,10 @@
 clr_ok=$'\e[1;32m';clr_warn=$'\e[1;33m';clr_err=$'\e[1;31m'
 clr_def=$'\e[1;0m';
 
-mapfile -t STAGED_FILES < <(git diff --name-only --cached --diff-filter=d)
+STAGED_FILES=()
+while IFS= read -r _line; do
+  STAGED_FILES+=("$_line")
+done < <(git diff --name-only --cached --diff-filter=d)
 
 clr_res=""
 if [[ ${#STAGED_FILES[@]} -eq 0 ]]; then
