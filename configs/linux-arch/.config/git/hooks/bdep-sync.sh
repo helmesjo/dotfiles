@@ -170,6 +170,12 @@ _bdep_sync_hook() {
   local cfg loc pkg src bak="" _manifest_swapped=0 suspend _err err_out="" _ok _any _found_any
   local -a cfg_dirs restored_locs=() _suspend_pkgs
 
+  # Skip silently during interactive rebase / git-am. git manipulates HEAD
+  # rapidly and bdep sync would interleave with the in-progress operation.
+  local _gd
+  _gd=$(git rev-parse --git-common-dir 2>/dev/null) || _gd=""
+  [[ -d "$_gd/rebase-merge" || -d "$_gd/rebase-apply" ]] && return 0
+
   # Guards: skip unless this is a branch switch with actual manifest changes
   [[ "$is_branch" != "1" || "$prev_head" == "$new_head" ]] && clr_res=$clr_warn
   if [[ -z "$clr_res" ]]; then
