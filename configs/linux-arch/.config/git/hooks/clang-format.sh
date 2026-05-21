@@ -17,18 +17,6 @@ if ! command -v clang-format >/dev/null 2>&1; then
   clr_res=$clr_warn
 fi
 
-# Skip if no .clang-format config.
-if [[ -z "$clr_res" ]]; then
-  _dir=$(git rev-parse --show-toplevel)
-  while [[ -n "$_dir" ]]; do
-    [[ -f "$_dir/.clang-format" || -f "$_dir/_clang-format" ]] && break
-    _parent="${_dir%/*}"
-    [[ "$_parent" == "$_dir" ]] && { _dir=""; break; }
-    _dir="$_parent"
-  done
-  [[ -z "$_dir" ]] && clr_res=$clr_warn
-fi
-
 # Skip if no C/C++ changes.
 if [[ -z "$clr_res" ]]; then
   STAGED_SRCS=()
@@ -38,23 +26,34 @@ if [[ -z "$clr_res" ]]; then
   [[ ${#STAGED_SRCS[@]} -eq 0 ]] && clr_res=$clr_warn
 fi
 
+# Filter to files that have a reachable .clang-format config.
+if [[ -z "$clr_res" ]]; then
+  FILES_TO_FORMAT=()
+  for _f in "${STAGED_SRCS[@]}"; do
+    clang-format --style=file --fallback-style=none --dump-config "$_f" 2>/dev/null \
+      | grep -q "^DisableFormat:[[:space:]]*false" \
+      && FILES_TO_FORMAT+=("$_f")
+  done
+  [[ ${#FILES_TO_FORMAT[@]} -eq 0 ]] && clr_res=$clr_warn
+fi
+
 if [[ -z "$clr_res" ]]; then
   # (1) stash any unstaged changes in the staged files
   stashed=0
-  if ! git diff --quiet -- "${STAGED_SRCS[@]}"; then
-    git stash push --keep-index --quiet --message "[hook/fmt]" -- "${STAGED_SRCS[@]}"
+  if ! git diff --quiet -- "${FILES_TO_FORMAT[@]}"; then
+    git stash push --keep-index --quiet --message "[hook/fmt]" -- "${FILES_TO_FORMAT[@]}"
     stashed=1
   fi
 
   # format staged files
-  if ! clang-format -i --style=file -- "${STAGED_SRCS[@]}"; then
+  if ! clang-format -i --style=file -- "${FILES_TO_FORMAT[@]}"; then
     clr_res=$clr_err
-  elif ! git diff --quiet --exit-code -- "${STAGED_SRCS[@]}"; then
+  elif ! git diff --quiet --exit-code -- "${FILES_TO_FORMAT[@]}"; then
     # add diff interactively if a TTY is available, otherwise stage all changes
     if [[ -e /dev/tty ]]; then
-      git add --patch -- "${STAGED_SRCS[@]}" </dev/tty
+      git add --patch -- "${FILES_TO_FORMAT[@]}" </dev/tty
     else
-      git add -- "${STAGED_SRCS[@]}"
+      git add -- "${FILES_TO_FORMAT[@]}"
     fi
   fi
 
