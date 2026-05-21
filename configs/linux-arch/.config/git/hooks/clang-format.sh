@@ -50,7 +50,7 @@ if [[ -z "$clr_res" ]]; then
     clr_res=$clr_err
   elif ! git diff --quiet --exit-code -- "${FILES_TO_FORMAT[@]}"; then
     # add diff interactively if a TTY is available, otherwise stage all changes
-    if [[ -e /dev/tty ]]; then
+    if { : </dev/tty; } 2>/dev/null; then
       git add --patch -- "${FILES_TO_FORMAT[@]}" </dev/tty
     else
       git add -- "${FILES_TO_FORMAT[@]}"
