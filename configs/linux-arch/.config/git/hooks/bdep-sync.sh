@@ -176,13 +176,13 @@ _bdep_sync_hook() {
   _gd=$(git rev-parse --git-common-dir 2>/dev/null) || _gd=""
   [[ -d "$_gd/rebase-merge" || -d "$_gd/rebase-apply" ]] && return 0
 
+  # Skip silently if not a bdep project.
+  root=$(git rev-parse --show-toplevel 2>/dev/null) || return 0
+  [[ -d "$root/.bdep" ]] || return 0
+
   # Guards: skip unless this is a branch switch with actual manifest changes
   [[ "$is_branch" != "1" || "$prev_head" == "$new_head" ]] && clr_res=$clr_warn
   if [[ -z "$clr_res" ]]; then
-    root=$(git rev-parse --show-toplevel 2>/dev/null) || clr_res=$clr_warn
-  fi
-  if [[ -z "$clr_res" ]]; then
-    [[ -d "$root/.bdep" ]] || clr_res=$clr_warn
     command -v bdep >/dev/null 2>&1 || clr_res=$clr_warn
   fi
   if [[ -z "$clr_res" ]]; then
