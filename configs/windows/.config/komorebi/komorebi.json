@@ -259,6 +259,11 @@
       "kind": "Exe",
       "id": "Obsidian.exe",
       "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "Exanima.exe",
+      "matching_strategy": "Equals",
     }
   ]
 }
