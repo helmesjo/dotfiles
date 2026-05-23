@@ -47,38 +47,82 @@ function _open_file_explorer() {
 }
 
 ## erdtree:
-# Converts common POSIX ls/tree flags (-a, -h, -l and bundles like -lah)
-# to the equivalent erdtree short flags on the fly.
+# Translates common POSIX ls/tree flags to erdtree equivalents.
+# Handles bundles (-lah), sort flags (-t/-S/-r), and conflicts (-d/-i/-s).
 function _erdtree() {
   local -a newargs=()
   local arg flags f
+  local sort_val=""  # default "name" applied after loop
+  local reverse=0
+  local eat_sort=0   # consume next arg as sort value
 
   for arg in "$@"; do
-    # === Handle bundled POSIX short flags (e.g. -lah, -al, -Lah, etc.) ===
+    # Consume value for -s / --sort; translate ls sort names to erdtree
+    if (( eat_sort )); then
+      case "$arg" in
+        time)      sort_val="mod" ;;
+        size)      sort_val="size" ;;
+        name|none) sort_val="name" ;;
+        *)         sort_val="$arg" ;;  # assume already an erdtree value (rmod, rsize, etc.)
+      esac
+      eat_sort=0
+      continue
+    fi
+
+    # === Bundled short flags (e.g. -lah, -rta) ===
     if [[ $arg =~ ^-[a-zA-Z]+$ && ${#arg} -gt 2 ]]; then
       flags="${arg#-}"
       while [[ -n $flags ]]; do
-        # Extract first character (portable in Bash + Zsh)
         f="${flags%%${flags#?}}"
         case "$f" in
-          a) newargs+=("-.") ;;   # -a → -.
-          h) newargs+=("-H") ;;   # -h → -H
-          l) newargs+=("-l") ;;   # -l → -l
-          *) newargs+=("-$f") ;;  # everything else unchanged
+          a|A) newargs+=("-.") ;;           # -a/-A -> show hidden
+          h)   newargs+=("-H") ;;           # -h    -> human-readable
+          l)   newargs+=("--long") ;;       # -l    -> long format (ls)
+          i)   newargs+=("--ino") ;;        # -i    -> inode number (not erdtree --no-ignore)
+          s)   ;;                           # -s    -> skip (ls block-sizes; -H already shows sizes)
+          S)   sort_val="size" ;;           # -S    -> sort by size (ls)
+          r)   reverse=1 ;;                # -r    -> reverse sort (ls/tree)
+          t)   sort_val="mod" ;;           # -t    -> sort by mtime (not erdtree --file-type)
+          c)   sort_val="create" ;;         # -c    -> sort by ctime (ls)
+          u)   sort_val="access" ;;         # -u    -> sort by atime (ls)
+          d)   newargs+=("--dirs-only") ;;  # -d    -> dirs only (not erdtree --disk-usage)
+          R)   newargs+=("-L" "999") ;;    # -R    -> all levels / recursive (ls)
+          *)   newargs+=("-$f") ;;
         esac
-        flags="${flags#?}"        # remove first character
+        flags="${flags#?}"
       done
       continue
     fi
 
-    # === Handle standalone common POSIX flags ===
+    # === Standalone flags ===
     case "$arg" in
-      -a) newargs+=("-.") ;;
-      -h) newargs+=("-H") ;;
-      -l) newargs+=("-l") ;;
-      *)  newargs+=("$arg") ;;  # paths, -L 5, --help, etc. untouched
+      -s|--sort)                eat_sort=1 ;;   # consume next arg as sort value
+      --sort=time)              sort_val="mod" ;;
+      --sort=size)              sort_val="size" ;;
+      --sort=name|--sort=none)  sort_val="name" ;;
+      --sort=*)                 sort_val="${arg#--sort=}" ;;  # erdtree value passed directly
+      -a|-A|--all|--almost-all) newargs+=("-.") ;;
+      -h|--human-readable)      newargs+=("-H") ;;
+      -l)                       newargs+=("--long") ;;
+      -i|--inode)               newargs+=("--ino") ;;
+      -S)                       sort_val="size" ;;
+      -r|--reverse)             reverse=1 ;;
+      -t)                       sort_val="mod" ;;
+      -c)                       sort_val="create" ;;
+      -u)                       sort_val="access" ;;
+      -d|--directory)           newargs+=("--dirs-only") ;;
+      -R|--recursive)           newargs+=("-L" "999") ;;
+      *)                        newargs+=("$arg") ;;
     esac
   done
+
+  # Synthesize sort, toggling reverse via r-prefix
+  [[ -z "$sort_val" ]] && sort_val="name"
+  if (( reverse )); then
+    [[ $sort_val == r* ]] && sort_val="${sort_val#r}" || sort_val="r${sort_val}"
+  fi
+  # Prepend sort so the path arg remains last in newargs
+  newargs=("-s" "$sort_val" "${newargs[@]}")
 
   if [[ -d "${@: -1}" || ! -f "${@: -1}" ]]; then
     command erd "${newargs[@]}"
@@ -98,13 +142,13 @@ function _erdtree() {
     command erd "${newargs[@]}"
   fi
 }
-if [[ $OSTYPE != cygwin ]]; then
-  alias ll='_erdtree -HI -d physical -s name -y inverted --long --no-ignore --no-progress -L1'
+if [[ $OSTYPE != cygwin && $OSTYPE != msys ]]; then
+  alias ll='_erdtree -H -I --disk-usage physical --layout inverted --long --no-ignore --no-progress -L1'
 else
-  # no permission info (erd --long) on non-unix
-  alias ll='_erdtree -HI -d physical -s name -y inverted --no-ignore --no-progress -L1 "$@"'
+  # no permission info (erd --long) on Windows/msys2/cygwin
+  alias ll='_erdtree -H -I --disk-usage physical --layout inverted --no-ignore --no-progress -L1'
 fi
-alias tree='_erdtree -HI -d physical -s name -y inverted --no-progress'
+alias tree='_erdtree -H -I --disk-usage physical --layout inverted --no-progress'
 
 ## File completion for aliases
 #
