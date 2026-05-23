@@ -150,6 +150,10 @@ else
 fi
 alias tree='_erdtree -H -I --disk-usage physical --layout inverted --no-progress'
 
+_claude_run() { CLAUDE_CONFIG_DIR=$1 command claude "${@:2}"; }
+alias claude='_claude_run ~/.config/claude/personal'
+alias claude-work='_claude_run ~/.config/claude/work'
+
 ## File completion for aliases
 #
 

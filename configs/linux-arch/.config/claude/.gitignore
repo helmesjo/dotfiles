@@ -1,0 +1,15 @@
+# Runtime state and private data - not shareable
+**/.claude.json
+**/.last-cleanup
+**/backups/
+**/cache/
+**/file-history/
+**/history.jsonl
+**/mcp-needs-auth-cache.json
+**/plans/
+**/plugins/
+**/policy-limits.json
+**/projects/
+**/session-env
+**/sessions/
+**/shell-snapshots/

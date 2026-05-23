@@ -1,5 +1,6 @@
 .zsh.d         symlink=dir
 
+.config/claude symlink=dir
 .config/Code   symlink=dir
 .config/fish   symlink=dir
 .config/git    symlink=dir
