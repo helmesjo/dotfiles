@@ -1,7 +1,7 @@
-.zsh.d        symlink=dir
+.zsh.d         symlink=dir
 
-appdata/Code  symlink=dir
-appdata/fish  symlink=dir
-appdata/git   symlink=dir
-appdata/helix symlink=dir
-appdata/zen   symlink=dir
+.config/Code   symlink=dir
+.config/fish   symlink=dir
+.config/git    symlink=dir
+.config/helix  symlink=dir
+.config/zen    symlink=dir
