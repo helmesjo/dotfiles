@@ -5,6 +5,7 @@ set -eu -o pipefail
 file_dir=`dirname $(readlink -f $BASH_SOURCE)`
 $file_dir/install-zsh-antidote.sh
 $file_dir/install-brew.sh
+$file_dir/install-browser-selector.sh
 # $file_dir/install-pkgin.sh
 
 brewpkgs=(
@@ -21,6 +22,7 @@ brewpkgs=(
   koekeishiya/formulae/yabai # tiling window manager
   koekeishiya/formulae/skhd  # hotkey daemon
   zoxide                     # cd replacement
+  defaultbrowser             # set default browser from cli
   # Prompt
   zsh
   zsh-completion
@@ -45,6 +47,7 @@ brewpkgs=(
 )
 brewcasks=(
   git-credential-manager
+  microsoft-edge
   zen
 )
 
