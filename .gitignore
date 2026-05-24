@@ -2,5 +2,6 @@ _backup
 *.bak
 *.DS_Store
 .config/pulse/
+Epic/
 mozilla/
 dconf/
