@@ -92,6 +92,7 @@ aurpkgs=(
   bluetuith            # bluetooth TUI
   # Misc
   zen-browser-bin
+  microsoft-edge-stable-bin
 )
 
 if [[ $is_wsl -eq 1 ]]; then
@@ -124,6 +125,8 @@ yay -Yc --noconfirm
 # a native compositor, hardware groups (audio, bluetooth, etc.) are managed
 # by the Windows host, and display manager / bluetooth services don't exist.
 if [[ $is_wsl -eq 0 ]]; then
+  $file_dir/install-browser-selector.sh
+
   # Setup system/package envars
   envar_file="/etc/environment"
   envars=(
