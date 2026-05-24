@@ -101,7 +101,7 @@ function _erdtree() {
       --sort=size)              sort_val="size" ;;
       --sort=name|--sort=none)  sort_val="name" ;;
       --sort=*)                 sort_val="${arg#--sort=}" ;;  # erdtree value passed directly
-      -a|-A|--all|--almost-all) newargs+=("-.") ;;
+      -a|-A|--all|--almost-all) newargs+=("-." "--no-ignore") ;;
       -h|--human-readable)      newargs+=("-H") ;;
       -l)                       newargs+=("--long") ;;
       -i|--inode)               newargs+=("--ino") ;;
