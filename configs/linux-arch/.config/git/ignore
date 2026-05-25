@@ -2,3 +2,6 @@
 .vs
 .vscode
 .zed
+
+**/.credentials*
+**/settings.local.json
