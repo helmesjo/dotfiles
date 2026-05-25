@@ -1,3 +1,5 @@
 {
-  "theme": "dark"
+  "theme": "dark",
+  "viewMode": "verbose",
+  "showThinkingSummaries": true
 }
