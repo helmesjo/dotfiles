@@ -82,5 +82,30 @@ if [[ -z "$openconsole" ]]; then
   exit 0
 fi
 
-# Copy into Alacritty's dir (requires elevation if in Program Files)
-gsudo bash -c "cp -v '$conpty_dll' '$alacritty_dir/' && cp -v '$openconsole' '$alacritty_dir/' && printf '%s' '$latest_version' > '$alacritty_dir/conpty.version'"
+# Copy into Alacritty's dir (requires elevation if in Program Files).
+# Windows locks in-use DLLs against overwrite but allows renaming them (Win32
+# LoadLibrary opens with FILE_SHARE_DELETE). MSYS2 mv/cp cannot do this;
+# [IO.File]::Move maps directly to Win32 MoveFile and handles it correctly.
+alacritty_dir_win=$(cygpath -w "$alacritty_dir")
+ps_script="$tmp/install-conpty.ps1"
+cat > "$ps_script" <<PS
+\$ErrorActionPreference = 'Stop'
+\$dir = '$alacritty_dir_win'
+foreach (\$f in @('conpty.dll', 'OpenConsole.exe')) {
+    \$target = [IO.Path]::Combine(\$dir, \$f)
+    \$old    = "\$target.old"
+    if (Test-Path \$old)    { Remove-Item \$old -Force }
+    if (Test-Path \$target) { [IO.File]::Move(\$target, \$old) }
+}
+Copy-Item -Path '$(cygpath -w "$conpty_dll")'  -Destination ([IO.Path]::Combine(\$dir, 'conpty.dll'))    -Force
+Copy-Item -Path '$(cygpath -w "$openconsole")' -Destination ([IO.Path]::Combine(\$dir, 'OpenConsole.exe')) -Force
+[IO.File]::WriteAllText([IO.Path]::Combine(\$dir, 'conpty.version'), '$latest_version')
+Remove-Item ([IO.Path]::Combine(\$dir, 'conpty.dll.old')), ([IO.Path]::Combine(\$dir, 'OpenConsole.exe.old')) -Force -ErrorAction SilentlyContinue
+PS
+
+ps_file=$(cygpath -m "$ps_script")
+if touch "$alacritty_dir/.write_test" 2>/dev/null && rm -f "$alacritty_dir/.write_test" 2>/dev/null; then
+  powershell -NoProfile -NonInteractive -File "$ps_file"
+else
+  gsudo powershell -NoProfile -NonInteractive -File "$ps_file"
+fi
