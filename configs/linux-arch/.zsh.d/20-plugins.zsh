@@ -1,9 +1,11 @@
 # Plugins (antidote)
 if command -v antidote &>/dev/null; then
   if [[ -f ~/.zsh_plugins.txt ]]; then
-    # Re-bundle when the plugin list changes or missing bundle.
+    # Re-bundle when the plugin list changes, plugins are updated, or bundle is missing.
+    antidote_home="${ANTIDOTE_HOME:-${XDG_DATA_HOME:-~/.local/share}/antidote}"
     if [[ ( ! -f ~/.zsh_plugins.sh || \
-            ~/.zsh_plugins.txt -nt ~/.zsh_plugins.sh ) \
+            ~/.zsh_plugins.txt -nt ~/.zsh_plugins.sh || \
+            "$antidote_home" -nt ~/.zsh_plugins.sh ) \
        ]]; then
       antidote bundle < ~/.zsh_plugins.txt > ~/.zsh_plugins.sh
     fi
