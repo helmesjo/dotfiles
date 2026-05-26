@@ -2,6 +2,7 @@ dotfiles_root=$(dirname $(readlink -f ${BASH_SOURCE[0]:-$0}))
 # Make sudo work with other aliases
 alias sudo='sudo '
 alias cat='bat'
+[[ $OSTYPE == darwin* ]] && git() { test -e /opt/homebrew/bin/git && { /opt/homebrew/bin/git "$@"; return; }; command git "$@"; }
 alias config='git -C $dotfiles_root'
 alias fg1='fg %1'
 alias fg2='fg %2'
