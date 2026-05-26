@@ -40,5 +40,5 @@ done
 if [[ $is_work -eq 1 ]]; then
     exec "$WORK_BROWSER" "$url"
 else
-    exec "$PERSONAL_BROWSER" "$url"
+    exec "$PERSONAL_BROWSER" -osint -url "$url"
 fi

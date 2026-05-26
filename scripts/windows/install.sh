@@ -19,6 +19,7 @@ fi
 file_dir=`dirname $(readlink -f "${BASH_SOURCE[0]:-$0}")`
 $file_dir/install-zsh-antidote.sh
 $file_dir/install-win32yank.sh
+$file_dir/install-browser-selector.sh
 
 wingetpkgs=(
   Alacritty.Alacritty

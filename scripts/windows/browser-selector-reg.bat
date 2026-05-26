@@ -15,11 +15,11 @@ reg add "HKCU\Software\Classes\BrowserSelector\Capabilities\UrlAssociations" /v 
 reg add "HKCU\Software\RegisteredApplications" /v "BrowserSelector" /t REG_SZ /d "Software\\Classes\\BrowserSelector\\Capabilities" /f >nul
 
 :: Change default browser to custom browser selector
-reg add "HKCU\Software\Classes\BrowserSelector\shell\open\command" /ve /t REG_SZ /d "wscript.exe \"%USERPROFILE%\\.local\\bin\\browser-selector.bat.vbs\" \"%%1\"" /f >nul
+reg add "HKCU\Software\Classes\BrowserSelector\shell\open\command" /ve /t REG_SZ /d "wscript.exe /B \"%USERPROFILE%\.local\bin\browser-selector.vbs\" \"%%1\"" /f >nul
 reg add "HKCU\Software\Classes\http" /ve /t REG_SZ /d "BrowserSelector" /f >nul
 reg add "HKCU\Software\Classes\https" /ve /t REG_SZ /d "BrowserSelector" /f >nul
 
 :: Windows 10/11 UserChoice (ProgId=MSEdgeHTM) is hash-protected and cannot be
 :: changed programmatically. Instead, override MSEdgeHTM at the per-user level so
 :: our selector runs regardless of what UserChoice points to.
-reg add "HKCU\Software\Classes\MSEdgeHTM\shell\open\command" /ve /t REG_SZ /d "wscript.exe \"%USERPROFILE%\\.local\\bin\\browser-selector.bat.vbs\" \"%%1\"" /f >nul
+reg add "HKCU\Software\Classes\MSEdgeHTM\shell\open\command" /ve /t REG_SZ /d "wscript.exe /B \"%USERPROFILE%\.local\bin\browser-selector.vbs\" \"%%1\"" /f >nul

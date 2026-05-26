@@ -12,4 +12,4 @@ esac
 
 ${CMD_EXE[@]} " "$(cygpath -m "$this_dir/browser-selector-reg.bat")" "
 
-echo "  - browser-selector.bat is now the default browser."
+echo "  - browser-selector.vbs is now the default browser."
