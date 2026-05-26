@@ -91,6 +91,7 @@
       fi; \
       git log --pretty=format:\"$fmt\" --date=short \"$@\"; \
     }; f"
+    lf = l --follow
     ls = l --stat
     ps = push
     psf = "!read -p \"Force push? [Y/n]: \" -r && [[ $REPLY =~ ^[Yy]$ ]] && git ps --force || true"
