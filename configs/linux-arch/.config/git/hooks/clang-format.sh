@@ -48,7 +48,7 @@ if [[ -z "$clr_res" ]]; then
   # format staged files
   if ! clang-format -i --style=file -- "${FILES_TO_FORMAT[@]}"; then
     clr_res=$clr_err
-  elif ! git diff --quiet --exit-code -- "${FILES_TO_FORMAT[@]}"; then
+  elif git diff -- "${FILES_TO_FORMAT[@]}" | grep -q '^@@'; then
     # add diff interactively if a TTY is available, otherwise stage all changes
     if { : </dev/tty; } 2>/dev/null; then
       git add --patch -- "${FILES_TO_FORMAT[@]}" </dev/tty
