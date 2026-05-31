@@ -264,6 +264,11 @@
       "kind": "Exe",
       "id": "Exanima.exe",
       "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": ".*Launcher.*",
+      "matching_strategy": "Regex",
     }
   ]
 }
