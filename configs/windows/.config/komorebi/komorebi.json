@@ -83,6 +83,21 @@
     },
     {
       "kind": "Exe",
+      "id": ".+Installer.exe",
+      "matching_strategy": "Regex",
+    },
+    {
+      "kind": "Exe",
+      "id": "setup.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Title",
+      "id": "Python.+Setup",
+      "matching_strategy": "Regex",
+    },
+    {
+      "kind": "Exe",
       "id": "explorer.exe",
       "matching_strategy": "Equals",
     },
@@ -96,6 +111,47 @@
       "id": "ApplicationFrameHost.exe",
       "matching_strategy": "Equals",
     },
+    {
+      "kind": "Exe",
+      "id": "steam.*\\.exe",
+      "matching_strategy": "Regex",
+    },
+    {
+      "kind": "Exe",
+      "id": ".*Launcher.*",
+      "matching_strategy": "Regex",
+    },
+    {
+      "kind": "Exe",
+      "id": "RSI Launcher.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "StarCitizen.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "MaxPayne3.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "SocialClubHelper.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "Exanima.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Class",
+      "id": "UnrealWindow"
+    }
+  ],
+  "floating_applications": [
     {
       "kind": "Exe",
       "id": "olk.exe",
@@ -112,28 +168,23 @@
       "matching_strategy": "Equals",
     },
     {
+      "kind": "Class",
+      "id": "TeamsWebView",
+      "matching_strategy": "Equals",
+    },
+    {
       "kind": "Exe",
       "id": "slack.exe",
       "matching_strategy": "Equals",
     },
     {
       "kind": "Exe",
-      "id": "steam.*\\.exe",
-      "matching_strategy": "Regex",
-    },
-    {
-      "kind": "Exe",
-      "id": "ScreenToGif.exe",
+      "id": "Discord.exe",
       "matching_strategy": "Equals",
     },
     {
       "kind": "Exe",
-      "id": "setup.exe",
-      "matching_strategy": "Equals",
-    },
-    {
-      "kind": "Exe",
-      "id": "Photos.exe",
+      "id": "Spotify.exe",
       "matching_strategy": "Equals",
     },
     {
@@ -143,7 +194,52 @@
     },
     {
       "kind": "Exe",
-      "id": "Spotify.exe",
+      "id": "Code.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "Zed.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "devenv.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "Obsidian.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "Wireshark.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "vlc.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "ScreenToGif.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "Photos.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "mspaint.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
+      "id": "Notepad.exe",
       "matching_strategy": "Equals",
     },
     {
@@ -158,21 +254,6 @@
     },
     {
       "kind": "Exe",
-      "id": "devenv.exe",
-      "matching_strategy": "Equals",
-    },
-    {
-      "kind": "Exe",
-      "id": "Code.exe",
-      "matching_strategy": "Equals",
-    },
-    {
-      "kind": "Exe",
-      "id": "Wireshark.exe",
-      "matching_strategy": "Equals",
-    },
-    {
-      "kind": "Exe",
       "id": "gui.exe",
       "matching_strategy": "Equals",
     },
@@ -183,22 +264,7 @@
     },
     {
       "kind": "Exe",
-      "id": "MaxPayne3.exe",
-      "matching_strategy": "Equals",
-    },
-    {
-      "kind": "Exe",
-      "id": "SocialClubHelper.exe",
-      "matching_strategy": "Equals",
-    },
-    {
-      "kind": "Exe",
-      "id": "Discord.exe",
-      "matching_strategy": "Equals",
-    },
-    {
-      "kind": "Exe",
-      "id": ".*OneConnect.*",
+      "id": "iCloud.*exe",
       "matching_strategy": "Regex",
     },
     {
@@ -208,66 +274,7 @@
     },
     {
       "kind": "Exe",
-      "id": "iCloud.*exe",
-      "matching_strategy": "Regex",
-    },
-    {
-      "kind": "Exe",
-      "id": ".+Installer.exe",
-      "matching_strategy": "Regex",
-    },
-    {
-      "kind": "Exe",
-      "id": "mspaint.exe",
-      "matching_strategy": "Equals",
-    },
-    {
-      "kind": "Exe",
-      "id": "Notepad.exe",
-      "matching_strategy": "Equals",
-    },
-    {
-      "kind": "class",
-      "id": "UnrealWindow"
-    },
-    {
-      "kind": "Exe",
-      "id": "Zed.exe",
-      "matching_strategy": "Equals",
-    },
-    {
-      "kind": "Title",
-      "id": "Python.+Setup",
-      "matching_strategy": "Regex",
-    },
-    {
-      "kind": "Exe",
-      "id": "vlc.exe",
-      "matching_strategy": "Equals",
-    },
-    {
-      "kind": "Exe",
-      "id": "RSI Launcher.exe",
-      "matching_strategy": "Equals",
-    },
-    {
-      "kind": "Exe",
-      "id": "StarCitizen.exe",
-      "matching_strategy": "Equals",
-    },
-    {
-      "kind": "Exe",
-      "id": "Obsidian.exe",
-      "matching_strategy": "Equals",
-    },
-    {
-      "kind": "Exe",
-      "id": "Exanima.exe",
-      "matching_strategy": "Equals",
-    },
-    {
-      "kind": "Exe",
-      "id": ".*Launcher.*",
+      "id": ".*OneConnect.*",
       "matching_strategy": "Regex",
     }
   ]
