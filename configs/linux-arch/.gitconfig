@@ -91,6 +91,7 @@
       fi; \
       git log --pretty=format:\"$fmt\" --date=short \"$@\"; \
     }; f"
+    ignored = ls-files -i --exclude-standard -c
     lf = l --follow
     ls = l --stat
     ps = push
