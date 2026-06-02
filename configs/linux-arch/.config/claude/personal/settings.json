@@ -1,4 +1,5 @@
 {
+  "verbose": true,
   "viewMode": "verbose",
   "showThinkingSummaries": true,
   "theme": "dark",
