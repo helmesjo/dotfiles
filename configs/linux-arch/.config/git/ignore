@@ -5,3 +5,5 @@
 
 **/.credentials*
 **/settings.local.json
+
+**/.claude/
