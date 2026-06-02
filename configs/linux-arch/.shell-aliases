@@ -160,13 +160,20 @@ alias claude-work='_claude_run ~/.config/claude/work'
 
 # completion function for _open_file_explorer
 function _files_completion() {
-  _files -/  # Completes files and directories
+  if [[ -n "$ZSH_VERSION" ]]; then
+    _files
+  else
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    COMPREPLY=($(compgen -d -f -- "$cur"))
+  fi
 }
 
 if [[ -n "$ZSH_VERSION" ]]; then
   compdef _files_completion _open_file_explorer
   compdef _files_completion _erdtree
+  compdef _files_completion tree
 else
   complete -F _files_completion _open_file_explorer
   complete -F _files_completion _erdtree
+  complete -F _files_completion tree
 fi
