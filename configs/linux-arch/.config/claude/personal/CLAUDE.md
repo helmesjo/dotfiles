@@ -1,5 +1,7 @@
 # Global instructions
 
+- Check `<work-dir>/custom-skills/` for detailed tool information. CLI tools follow the naming convention `<tool>-cli.md` (e.g. `az-cli.md` for the `az` tool).
+
 - Always use POSIX tools (assume cygwin/msys2 on Windows).
 - Never add `Co-Authored-By` to commit messages.
 - Only use keyboard-available characters in all written language, docs, and comments (no emojis or Unicode ornaments).
