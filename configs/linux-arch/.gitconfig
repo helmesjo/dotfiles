@@ -94,6 +94,7 @@
     ignored = ls-files -i --exclude-standard -c
     lf = l --follow
     ls = l --stat
+    ls-symdir = "!git ls-files -s|awk '$1==\"120000\"{print $4}'|while IFS= read -r f;do if [ -d \"$f\" ];then git check-attr symlink -- \"$f\"|awk -F': ' -v p=\"$f\" '{v=$3;printf \"%s %s\\n\",p,(v==\"unspecified\"?\"[]\":\"[\"v\"]\")}';fi;done"
     ps = push
     psf = "!read -p \"Force push? [Y/n]: \" -r && [[ $REPLY =~ ^[Yy]$ ]] && git ps --force || true"
     psu = "!git push --set-upstream origin \"$(git rev-parse --abbrev-ref HEAD)\""
