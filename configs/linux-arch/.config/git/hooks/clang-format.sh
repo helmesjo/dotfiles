@@ -12,6 +12,11 @@
 clr_ok=$'\e[1;32m';clr_warn=$'\e[1;33m';clr_err=$'\e[1;31m'
 clr_def=$'\e[1;0m';
 
+# Skip entirely when no TTY is available (CI, IDE, non-interactive git).
+# The interactive add-patch below requires a TTY, and the stash/pop it relies
+# on can leave the index in a conflicted state when run non-interactively.
+{ : </dev/tty; } 2>/dev/null || { printf '[hook/fmt]:%bno-tty%b\n' "$clr_warn" "$clr_def"; exit 0; }
+
 # Skip if no clang-format exe.
 if ! command -v clang-format >/dev/null 2>&1; then
   clr_res=$clr_warn
@@ -49,12 +54,7 @@ if [[ -z "$clr_res" ]]; then
   if ! clang-format -i --style=file -- "${FILES_TO_FORMAT[@]}"; then
     clr_res=$clr_err
   elif git diff -- "${FILES_TO_FORMAT[@]}" | grep -q '^@@'; then
-    # add diff interactively if a TTY is available, otherwise stage all changes
-    if { : </dev/tty; } 2>/dev/null; then
-      git add --patch -- "${FILES_TO_FORMAT[@]}" </dev/tty
-    else
-      git add -- "${FILES_TO_FORMAT[@]}"
-    fi
+    git add --patch -- "${FILES_TO_FORMAT[@]}" </dev/tty
   fi
 
   # (1) restore original unstaged changes
