@@ -4,6 +4,7 @@
 .config/Code   symlink=dir
 .config/fish   symlink=dir
 .config/git    symlink=dir
+.config/grok   symlink=dir
 .config/helix  symlink=dir
 .config/Zed    symlink=dir
 .config/zen    symlink=dir

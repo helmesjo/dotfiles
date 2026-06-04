@@ -1,7 +1,6 @@
 # Runtime state and private data - not shareable
 personal/*
 work/*
-!*/CLAUDE.md
-!*/settings.json
-!*/keybindings.json
+!*/AGENTS.md
+!*/config.toml
 !*/custom-skills

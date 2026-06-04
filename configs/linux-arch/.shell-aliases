@@ -155,6 +155,10 @@ _claude_run() { CLAUDE_CONFIG_DIR=$1 command claude "${@:2}"; }
 alias claude='_claude_run ~/.config/claude/personal'
 alias claude-work='_claude_run ~/.config/claude/work'
 
+_grok_run() { GROK_HOME=$1 command grok "${@:2}"; }
+alias grok='_grok_run ~/.config/grok/personal'
+alias grok-work='_grok_run ~/.config/grok/work'
+
 ## File completion for aliases
 #
 

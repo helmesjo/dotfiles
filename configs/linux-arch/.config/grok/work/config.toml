@@ -1,0 +1,16 @@
+# Work profile config for Grok.
+# Separate from personal for isolation of history, auth, projects, settings.
+
+[cli]
+auto_update = false
+show_tips = false
+
+[ui]
+simple_mode = false
+max_thoughts_width = 120
+default_selected_permission = "allow_once"
+# yolo = true   # if you want less confirmations on work machine
+
+[features]
+telemetry = false
+feedback = false

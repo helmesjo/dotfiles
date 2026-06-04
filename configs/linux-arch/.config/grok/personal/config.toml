@@ -1,0 +1,15 @@
+[cli]
+installer = "internal"
+show_tips = false
+auto_update = false
+
+[ui]
+max_thoughts_width = 120
+fork_secondary_model = "grok-build"
+yolo = false
+compact_mode = true
+default_selected_permission = "allow_once"
+permission_mode = "ask"
+simple_mode = false
+vim_mode = true
+scroll_speed = 80
