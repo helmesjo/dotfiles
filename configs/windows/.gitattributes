@@ -5,4 +5,5 @@
 .config/fish   symlink=dir
 .config/git    symlink=dir
 .config/helix  symlink=dir
+.config/Zed    symlink=dir
 .config/zen    symlink=dir
