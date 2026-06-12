@@ -58,7 +58,7 @@
     ba = branch --all
     bd = branch --delete
     # branch-prune-stale (local without remote)
-    bps = "!for branch in $(git for-each-ref --format '%(refname) %(upstream:track)' refs/heads | awk '$2 == \"[gone]\" {sub(\"refs/heads/\", \"\", $1); print $1}'); do echo \"> git branch -D $branch\" && read -p \"  ^ Proceed? [Y/n]: \" -r && [[ $REPLY =~ ^[Yy]$ ]] && git branch -D $branch && echo || true; done"
+    bps = "!for branch in $(git for-each-ref --format '%(refname) %(upstream:track)' refs/heads | awk '$2 == \"[gone]\" {sub(\"refs/heads/\", \"\", $1); print $1}'); do echo \"> git branch -D $branch\" && printf '  ^ Proceed? [Y/n]: ' && read -r REPLY && case \"$REPLY\" in [Yy]*) git branch -D \"$branch\" && echo;; esac; done"
     c = commit
     cne = commit --amend --no-edit
     ca = commit --all
@@ -69,8 +69,8 @@
     dc = diff --cached
     # Show commits unique to the specified ref (relative to current).
     # With no ref, log current branch.
-    l = "!f() { \
-      local fmt='%C(2)%cd %C(auto)%h%C(auto)%d %C(auto)%s'; \
+    l = "!bash -c 'f() { \
+      local fmt=\"%C(2)%cd %C(auto)%h%C(auto)%d %C(auto)%s\"; \
       local -a ARGS=(); \
       local REF=; \
       if [ $# -gt 0 ]; then \
@@ -90,13 +90,13 @@
         set -- \"${ARGS[@]}\"; \
       fi; \
       git log --pretty=format:\"$fmt\" --date=short \"$@\"; \
-    }; f"
+    }; f \"$@\"' -- "
     ignored = ls-files -i --exclude-standard -c
     lf = l --follow
     ls = l --stat
     ls-symdir = "!git ls-files -s|awk '$1==\"120000\"{print $4}'|while IFS= read -r f;do if [ -d \"$f\" ];then git check-attr symlink -- \"$f\"|awk -F': ' -v p=\"$f\" '{v=$3;printf \"%s %s\\n\",p,(v==\"unspecified\"?\"[]\":\"[\"v\"]\")}';fi;done"
     ps = push
-    psf = "!read -p \"Force push? [Y/n]: \" -r && [[ $REPLY =~ ^[Yy]$ ]] && git ps --force || true"
+    psf = "!printf 'Force push? [Y/n]: ' && read -r REPLY && case \"$REPLY\" in [Yy]*) git ps --force;; esac"
     psu = "!git push --set-upstream origin \"$(git rev-parse --abbrev-ref HEAD)\""
     pl = pull -p
     pwd = rev-parse --show-toplevel
