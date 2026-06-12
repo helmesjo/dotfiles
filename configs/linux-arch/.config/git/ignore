@@ -7,3 +7,5 @@
 **/settings.local.json
 
 **/.claude/
+
+**/.claude/settings.local.json
