@@ -9,7 +9,7 @@
     editor = hx
     pager = delta
     symlinks = true
-    autocrlf = input
+    autocrlf = false
     filemode = true
     eol = lf
     longpaths = true
