@@ -104,6 +104,11 @@
     },
     {
       "kind": "Exe",
+      "id": "mstsc.exe",
+      "matching_strategy": "Equals",
+    },
+    {
+      "kind": "Exe",
       "id": "SystemSettings.*\\.exe",
       "matching_strategy": "Regex",
     },
