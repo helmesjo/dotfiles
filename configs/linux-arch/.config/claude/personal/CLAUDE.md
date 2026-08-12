@@ -9,3 +9,4 @@
 - Always use `/tmp/claude/` as the base path for any temporary files (e.g. debug scripts, scratch files). Never write temp files directly into a project directory.
 - Never push changes to any remote. Never modify or delete remote-tracking refs (`refs/remotes/`). Only ever work on local branches and commits. This includes never running `git push`, `git push --tags`, or any operation that writes to or rewrites remote-tracking state.
 - Never use semicolons in any written text: not in commit messages, not in comments, not in docs, not in responses. Use a comma, a full stop, or rewrite the sentence instead.
+- Never use `--` (or an em dash) as punctuation in any written text: not in commit messages, not in comments, not in docs, not in responses. Use a comma, a colon, parentheses, or rewrite the sentence instead.
