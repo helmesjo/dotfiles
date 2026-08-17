@@ -14,6 +14,7 @@ yabai -m rule --add app='^Obsidian$' manage=off
 yabai -m rule --add app='^Zed$' manage=off
 yabai -m rule --add app='^Epic Games Launcher$' manage=off
 yabai -m rule --add app='^UnrealEditor$' manage=off
+yabai -m rule --add app='^Slack$' manage=off
 yabai -m rule --apply
 
 #
