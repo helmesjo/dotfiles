@@ -14,7 +14,7 @@ columns = 160
 lines = 80
 
 [scrolling]
-history = 3023
+history = 6046
 
 [cursor]
 style = { shape = "Block", blinking = "Off" }
