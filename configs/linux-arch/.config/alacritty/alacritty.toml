@@ -21,7 +21,7 @@ style = { shape = "Block", blinking = "Off" }
 unfocused_hollow = true
 
 [mouse]
-hide_when_typing = true
+hide_when_typing = false
 
 [selection]
 save_to_clipboard = false
