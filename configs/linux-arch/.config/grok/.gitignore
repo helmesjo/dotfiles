@@ -4,3 +4,7 @@ work/*
 !*/AGENTS.md
 !*/config.toml
 !*/custom-skills
+!*/skills
+*/skills/*
+!*/skills/build2
+!*/skills/init-skills-submodules

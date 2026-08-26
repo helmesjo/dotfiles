@@ -1,0 +1,3 @@
+[submodule "configs/linux-arch/.config/grok/personal/skills/agent-skills-build2"]
+	path = configs/linux-arch/.config/grok/personal/skills/build2
+	url = https://github.com/helmesjo/agent-skills-build2.git
