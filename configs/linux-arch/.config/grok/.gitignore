@@ -7,4 +7,6 @@ work/*
 !*/skills
 */skills/*
 !*/skills/build2
+!*/skills/build2-package
+!*/skills/build2-review
 !*/skills/init-skills-submodules
