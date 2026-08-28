@@ -6,6 +6,7 @@ work/*
 !*/custom-skills
 !*/skills
 */skills/*
+!*/skills/az-cli
 !*/skills/build2
 !*/skills/build2-package
 !*/skills/build2-review

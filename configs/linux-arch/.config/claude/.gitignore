@@ -4,4 +4,4 @@ work/*
 !*/CLAUDE.md
 !*/settings.json
 !*/keybindings.json
-!*/custom-skills
+!*/skills
