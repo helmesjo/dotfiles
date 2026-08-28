@@ -36,7 +36,7 @@ reported finding instead. The repository under review must come out of
 this check exactly as it went in.
 
 The checklist and criteria in
-[packaging-guide-review.md](../agent-skills-build2/guides/packaging-guide-review.md)
+[packaging-guide-review.md](../build2/guides/packaging-guide-review.md)
 are the source of truth. Copy the checklist items. Do not paraphrase the
 required criteria. Do not invent review criteria.
 
@@ -46,7 +46,7 @@ quality, upstream docs, and style of upstream C/C++.
 ## Resolve ROOT
 
 Let `HERE` be the directory that contains this `SKILL.md` (absolute path
-from the system context). Let `ROOT` be `HERE/../agent-skills-build2`
+from the system context). Let `ROOT` be `HERE/../build2`
 (the existing `build2` skill). Confirm
 `ROOT/guides/packaging-guide-review.md` exists. If it does not, stop.
 
@@ -235,9 +235,9 @@ Stop rather than guess when any of these is true:
 
 | Need | File |
 |------|------|
-| Checklist and criteria | [packaging-guide-review.md](../agent-skills-build2/guides/packaging-guide-review.md) |
-| What not to do | [packaging-guide-antipatterns.md](../agent-skills-build2/guides/packaging-guide-antipatterns.md) |
-| Names | [package-naming.md](../agent-skills-build2/HOWTO/package-naming.md) |
-| License | [packaging-license.md](../agent-skills-build2/guides/packaging-license.md) |
-| Accompanying packages | [tests-extra-dependencies.md](../agent-skills-build2/HOWTO/tests-extra-dependencies.md) |
+| Checklist and criteria | [packaging-guide-review.md](../build2/guides/packaging-guide-review.md) |
+| What not to do | [packaging-guide-antipatterns.md](../build2/guides/packaging-guide-antipatterns.md) |
+| Names | [package-naming.md](../build2/HOWTO/package-naming.md) |
+| License | [packaging-license.md](../build2/guides/packaging-license.md) |
+| Accompanying packages | [tests-extra-dependencies.md](../build2/HOWTO/tests-extra-dependencies.md) |
 | Creating the package | [../build2-package/SKILL.md](../build2-package/SKILL.md) |

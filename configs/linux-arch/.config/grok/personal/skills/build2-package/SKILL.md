@@ -20,14 +20,14 @@ user-invocable: true
 # build2-package
 
 This file is the procedure. The packaging guides in the `build2` skill
-(`agent-skills-build2/guides/` and `HOWTO/`) are the source of truth for
+(`build2/guides/` and `HOWTO/`) are the source of truth for
 how each step is done. Do not invent a layout, a `bdep new` invocation, a
 branch name, or a publish sequence.
 
 ## Resolve ROOT
 
 Let `HERE` be the directory that contains this `SKILL.md` (absolute path
-from the system context). Let `ROOT` be `HERE/../agent-skills-build2`
+from the system context). Let `ROOT` be `HERE/../build2`
 (the existing `build2` skill). Confirm
 `ROOT/guides/packaging-guide-summary.md` exists. If it does not, stop.
 
@@ -113,9 +113,9 @@ Ask the user how to recover.
 ## Mode: new (initial stretch)
 
 Follow the checklist in
-[packaging-guide-summary.md](../agent-skills-build2/guides/packaging-guide-summary.md)
+[packaging-guide-summary.md](../build2/guides/packaging-guide-summary.md)
 and steps 8-10 in
-[packaging-guide-testing.md](../agent-skills-build2/guides/packaging-guide-testing.md).
+[packaging-guide-testing.md](../build2/guides/packaging-guide-testing.md).
 The numbered gates below are the ones that must not be skipped or reordered.
 
 ### Gate A: existing work
@@ -343,13 +343,13 @@ Stop rather than guess when any of these is true:
 
 | Need | File |
 |------|------|
-| Concepts, review branch, steps 1-7 | [packaging-guide-summary.md](../agent-skills-build2/guides/packaging-guide-summary.md) |
-| Tests, CI, merge, publish | [packaging-guide-testing.md](../agent-skills-build2/guides/packaging-guide-testing.md) |
-| What not to do, patching | [packaging-guide-antipatterns.md](../agent-skills-build2/guides/packaging-guide-antipatterns.md) |
-| New version / revision | [packaging-guide-version-management.md](../agent-skills-build2/guides/packaging-guide-version-management.md) |
-| Repository / project / package names | [package-naming.md](../agent-skills-build2/HOWTO/package-naming.md) |
-| License field | [packaging-license.md](../agent-skills-build2/guides/packaging-license.md) |
-| Accompanying test packages | [tests-extra-dependencies.md](../agent-skills-build2/HOWTO/tests-extra-dependencies.md) |
-| Version / constraint syntax | [bpkg-package-name-version.md](../agent-skills-build2/guides/bpkg-package-name-version.md) |
-| `bdep new` layouts | [bdep-new-layouts.md](../agent-skills-build2/bdep/bdep-new-layouts.md) |
+| Concepts, review branch, steps 1-7 | [packaging-guide-summary.md](../build2/guides/packaging-guide-summary.md) |
+| Tests, CI, merge, publish | [packaging-guide-testing.md](../build2/guides/packaging-guide-testing.md) |
+| What not to do, patching | [packaging-guide-antipatterns.md](../build2/guides/packaging-guide-antipatterns.md) |
+| New version / revision | [packaging-guide-version-management.md](../build2/guides/packaging-guide-version-management.md) |
+| Repository / project / package names | [package-naming.md](../build2/HOWTO/package-naming.md) |
+| License field | [packaging-license.md](../build2/guides/packaging-license.md) |
+| Accompanying test packages | [tests-extra-dependencies.md](../build2/HOWTO/tests-extra-dependencies.md) |
+| Version / constraint syntax | [bpkg-package-name-version.md](../build2/guides/bpkg-package-name-version.md) |
+| `bdep new` layouts | [bdep-new-layouts.md](../build2/bdep/bdep-new-layouts.md) |
 | Review of the result | [../build2-review/SKILL.md](../build2-review/SKILL.md) |
