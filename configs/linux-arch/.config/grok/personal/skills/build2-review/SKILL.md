@@ -1,28 +1,44 @@
 ---
 name: build2-review
 description: >
-  End-to-end cppget.org third-party package review (initial submission, new
-  version, or new revision). Use when the user wants to review a build2
-  package on cppget.org, run the packaging review checklist, send the
-  review@cppget.org notification, or runs /build2-review or /build2 review.
-  Do not use for ordinary source-code review of a build2 project (that is
-  /review). Do not use for creating the package (that is build2-package).
+  Pre-release/publish sanity check for a build2 third-party package (initial
+  submission, new version, or new revision) on the local or specified
+  repository. Runs the packaging review checklist against the repository and
+  reports findings. Read-only: makes no changes, local or externally
+  visible (no commits, no pushes, no GitHub issues/PRs/comments, no email).
+  Use when the user wants to sanity-check packaging before publishing, run
+  the packaging review checklist locally, or runs /build2-review or
+  /build2 review. Do not use for ordinary source-code review of a build2
+  project (that is /review). Do not use for creating the package (that is
+  build2-package). Do not use to act as an official cppget.org reviewer
+  performing the actual GitHub review (that requires opening an issue/PR,
+  merging, and emailing review@cppget.org, which is out of scope here).
 when-to-use: >
-  Triggers on "/build2-review", "/build2 review", "review cppget package",
-  "review third-party package submission", "packaging review checklist".
-argument-hint: "[initial | version | revision | continue] [<repo-or-url> [<version>]]"
+  Triggers on "/build2-review", "/build2 review", "sanity check this build2
+  package", "check packaging before publish", "run the packaging review
+  checklist locally".
+argument-hint: "[initial | version | revision] [<repo-or-local-path> [<version>]]"
 metadata:
-  short-description: "End-to-end cppget.org package review"
-user-invocable: true
+  short-description: "Local pre-publish build2 packaging sanity check (no external changes)"
+  user-invocable: true
 ---
 
 # build2-review
 
-This file is the procedure. The checklist, outcome comment, and
-notification email in
+This is a **read-only, local sanity check**. It exists to catch packaging
+problems before you publish, by running the same checklist a cppget.org
+reviewer would use against the repository. It must never create, comment
+on, or merge a GitHub issue or pull request, never push a branch, never
+send email, and never modify the repository under review (no commits, no
+tags, no file edits, no `bdep release`, no `bdep publish`, no `git push`).
+If a step below would make such a change, skip it and turn it into a
+reported finding instead. The repository under review must come out of
+this check exactly as it went in.
+
+The checklist and criteria in
 [packaging-guide-review.md](../agent-skills-build2/guides/packaging-guide-review.md)
-are the source of truth. Copy them. Do not paraphrase the required
-formats. Do not invent review criteria.
+are the source of truth. Copy the checklist items. Do not paraphrase the
+required criteria. Do not invent review criteria.
 
 Reviews cover build and packaging support only. Ignore upstream source
 quality, upstream docs, and style of upstream C/C++.
@@ -38,25 +54,28 @@ All later `read_file` paths are `${ROOT}/...`.
 
 ## Hard rules
 
-1. Never mark the review complete without an outcome comment in the
-   required format (unless this is a no-issue new-version shortcut that
-   the guide explicitly allows).
-2. Never send `review@cppget.org` without a real-name `From` and the
-   subject `Review <PROJECT> <VERSION>`.
-3. Never tick a checklist item unless you personally verified it on this
-   run. The author must not tick items.
-4. Never merge a dummy `review-X.Y.Z` pull request.
-5. Never treat a green CI badge as a substitute for the checklist.
-6. Review every package in a multi-package repository together. One
-   issue, one outcome, one email.
-7. Do not start if another review issue is already open without telling
-   the user. Multiple reviews are allowed. Duplicate silent work is not.
-8. Blocking vs non-blocking follows the guide. When in doubt, discuss,
-   do not downgrade a conceptual `buildfile` error.
+1. No externally visible changes: never create, comment on, or merge a
+   GitHub issue or pull request, never push a branch, never send email.
+2. No changes to the repository under review: no commits, tags, or file
+   edits, no `git push`, no `bdep release`, no `bdep publish`. Inspection
+   only (`git log`, `git show`, `git diff`, reading files). If you build or
+   test something to verify an item, do it out-of-tree in a scratch
+   directory, never inside the reviewed repository's working tree.
+3. If given a local path, use it in place, read-only. Do not check out a
+   different ref, stash, or reset it.
+4. If given a remote repo or URL, clone it read-only into a scratch
+   directory under `/tmp/claude/`. Never use push-capable remotes or
+   `git push`. Treat the clone as disposable.
+5. Never tick a checklist item without personally verifying it on this
+   run.
+6. Blocking vs non-blocking follows the guide's criteria. When in doubt,
+   say so rather than silently downgrading a conceptual `buildfile` error.
+7. The output is a report in the conversation (optionally also written to
+   a scratch file under `/tmp/claude/`). Never post it anywhere external.
 
-## Mandatory reads (this turn, before any GitHub write)
+## Mandatory reads (before reporting findings)
 
-Read these files in full with `read_file` before opening an issue or PR.
+Read these files in full with `read_file` before reporting any findings.
 Do not skim.
 
 1. `${ROOT}/guides/packaging-guide-review.md`
@@ -64,8 +83,8 @@ Do not skim.
 3. `${ROOT}/HOWTO/package-naming.md`
 
 Load on demand from the map at the end. The Initial Review Checklist
-inside packaging-guide-review.md is the checklist you paste. That file
-is the only copy.
+inside packaging-guide-review.md is the checklist you work through. That
+file is the only copy.
 
 ## Arguments
 
@@ -74,114 +93,62 @@ Parse in order. The first matching rule wins.
 
 | First token | Kind |
 |-------------|------|
-| empty / omitted | auto-detect after clone |
-| `initial` | full initial-submission review |
-| `version` | new upstream version |
-| `revision` | new packaging revision |
-| `continue` | resume an in-progress review issue |
-| anything else | treat as `<repo-or-url>` and auto-detect kind |
+| empty / omitted | auto-detect after resolving the target |
+| `initial` | full initial-submission checklist |
+| `version` | new upstream version, diff-based |
+| `revision` | new packaging revision, diff-based plus extra checks |
+| anything else | treat as `<repo-or-local-path>` and auto-detect kind |
 
-Remaining tokens: `<repo-or-url>` (GitHub URL, `build2-packaging/<repo>`,
-or a local clone path) and optional `<version>`. If the target is missing,
-ask. Do not pick a random unreviewed package unless the user asked to
-find one.
+Remaining tokens: `<repo-or-local-path>` (GitHub URL, `owner/repo`, or a
+local clone path) and optional `<version>`. If the target is missing, ask.
 
-Report the chosen kind and version to the user before opening GitHub
-objects.
+Report the chosen kind and version to the user before starting.
 
-## Find a package (only if the user asked)
+## Get the repository
 
-Use the
-[cppget.org Advanced Package Search](https://cppget.org/?advanced-search)
-filtered to unreviewed packages in `testing`. Prefer packages the user
-already consumes. Before opening anything, search the repository issues
-for an existing review.
+If the user gave a local path, use it as-is, read-only.
 
-## Clone and classify
+Otherwise clone read-only into a scratch directory (never push to this
+clone, never add it as a push target for anything else):
 
 ```
-git clone --recurse-submodules --shallow-submodules \
-  git@github.com:build2-packaging/<repo>.git
+git clone --recurse-submodules --shallow-submodules <url> /tmp/claude/<name>
 ```
 
-If the user passed a local path, use that clone, then `git submodule update --init`.
+## Classify
 
 Determine `<VERSION>` from the `manifest` `version:` field (the latest
-released tag if several packages). Determine kind:
+released tag if there are several packages). Determine kind:
 
 | Evidence | Kind |
 |----------|------|
-| No prior review issue, `main` is still the first `bdep new` commit or `review` is unmerged | `initial` |
+| No released tag yet, or the reviewed ref is still the first `bdep new` commit | `initial` |
 | A `vX.Y.Z` tag already exists and this version is `X.Y.Z+R` | `revision` |
-| A previous version was reviewed and this is a new `X.Y.Z` | `version` |
+| A previous version was tagged and this is a new `X.Y.Z` | `version` |
 
-Verify the first commit of the repository:
+Verify the first commit of the repository (read-only):
 
 ```
 git log -p "$(git rev-list --all | tail -1)"
 ```
 
 That commit must contain only files generated by `bdep new`, and its
-message must be the exact command line. It must be the tip of `main`
-from which `review` was created. If later packaging commits landed on
-`main` during the stretch, that is a process error. Record it in the
-review. Do not ignore it.
+message must be the exact command line. Record any deviation as a finding.
+Do not ignore it.
 
 ## Kind: initial
 
-Follow packaging-guide-review.md "Reviewing an Initial Submission"
-without skipping steps.
+Work through every item in the Initial Review Checklist section of
+packaging-guide-review.md against the repository. Tick an item only after
+personally verifying it (tree, `manifest`, `buildfile`s, install layout,
+tests, tags). Use the linked HOWTO/guide for each item rather than memory.
 
-### 1. Review issue
-
-Title (exact):
-
-```
-Review of the `X.Y.Z` version (initial package submission)
-```
-
-Paste the entire Initial Review Checklist from
-packaging-guide-review.md as the issue body, including both NOTE lines
-at the top. Create the issue. Remember its number.
-
-### 2. Review pull request
-
-**If `review` exists and is not merged into `main`:** open a real PR,
-`base: main`, `compare: review`. Link the issue. This PR is the one
-that later gets merged.
-
-**If `review` is already merged:** create a dummy draft PR only to host
-code-review comments:
-
-```
-git branch review-X.Y.Z "$(git rev-list --all | tail -1)"
-git push origin review-X.Y.Z
-```
-
-`base: review-X.Y.Z`, `compare: main` (or `master`). Title (exact):
-
-```
-Dummy draft pull request for version `X.Y.Z` review (do not merge)
-```
-
-Description: `See review issue #<N>.` Create it as a draft. Never merge
-it.
-
-### 3. Work the checklist
-
-Tick items only after checking the tree, `manifest`, `buildfile`s,
-install layout, tests, and tags. Use the linked HOWTO/guide for each
-item rather than memory.
-
-Post pinpoint findings as PR review comments. Post general observations
-in the outcome comment.
-
-Classify each finding:
+Classify each finding exactly as the guide does:
 
 | Class | When |
 |-------|------|
 | Blocking | high severity or impact, many users, conceptual error (wrong compile options in `buildfile`s), or cannot be fixed later without breaking compatibility |
-| Non-blocking | should be fixed in a revision or the next version, does not fail this review |
+| Non-blocking | should be fixed in a revision or the next version, does not fail the check |
 | Note | observation only |
 
 Load on demand while checking:
@@ -193,62 +160,52 @@ Load on demand while checking:
 - compile options: `${ROOT}/HOWTO/buildfile-compile-options.md`
 - what not to do: `${ROOT}/guides/packaging-guide-antipatterns.md`
 
-### 4. Outcome comment
+### Report
 
-Copy the successful or unsuccessful template from
-packaging-guide-review.md. Fill `@<AUTHOR>`. Omit empty sections. If
-findings live on the PR, reference `#<PR>` rather than restating every
-line.
+Present the results to the user using the same section layout as the
+guide's outcome comment, but do not post it anywhere:
 
-### 5a. Successful
+```
+Blocking issues:
 
-1. Edit the issue: remove the in-progress NOTE line.
-2. Merge the author's `review` to `main` PR. Close a dummy
-   `review-X.Y.Z` PR without merging.
-3. Close the issue if there are no non-blocking items. Leave it open
-   otherwise (reminder for the next version).
-4. Send the notification email.
+...
 
-### 5b. Unsuccessful
+Non-blocking issues:
 
-1. Send the notification email.
-2. Wait for a published revision.
-3. Re-review the relevant diffs. Confirm blocking items are gone. Look
-   for new blocking items.
-4. Return to step 4 with a new outcome comment.
+...
+
+Notes:
+
+...
+```
+
+Omit empty sections. If you wrote a scratch copy, mention its path.
 
 ## Kind: version
 
-Compare tags (submodule means the diff is packaging-only):
+Diff the base (previously reviewed) version against the target version.
+Prefer a local `git diff <old-tag>..<new-tag>` if both tags are available
+in the clone, otherwise the GitHub compare view:
 
 ```
-https://github.com/build2-packaging/<project>/compare/vOLD...vNEW
+https://github.com/<owner>/<project>/compare/vOLD...vNEW
 ```
 
 Watch build-level compatibility: renamed exported targets or config
 variables are breaking even when upstream's API is stable.
 
-Then pick the alternative the guide names:
+Report one of:
 
-1. **No substantial packaging changes, no issues:** skip the review
-   issue. Send the notification email. Omit the outcome link.
-2. **No substantial packaging changes, there are issues:** issue title
-   `Review of the \`X.Y.Z\` version`. No checklist. Feedback in the
-   issue body. PR is optional (use the base version's release commit as
-   the starting commit if you open one).
-3. **Substantial packaging changes:** full initial procedure, including
-   the checklist.
-
-If a PR for the upgrade was already reviewed and merged by the package
-author, that review counts. The author may send the notification using
-the PR URL as the outcome link.
-
-Unsuccessful version reviews follow the same cycle as initial.
+1. **No substantial packaging changes, no issues:** say so plainly, no
+   checklist needed.
+2. **No substantial packaging changes, there are issues:** list them
+   directly (no checklist).
+3. **Substantial packaging changes:** run the full initial checklist above.
 
 ## Kind: revision
 
-Same procedure as `version`, plus all of these must hold or the revision
-fails:
+Same as `version`, plus flag it as a finding if any of these does not
+hold:
 
 - Changes are limited to bug fixes in `buildfile`s, `manifest`, and
   similar packaging files.
@@ -258,49 +215,27 @@ fails:
 - No major structural changes (source layout, exported target names,
   config variable names).
 
-## Notification email
-
-Required for both pass and fail. Draft it even if you cannot send mail
-from this environment, then send it if a mailer is available. Do not
-drop this step.
-
-- `From:` the reviewer's real name (oversight statement).
-- `Subject:` `Review <PROJECT> <VERSION>`
-- Body: list of packages, `pass` or `fail`, link to the outcome comment.
-
-Copy the example block from packaging-guide-review.md. All packages in
-the project go in that one email.
-
-If this was a successful no-issue version/revision with no review issue,
-the outcome link may be omitted.
-
-## Mode: continue
-
-Find the open review issue and PR. Read every outcome comment. Resume
-at the first incomplete step of the matching kind (usually 5b waiting
-for a revision, or a checklist that is still in progress). Do not open
-a second issue.
-
 ## Stop and ask
 
 Stop rather than guess when any of these is true:
 
 - You cannot determine the version or the kind.
-- `gh` / git access to `build2-packaging/<repo>` fails.
+- You cannot access the repository (clone fails, local path invalid).
 - The first commit is not a `bdep new` commit and the user has not
-  decided how to record that.
+  decided how to record that in the report.
 - Blocking vs non-blocking is unclear for a finding that would break
   compatibility.
-- The user asked to *create* the package rather than review it
-  (switch to `build2-package`).
+- The user asked to actually open the GitHub review issue/PR, merge
+  something, or send the review@cppget.org email. That is a separate,
+  out-of-scope workflow this skill does not perform.
+- The user asked to *create* the package rather than check it (switch to
+  `build2-package`).
 
 ## On-demand map
 
 | Need | File |
 |------|------|
-| Procedure, checklist, outcome, email | [packaging-guide-review.md](../agent-skills-build2/guides/packaging-guide-review.md) |
-| Author-side review branch and first commit | [packaging-guide-summary.md](../agent-skills-build2/guides/packaging-guide-summary.md) |
-| Publish-time merge of `review` | [packaging-guide-testing.md](../agent-skills-build2/guides/packaging-guide-testing.md) |
+| Checklist and criteria | [packaging-guide-review.md](../agent-skills-build2/guides/packaging-guide-review.md) |
 | What not to do | [packaging-guide-antipatterns.md](../agent-skills-build2/guides/packaging-guide-antipatterns.md) |
 | Names | [package-naming.md](../agent-skills-build2/HOWTO/package-naming.md) |
 | License | [packaging-license.md](../agent-skills-build2/guides/packaging-license.md) |
