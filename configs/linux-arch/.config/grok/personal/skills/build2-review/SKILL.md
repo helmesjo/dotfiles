@@ -3,8 +3,9 @@ name: build2-review
 description: >
   Pre-release/publish sanity check for a build2 third-party package (initial
   submission, new version, or new revision) on the local or specified
-  repository. Runs the packaging review checklist against the repository and
-  reports findings. Read-only: makes no changes, local or externally
+  repository. Runs the packaging review checklist against the repository,
+  including testing the installed case and the source distribution
+  out-of-tree, and reports findings. Read-only: makes no changes, local or externally
   visible (no commits, no pushes, no GitHub issues/PRs/comments, no email).
   Use when the user wants to sanity-check packaging before publishing, run
   the packaging review checklist locally, or runs /build2-review or
@@ -81,6 +82,9 @@ Do not skim.
 1. `${ROOT}/guides/packaging-guide-review.md`
 2. `${ROOT}/guides/packaging-guide-antipatterns.md`
 3. `${ROOT}/HOWTO/package-naming.md`
+4. `${ROOT}/guides/packaging-guide-testing.md`, Step 9 ("Test the
+   Package") only. Step 10 ("Publish") merges `review` into `main` and
+   is out of scope here, ignore it.
 
 Load on demand from the map at the end. The Initial Review Checklist
 inside packaging-guide-review.md is the checklist you work through. That
@@ -160,6 +164,30 @@ Load on demand while checking:
 - compile options: `${ROOT}/HOWTO/buildfile-compile-options.md`
 - what not to do: `${ROOT}/guides/packaging-guide-antipatterns.md`
 
+### Test install and distribution
+
+Static inspection of the checklist is not enough. Also build the package
+out-of-tree to catch what only shows up at build time (missing or private
+headers reaching the install tree, files missing from the `buildfile`
+graph, broken `clean` rules). Do this in a scratch directory under
+`/tmp/claude/`, never inside the reviewed repository. Follow "Step 9:
+Test the Package" in
+[packaging-guide-testing.md](../build2/guides/packaging-guide-testing.md):
+
+1. **Installed case:** `b install config.install.root=/tmp/claude/<name>-install`,
+   then build and run `tests/` out-of-source against that installed
+   copy. Confirm nothing unexpected got installed (no missing headers,
+   no private headers installed by mistake).
+2. **Source distribution:** `b dist config.dist.root=/tmp/claude/<name>-dist
+   config.dist.uncommitted=true`, then in the extracted archive run
+   `configure`, `update`, `test`, and `clean`. A green `bdep test` alone
+   is not sufficient, this is how `cppget.org` actually builds the
+   package.
+
+Remove both scratch directories afterward. Record any failure as a
+finding (a package that fails to install or distribute correctly is
+normally blocking).
+
 ### Report
 
 Present the results to the user using the same section layout as the
@@ -200,7 +228,8 @@ Report one of:
    checklist needed.
 2. **No substantial packaging changes, there are issues:** list them
    directly (no checklist).
-3. **Substantial packaging changes:** run the full initial checklist above.
+3. **Substantial packaging changes:** run the full initial procedure
+   above, checklist plus the install and distribution test.
 
 ## Kind: revision
 
