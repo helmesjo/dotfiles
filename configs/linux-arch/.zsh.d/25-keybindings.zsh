@@ -25,4 +25,9 @@ _zle_shift_enter() { LBUFFER+=$'\n' }
 zle -N _zle_shift_enter
 bindkey $'\e[13;2u' _zle_shift_enter
 bindkey '\e^J' undefined-key  # disable built-in newline insertion on Alt+Enter (ESC+LF)
-bindkey '\e^M' undefined-key  # same, covers both sequences terminals may send (ESC+CR)
+# Windows Alacritty Shift+Enter is ESC+CR (ConPTY cannot decode CSI-u).
+if [[ $OSTYPE == (msys|cygwin)* || -n ${MSYSTEM:-} ]]; then
+    bindkey '\e^M' _zle_shift_enter
+else
+    bindkey '\e^M' undefined-key
+fi

@@ -1,3 +1,8 @@
 [terminal.shell]
 program = "zsh"
 args = ["--login"]
+
+[keyboard]
+bindings = [
+  { key = "Enter", mods = "Shift", chars = "\x1b[13;2u" },
+]

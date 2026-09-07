@@ -4,3 +4,8 @@ args = ["--login"]
 
 [window]
 option_as_alt = 'Both'
+
+[keyboard]
+bindings = [
+  { key = "Enter", mods = "Shift", chars = "\x1b[13;2u" },
+]

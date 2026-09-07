@@ -8,6 +8,10 @@ _bash_shift_enter() {
   READLINE_POINT=$((READLINE_POINT + 1))
 }
 bind -x '"\e[13;2u": _bash_shift_enter'
+# Windows Alacritty Shift+Enter is ESC+CR (ConPTY cannot decode CSI-u).
+if [[ $OSTYPE == msys* || $OSTYPE == cygwin* || -n ${MSYSTEM:-} ]]; then
+  bind -x '"\e\r": _bash_shift_enter'
+fi
 
 # Alt+Backspace: kill one token at a time, stopping at special characters.
 # Readline has no word-char setting, so this is implemented as a shell function.

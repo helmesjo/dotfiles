@@ -14,3 +14,13 @@ args = [
     zsh --login"
   """
 ]
+
+# ConPTY does not decode kitty CSI-u (it types "[13;2u" into Win32 TUIs).
+# Do not inject win32-input-mode (`CSI ... _`) either. One `_` sequence
+# latches ConPTY into W32IM for the rest of the PTY, after which a lone
+# ESC is treated as a split sequence and never reaches Helix or anyone.
+# ESC+CR is Alt+Enter, which ConPTY already turns into a modified Return.
+[keyboard]
+bindings = [
+  { key = "Enter", mods = "Shift", chars = "\x1b\r" },
+]

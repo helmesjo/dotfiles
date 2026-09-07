@@ -36,7 +36,6 @@ bindings = [
   { key = "Equals",  mods = "Control|Shift", action = "IncreaseFontSize" },
   { key = "Minus",   mods = "Control",       action = "DecreaseFontSize" },
   { key = "Key0",    mods = "Control",       action = "ResetFontSize"    },
-  { key = "Enter",   mods = "Shift",         chars = "\x1b[13;2u" },
 ]
 
 [font]
