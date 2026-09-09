@@ -62,3 +62,4 @@ F = "file_picker_in_current_buffer_directory"
 # Windows Alacritty Shift+Enter is ESC+CR. ConPTY delivers that as Alt+Enter.
 [keys.insert]
 A-ret = "insert_newline"
+C-S-v = "paste_clipboard_before"
