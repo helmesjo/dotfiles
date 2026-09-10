@@ -29,12 +29,14 @@ alacritty_dir=$(dirname "$alacritty_exe")
 echo "  - Alacritty: $alacritty_dir"
 
 # Detect arch
-case "$(uname -m)" in
+_arch=$MSYSTEM_CARCH
+case "$_arch" in
   x86_64)  arch=x64   ;;
   i686)    arch=x86   ;;
   aarch64) arch=arm64 ;;
-  *)       echo "WARN: unsupported arch $(uname -m), cannot install ConPTY binaries" >&2; exit 0 ;;
+  *)       echo "WARN: unsupported arch $_arch, cannot install ConPTY binaries" >&2; exit 0 ;;
 esac
+unset _arch
 
 # Fetch latest Windows Terminal release and find the ConPTY nupkg asset URL
 nupkg_url=$(curl -fsSL "https://api.github.com/repos/microsoft/terminal/releases/latest" \

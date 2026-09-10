@@ -126,13 +126,12 @@ function vsdevenv_find_vsvarsall_bat()
 function vsdevenv_setup()
 {
   # If on windows and not in developer prompt (or with wrong architecture), try to set it up
-  local _uname_o="$(uname -o)"
-  if [[ "$_uname_o" == Msys ]] || [[ "$_uname_o" == Cygwin ]]; then
+  if [[ $OSTYPE == msys* || $OSTYPE == cygwin* ]]; then
       if [ ! -n "${HOST_ARCH-}" ]; then
-          HOST_ARCH=$(uname -m)
+          HOST_ARCH=$MSYSTEM_CARCH
       fi
       if [ ! -n "${TARGET_ARCH-}" ]; then
-          TARGET_ARCH=$(uname -m)
+          TARGET_ARCH=$MSYSTEM_CARCH
       fi
 
       case "$HOST_ARCH-$TARGET_ARCH" in
@@ -236,7 +235,7 @@ function vsdevenv_setup()
 
       # Msys: Deal with '/' being parsed as path & not cmd flag
       CMD_EXE=($(dir.exe $(which cmd.exe)))
-      case "$(uname -s)" in
+      case "${MSYSTEM:-}" in
           MINGW*) CMD_EXE+=(start //wait cmd //C);;
           *)      CMD_EXE+=(start /wait cmd /C);;
       esac
