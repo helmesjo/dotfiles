@@ -152,11 +152,11 @@ fi
 alias tree='_erdtree -H -I --disk-usage physical --layout inverted --no-progress'
 [[ $OSTYPE == msys || $OSTYPE == cygwin ]] && alias ssh="$(cygpath -m "${WINDIR}")/System32/OpenSSH/ssh.exe"
 
-_claude_run() { CLAUDE_CONFIG_DIR=$1 command claude "${@:2}"; }
+_claude_run() { CLAUDE_CONFIG_DIR=$1 CLAUDE_CODE_SHELL="$SHELL" command claude "${@:2}"; }
 alias claude='_claude_run ~/.config/claude/personal'
 alias claude-work='_claude_run ~/.config/claude/work'
 
-_grok_run() { GROK_HOME=$1 command grok "${@:2}"; }
+_grok_run() { GROK_HOME=$1 GROK_SHELL="$SHELL" command grok "${@:2}"; }
 alias grok='_grok_run ~/.config/grok/personal'
 alias grok-work='_grok_run ~/.config/grok/work'
 
