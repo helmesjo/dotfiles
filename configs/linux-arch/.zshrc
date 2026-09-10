@@ -38,23 +38,11 @@ case "$(uname -s)" in
     drives=$(mount | sed -rn 's#^[A-Z]: on /([a-z]).*#\1#p' | tr '\n' ' ')
     zstyle ':completion:*' fake-files /: "/:$drives"
     unset drives
-
-    alias sudo=gsudo
-
-    alias reboot='powershell.exe -command restart-computer'
-    alias shutdown='powershell.exe -command stop-computer'
     ;;
 esac
 
 # Load drop-in configs
 for f in ~/.zsh.d/*.zsh(N); do source "$f"; done
-
-# see: .shell-aliases
-# NOTE: MacOS already has 'open' that does the right thing.
-name=open
-if ! command -v $name >/dev/null || [[ "$(whence -w $name)" == *": alias" ]]; then
-  alias $name="_open_file_explorer"
-fi
 
 # source aliases
 source ~/.bazsh_aliases

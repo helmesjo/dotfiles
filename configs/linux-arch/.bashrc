@@ -31,18 +31,7 @@ case "$(uname -s)" in
 
     fi
     ;;
-  MSYS*|MINGW*|CYGWIN*)
-    alias reboot='powershell.exe -command restart-computer'
-    alias shutdown='powershell.exe -command stop-computer'
-    ;;
 esac
-
-# see: .shell-aliases
-# NOTE: MacOS already has 'open' that does the right thing.
-name=open
-if ! command -v $name >/dev/null || [[ $(type -t $name) == "alias" ]]; then
-  alias $name="_open_file_explorer"
-fi
 
 # source aliases
 source ~/.bazsh_aliases

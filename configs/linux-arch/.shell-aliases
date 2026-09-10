@@ -47,6 +47,9 @@ function _open_file_explorer() {
   esac
 }
 
+# NOTE: macOS already has 'open' that does the right thing.
+! command -v open >/dev/null 2>&1 && alias open="_open_file_explorer"
+
 ## erdtree:
 # Translates common POSIX ls/tree flags to erdtree equivalents.
 # Handles bundles (-lah), sort flags (-t/-S/-r), and conflicts (-d/-i/-s).
@@ -151,6 +154,10 @@ else
 fi
 alias tree='_erdtree -H -I --disk-usage physical --layout inverted --no-progress'
 [[ $OSTYPE == msys || $OSTYPE == cygwin ]] && alias ssh="$(cygpath -m "${WINDIR}")/System32/OpenSSH/ssh.exe"
+[[ $OSTYPE == msys || $OSTYPE == cygwin ]] && {
+  alias reboot='powershell.exe -command restart-computer'
+  alias shutdown='powershell.exe -command stop-computer'
+}
 
 _claude_run() { CLAUDE_CONFIG_DIR=$1 CLAUDE_CODE_SHELL="$SHELL" command claude "${@:2}"; }
 alias claude='_claude_run ~/.config/claude/personal'
