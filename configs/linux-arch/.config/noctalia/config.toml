@@ -1,0 +1,12 @@
+[bar.default]
+position = "top"
+thickness = 34
+padding = 14
+widget_spacing = 6
+background_opacity = 1.0
+radius = 0
+capsule = true
+
+start  = ["launcher", "workspaces"]
+center = ["clock"]
+end    = ["media", "volume", "battery", "tray", "control-center", "notifications", "session"]
