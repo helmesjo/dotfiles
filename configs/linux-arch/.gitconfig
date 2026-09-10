@@ -82,8 +82,10 @@
           ARGS=(\"$@\"); \
         fi; \
       fi; \
-      local CUR; \
-      CUR=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo HEAD); \
+      local _head CUR; \
+      IFS= read -r _head < \"${GIT_DIR:-.git}/HEAD\" 2>/dev/null \
+        || CUR=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo HEAD); \
+      [ -z \"$CUR\" ] && case \"$_head\" in ref:*) CUR=\"${_head#ref: refs/heads/}\" ;; *) CUR=\"${_head:-HEAD}\" ;; esac; \
       if [ -n \"$REF\" ]; then \
         set -- \"${ARGS[@]}\" \"$CUR..$REF\"; \
       else \
@@ -97,7 +99,13 @@
     ls-symdir = "!git ls-files -s|awk '$1==\"120000\"{print $4}'|while IFS= read -r f;do if [ -d \"$f\" ];then git check-attr symlink -- \"$f\"|awk -F': ' -v p=\"$f\" '{v=$3;printf \"%s %s\\n\",p,(v==\"unspecified\"?\"[]\":\"[\"v\"]\")}';fi;done"
     ps = push
     psf = "!printf 'Force push? [Y/n]: ' && read -r REPLY && case \"$REPLY\" in [Yy]*) git ps --force;; esac"
-    psu = "!git push --set-upstream origin \"$(git rev-parse --abbrev-ref HEAD)\""
+    psu = "!bash -c '\
+      _h=; IFS= read -r _h < \"${GIT_DIR:-.git}/HEAD\" 2>/dev/null; \
+      case \"$_h\" in \
+        ref:*) CUR=\"${_h#ref: refs/heads/}\" ;; \
+        *) CUR=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo HEAD) ;; \
+      esac; \
+      git push --set-upstream origin \"$CUR\"'"
     pl = pull -p
     pwd = rev-parse --show-toplevel
     rb = rebase
