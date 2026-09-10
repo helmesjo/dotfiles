@@ -17,7 +17,10 @@ OS-specific configuration scripts.
 
 `scripts/get-os.sh` identifies the current OS and returns a key such as
 `linux-arch`, `macos`, or `windows`. This key is used throughout to select
-the right configs and scripts.
+the right configs and scripts. The OS is identified primarily from `$OSTYPE`
+(set by the shell), with `uname -s` as a fallback. When running inside WSL,
+`$WSL_DISTRO_NAME` (set by the WSL kernel for all WSL processes) is used to
+distinguish WSL from a native Linux host so that WSL-specific scripts apply.
 
 ### Config symlinking
 
