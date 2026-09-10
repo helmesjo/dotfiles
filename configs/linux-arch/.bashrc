@@ -4,20 +4,18 @@
 
 [[ -f "$HOME/.env" ]] && { set -a; source "$HOME/.env"; set +a; }
 
-# Enable shared history
-touch ~/.bash_history
-chmod 600 ~/.bash_history        # user-only read/write permission.
-export HISTFILE=~/.bash_history  # History file location
-export HISTSIZE=1000             # Maximum number of commands stored in memory.
-export HISTFILESIZE=2000         # Maximum number of commands stored in the history file.
-export HISTCONTROL=ignoredups    # Don't save consecutive duplicate commands in history.
-export HISTCONTROL=ignorespace   # Don't save commands starting with a space in history (combine with ignoredups).
-export HISTCONTROL=erasedups     # Remove all duplicates from history, even non-consecutive ones (combine with others).
-export HISTTIMEFORMAT='%F %T '   # Save timestamp with each history entry (approximates INC_APPEND_HISTORY_TIME behavior).
-shopt -s histappend              # Append new history entries to the file instead of overwriting it.
-
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
+
+# Enable shared history
+touch ~/.bash_history
+chmod 600 ~/.bash_history
+export HISTFILE=~/.bash_history
+export HISTSIZE=1000
+export HISTFILESIZE=2000
+export HISTCONTROL=erasedups:ignorespace
+export HISTTIMEFORMAT='%F %T '
+shopt -s histappend
 
 PS1='[\u@\h \W]> '
 
@@ -33,7 +31,7 @@ case "$(uname -s)" in
 
     fi
     ;;
-  MSYS*|MINGW*|CYGWIN)
+  MSYS*|MINGW*|CYGWIN*)
     alias reboot='powershell.exe -command restart-computer'
     alias shutdown='powershell.exe -command stop-computer'
     ;;
