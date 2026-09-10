@@ -1,4 +1,4 @@
-[[ "$(uname -r)" != *WSL* ]] && return
+[[ -z ${WSL_DISTRO_NAME:-} ]] && return
 
 # If a command isn't found, retry with .exe suffix before giving up.
 command_not_found_handler() {

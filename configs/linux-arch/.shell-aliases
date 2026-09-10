@@ -33,18 +33,14 @@ function _open_file_explorer() {
     command $tgt_path
     return $?
   fi
-  case "$(uname -s)" in
-    Linux)
-      xdg-open "$tgt_path" 2>/dev/null || gio open "$tgt_path" 2>/dev/null || nautilus "$tgt_path" 2>/dev/null
-      ;;
-    MINGW*|MSYS*|CYGWIN*)
-      explorer "$(cygpath -w "$tgt_path")" >/dev/null 2>&1 & disown
-      ;;
-    *)
-      echo "Unsupported platform: $(uname -s)" >&2
-      return 1
-      ;;
-  esac
+  if [[ $OSTYPE == linux* ]]; then
+    xdg-open "$tgt_path" 2>/dev/null || gio open "$tgt_path" 2>/dev/null || nautilus "$tgt_path" 2>/dev/null
+  elif [[ $OSTYPE =~ ^(msys|cygwin) ]]; then
+    explorer "$(cygpath -w "$tgt_path")" >/dev/null 2>&1 & disown
+  else
+    echo "Unsupported platform: $OSTYPE" >&2
+    return 1
+  fi
 }
 
 # NOTE: macOS already has 'open' that does the right thing.
@@ -146,15 +142,15 @@ function _erdtree() {
     command erd "${newargs[@]}"
   fi
 }
-if [[ $OSTYPE != cygwin && $OSTYPE != msys ]]; then
+if [[ ! $OSTYPE =~ ^(msys|cygwin) ]]; then
   alias ll='_erdtree -H -I --disk-usage physical --layout inverted --long --no-ignore --no-progress -L1'
 else
   # no permission info (erd --long) on Windows/msys2/cygwin
   alias ll='_erdtree -H -I --disk-usage physical --layout inverted --no-ignore --no-progress -L1'
 fi
 alias tree='_erdtree -H -I --disk-usage physical --layout inverted --no-progress'
-[[ $OSTYPE == msys || $OSTYPE == cygwin ]] && alias ssh="$(cygpath -m "${WINDIR}")/System32/OpenSSH/ssh.exe"
-[[ $OSTYPE == msys || $OSTYPE == cygwin ]] && {
+[[ $OSTYPE =~ ^(msys|cygwin) ]] && alias ssh="$(cygpath -m "${WINDIR}")/System32/OpenSSH/ssh.exe"
+[[ $OSTYPE =~ ^(msys|cygwin) ]] && {
   alias reboot='powershell.exe -command restart-computer'
   alias shutdown='powershell.exe -command stop-computer'
 }
