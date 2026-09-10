@@ -18,6 +18,12 @@ if command -v antidote &>/dev/null; then
     (( ${+functions[_zsh_autosuggest_start]} )) && {
       ZSH_AUTOSUGGEST_STRATEGY=(history completion)
     }
+    # Windows ConPTY makes long-buffer highlighting unusably slow.
+    (( ${+functions[_zsh_highlight]} )) && {
+      if [[ $OSTYPE == (msys|cygwin)* || -n ${MSYSTEM:-} ]]; then
+        ZSH_HIGHLIGHT_MAXLENGTH=256
+      fi
+    }
     (( ${+widgets[history-substring-search-up]} )) && {
       bindkey '^[[A' history-substring-search-up    # up arrow
       bindkey '^[[B' history-substring-search-down  # down arrow
