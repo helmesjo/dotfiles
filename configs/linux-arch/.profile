@@ -1,6 +1,9 @@
 # ~/.profile: PATH setup for login shells.
 # Sourced automatically by bash; zsh sources this via ~/.zprofile.
 
+# Load base env vars (EDITOR, GOPATH, LANG, etc.).
+[ -f "$HOME/.env" ] && { set -a; . "$HOME/.env"; set +a; }
+
 pathappend() {
   for arg in "$@"; do
     case ":$PATH:" in
@@ -70,26 +73,7 @@ EOF
     unset _p
     pathappend "/c/build2/bin"
 
-    case "$(uname -s)" in
-      MSYS*|MINGW*)
-        # Use UCRT64 runtime (Windows installer defaults to MINGW64).
-        export MSYSTEM=UCRT64
-        export MINGW_PREFIX=/ucrt64
-        export MSYSTEM_PREFIX=/ucrt64
-        export MSYSTEM_CARCH=x86_64
-        export MSYSTEM_CHOST=x86_64-w64-mingw32
-        ;;
-    esac
-
-    # Load base env vars (EDITOR, GOPATH, LANG, etc.).
-    [ -f "$HOME/.env" ] && { set -a; . "$HOME/.env"; set +a; }
-
     path_resolve
-
-    # Wire non-interactive POSIX shells spawned by headless tools to re-source
-    # this file so they inherit the same environment without per-tool config.
-    export ENV="$HOME/.profile"
-    export BASH_ENV="$HOME/.profile"
     ;;
 esac
 
