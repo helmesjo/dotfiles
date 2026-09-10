@@ -6,7 +6,7 @@ $file_dir/install-zsh-antidote.sh
 $file_dir/install-yay.sh
 
 is_laptop=$(cat /sys/class/dmi/id/chassis_type 2>/dev/null | grep "\b9\b" > /dev/null && echo 1 || echo 0)
-is_wsl=$([[ "$(uname -r)" == *WSL* ]] && echo 1 || echo 0 )
+is_wsl=$([[ -n ${WSL_DISTRO_NAME:-} ]] && echo 1 || echo 0)
 
 pacpkgs=(
   # Base

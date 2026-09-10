@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eu -o pipefail
 
-is_wsl=$([[ "$(uname -r)" == *WSL* ]] && echo 1 || echo 0 )
+is_wsl=$([[ -n ${WSL_DISTRO_NAME:-} ]] && echo 1 || echo 0)
 this_dir=$(dirname $(readlink -f $BASH_SOURCE))
 
 if [[ $is_wsl -eq 1 ]]; then

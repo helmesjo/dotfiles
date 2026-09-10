@@ -16,7 +16,7 @@ mkdir -p ~/.local/bin
 
 # WSL shims: create before the version-check exit so they're always up to date
 # even when the binary itself doesn't need updating.
-if [[ "$(uname -r)" == *WSL* ]]; then
+if [[ -n ${WSL_DISTRO_NAME:-} ]]; then
   cat > ~/.local/bin/wl-copy << 'EOF'
 #!/usr/bin/env bash
 exec "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/win32yank.exe" -i "$@"

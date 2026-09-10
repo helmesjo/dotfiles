@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eu -o pipefail
 
-[[ "$(uname -r)" == *WSL* ]] && exit 0
+[[ -n ${WSL_DISTRO_NAME:-} ]] && exit 0
 
 xdg-settings set default-web-browser browser-selector.desktop
 
