@@ -42,8 +42,6 @@ case "$(uname -s)" in
 
     alias sudo=gsudo
 
-    source "$HOME/.vsdevenv.sh"
-
     alias reboot='powershell.exe -command restart-computer'
     alias shutdown='powershell.exe -command stop-computer'
     ;;

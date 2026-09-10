@@ -36,8 +36,6 @@ case "$(uname -s)" in
   MSYS*|MINGW*|CYGWIN)
     alias reboot='powershell.exe -command restart-computer'
     alias shutdown='powershell.exe -command stop-computer'
-
-    source "$HOME/.vsdevenv.sh"
     ;;
 esac
 
