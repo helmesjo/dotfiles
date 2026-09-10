@@ -3,6 +3,7 @@
 
 # Load base env vars (EDITOR, GOPATH, LANG, etc.).
 [ -f "$HOME/.env" ] && { set -a; . "$HOME/.env"; set +a; }
+OSTYPE=${OSTYPE:-$(uname -s | tr '[:upper:]' '[:lower:]')}
 
 pathappend() {
   for arg in "$@"; do
@@ -34,39 +35,37 @@ path_resolve() {
 mkdir -p "$HOME/.local/bin"
 pathappend "$HOME/.local/bin"
 
-case "$(uname -s)" in
-  Darwin)
+case "$OSTYPE" in
+  darwin*)
     brew_path=$(brew --prefix)
     pathappend "$brew_path/bin"
     pathappend "$brew_path/opt/llvm/bin"
     unset brew_path
     ;;
-  Linux)
-    case "$(uname -r)" in
-      *WSL*|*microsoft*)
-        # Rotate PATH: Windows-mounted (/mnt/X/) paths go last.
-        _old_ifs=$IFS
-        IFS=:
-        _keep='' _move=''
-        for _p in $PATH; do
-          case "$_p" in
-            /mnt/[A-Za-z]/*) _move="${_move:+$_move:}$_p" ;;
-            *)                _keep="${_keep:+$_keep:}$_p" ;;
-          esac
-        done
-        PATH="${_keep:+$_keep:}$_move"
-        IFS=$_old_ifs
-        unset _old_ifs _keep _move _p
-        # git-credential-manager: symlink Windows binary so WSL git can use it.
-        if [ -f "$HOST___PROGRAMFILES/Git/mingw64/bin/git-credential-manager.exe" ] && \
-           ! [ -L "$HOME/.local/bin/git-credential-manager.exe" ]; then
-          ln -sv "$HOST___PROGRAMFILES/Git/mingw64/bin/git-credential-manager.exe" \
-                 "$HOME/.local/bin"
-        fi
-        ;;
-    esac
+  linux*)
+    if [ -n "${WSL_DISTRO_NAME:-}" ]; then
+      # Rotate PATH: Windows-mounted (/mnt/X/) paths go last.
+      _old_ifs=$IFS
+      IFS=:
+      _keep='' _move=''
+      for _p in $PATH; do
+        case "$_p" in
+          /mnt/[A-Za-z]/*) _move="${_move:+$_move:}$_p" ;;
+          *)                _keep="${_keep:+$_keep:}$_p" ;;
+        esac
+      done
+      PATH="${_keep:+$_keep:}$_move"
+      IFS=$_old_ifs
+      unset _old_ifs _keep _move _p
+      # git-credential-manager: symlink Windows binary so WSL git can use it.
+      if [ -f "$HOST___PROGRAMFILES/Git/mingw64/bin/git-credential-manager.exe" ] && \
+         ! [ -L "$HOME/.local/bin/git-credential-manager.exe" ]; then
+        ln -sv "$HOST___PROGRAMFILES/Git/mingw64/bin/git-credential-manager.exe" \
+               "$HOME/.local/bin"
+      fi
+    fi
     ;;
-  MSYS*|MINGW*|CYGWIN*)
+  msys*|mingw*|cygwin*)
     pathappend "$HOME/AppData/Local/Microsoft/WinGet/Links"
     pathappend "$HOME/AppData/Local/Microsoft/WindowsApps"
     while IFS= read -r _p; do pathappend "$_p"; done << EOF
