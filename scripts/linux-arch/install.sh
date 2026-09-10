@@ -2,6 +2,7 @@
 set -eu -o pipefail
 
 file_dir=`dirname $(readlink -f $BASH_SOURCE)`
+$file_dir/install-cachyos-repo.sh
 $file_dir/install-zsh-antidote.sh
 $file_dir/install-yay.sh
 
@@ -45,7 +46,9 @@ pacpkgs=(
   gitui
   grim slurp       # screen grab tools
   niri
-  ly               # display manager
+  noctalia         # desktop shell
+  greetd           # greeter daemon
+  noctalia-greeter # login greeter (CachyOS)
   wlsunset         # night light
   television       # multi-purpose fuzzy finder
   udisks2          # Auto-mount removable devices
@@ -75,19 +78,13 @@ pacpkgs=(
   nwg-look               # gtk settings tool
   qt5ct                  # qt theming tool (shell dependency)
   qt6ct                  # qt theming tool (shell dependency)
-  # DMS dependencies
+  # Shell dependencies
   accountsservice        # user account info (lock screen)
   xdg-desktop-portal-gtk # XDG portal backend (file picker, screen share)
 )
 aurpkgs=(
   # Core
   tlrc-bin         # man
-  # DMS dependencies
-  dms-shell-bin        # dank desktop shell
-  quickshell           # compositor shell (DMS runtime)
-  xwayland-satellite   # rootful XWayland for niri (DMS XWayland support)
-  matugen              # material theme generator (DMS theming)
-  dgop                 # on-screen display overlays (DMS OSD)
   # Hardware
   bluetuith            # bluetooth TUI
   # Misc
@@ -159,7 +156,7 @@ if [[ $is_wsl -eq 0 ]]; then
 
   services=(
     bluetooth.service
-    ly@tty2.service
+    greetd.service
   )
   user_services=()
   if [ "$is_laptop" == "true" ]; then
