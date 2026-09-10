@@ -23,7 +23,7 @@ the right configs and scripts.
 
 `scripts/configure.sh` iterates over `configs/<os>/` and creates a symlink
 in `$HOME` for each tracked file or directory. Only files tracked by git are
-linked — untracked files are skipped. If something already exists at the
+linked - untracked files are skipped. If something already exists at the
 target path, it is backed up with a timestamp suffix before being replaced.
 
 ### Install and configure scripts

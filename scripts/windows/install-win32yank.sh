@@ -66,7 +66,7 @@ curl -L# "$URL/releases/download/$latest/win32yank-x64.zip" | \
   bsdtar -C ~/.local/bin/ -xz "win32yank.exe" && chmod +x "$BIN"
 
 if ! file "$BIN" | grep -q "PE32"; then
-  echo "error: $BIN is not a valid Windows executable — download may have failed" >&2
+  echo "error: $BIN is not a valid Windows executable - download may have failed" >&2
   rm -f "$BIN"
   exit 1
 fi

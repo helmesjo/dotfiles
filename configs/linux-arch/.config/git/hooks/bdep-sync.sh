@@ -17,7 +17,7 @@
 #   so bdep can resolve all package names in one pass.  All removed sources are
 #   git-restored before any deinit so every manifest listed there exists.
 #
-#   Phase 1 — bdep deinit:
+#   Phase 1 - bdep deinit:
 #     Packages that have no src-root.build in any configuration are skipped
 #     (never initialized; bdep deinit would fail and nothing to preserve).
 #     All remaining packages are deinited in a single bdep call; bdep resolves
@@ -25,7 +25,7 @@
 #     DB for Phase 2.  "not initialized in" is non-fatal (bdep DB already
 #     clean).  Any other failure aborts Phase 2 for all packages.
 #
-#   Phase 2 — bpkg cleanup + marker preservation:
+#   Phase 2 - bpkg cleanup + marker preservation:
 #     One bpkg pkg-status call per configuration captures state.  src-root.build
 #     content is saved to memory for all configured packages.  A single
 #     pkg-drop --drop-dependent call disfigures suspended packages and any kept

@@ -168,7 +168,7 @@ function vsdevenv_setup()
       if [ $REQUIRE_PROMPT -eq 0 ]; then
           return 0
       else
-          # Cache missing or invalid — fall through to full setup below
+          # Cache missing or invalid - fall through to full setup below
           true
       fi
 
