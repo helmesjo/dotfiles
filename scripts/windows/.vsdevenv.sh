@@ -2,15 +2,14 @@
 
 function vsdevenv_is_sourced()
 {
-  if [[ -z ${vsdevenv__caller:-} ]]; then
-    local vsdevenv__caller=$([ -n "$ZSH_VERSION" ] && \
-                              echo $ZSH_EVAL_CONTEXT || echo ${0##*/})
+  if [[ -n "$ZSH_VERSION" ]]; then
+    case "$ZSH_EVAL_CONTEXT" in *:file:*) return 0 ;; esac
+    return 1
   fi
-  case $vsdevenv__caller in
-    dash|-dash|bash|-bash|ksh|-ksh|sh|-sh|*:file:*)
-      return 0;;
-  esac
-  return 1 # NOT sourced.
+  # In bash, BASH_SOURCE[0] holds the script path regardless of how it was
+  # invoked; $0 is the caller's arg0 (e.g. '-bash', '--', or the script path
+  # itself). They differ iff we are being sourced.
+  [[ "${BASH_SOURCE[0]:-}" != "$0" ]]
 }
 
 if ! vsdevenv_is_sourced; then
