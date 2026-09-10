@@ -57,6 +57,12 @@ case "$(uname -s)" in
         PATH="${_keep:+$_keep:}$_move"
         IFS=$_old_ifs
         unset _old_ifs _keep _move _p
+        # git-credential-manager: symlink Windows binary so WSL git can use it.
+        if [ -f "$HOST___PROGRAMFILES/Git/mingw64/bin/git-credential-manager.exe" ] && \
+           ! [ -L "$HOME/.local/bin/git-credential-manager.exe" ]; then
+          ln -sv "$HOST___PROGRAMFILES/Git/mingw64/bin/git-credential-manager.exe" \
+                 "$HOME/.local/bin"
+        fi
         ;;
     esac
     ;;

@@ -19,20 +19,6 @@ shopt -s histappend
 
 PS1='[\u@\h \W]> '
 
-# platform-specific setup
-case "$(uname -s)" in
-  Linux)
-    if [[ "$(uname -r)" == *WSL* ]]; then
-      # use windows git-credential-manager in WSL to avoid re-authenticating
-      if test -f "$HOST___PROGRAMFILES/Git/mingw64/bin/git-credential-manager.exe" && \
-         ! test -L ~/.local/bin/git-credential-manager.exe >/dev/null; then
-        ln -sv "$HOST___PROGRAMFILES/Git/mingw64/bin/git-credential-manager.exe" ~/.local/bin
-      fi
-
-    fi
-    ;;
-esac
-
 # source aliases
 source ~/.bazsh_aliases
 
