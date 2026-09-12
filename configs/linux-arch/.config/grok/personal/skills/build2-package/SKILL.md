@@ -70,6 +70,37 @@ editing a `buildfile`, or publishing. Do not skim.
 Then load on demand from the map at the end of this file. Never substitute
 memory for a guide that this file names.
 
+## Re-verify against the checklist docs as you go
+
+A full packaging stretch (Gates A-K, or a `new-version`/`revision` run)
+can span far more turns than a single context window holds. Earlier
+turns, including the mandatory reads above, may already be summarized
+away by the time you reach a later gate. Having read a guide once at
+the start does not mean its rules are still in context, do not rely on
+conversation memory for them.
+
+Re-open and re-check the current state of the tree against these
+checklist-style docs at least once per gate, and again right before
+Gate K (publish-time):
+
+- `${ROOT}/guides/packaging-guide-antipatterns.md`: what not to do
+  (hand-written buildfiles, fixing upstream in the package, changed
+  upstream layout, header-only despite a compiled mode, bundled
+  dependencies, main targets in the root buildfile, an over-broad
+  revision, bad header inclusion, ad hoc patching).
+- `${ROOT}/guides/packaging-guide-review.md`: the same checklist a
+  cppget.org reviewer applies. Self-check the tree against it before
+  publish rather than finding out during the actual review.
+- `${ROOT}/HOWTO/third-party-private-headers.md`: private headers must
+  not reach the install tree.
+- `${ROOT}/HOWTO/buildfile-compile-options.md`: which compile/link
+  options are local vs exported.
+- `${ROOT}/HOWTO/package-naming.md`: the naming decisions made at
+  Gate E, a rename discovered late is expensive.
+
+If the tree no longer matches one of these, fix it before moving to the
+next gate rather than carrying the drift forward.
+
 ## Arguments
 
 `$ARGUMENTS` is the invocation text after `/build2-package` (or after
