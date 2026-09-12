@@ -11,6 +11,10 @@ trap on_error ERR
 root_dir=$(git rev-parse --show-toplevel)
 os=$($root_dir/scripts/get-os.sh 2>&1)
 
+if [[ $os == windows ]]; then
+  source "$root_dir/scripts/windows/require-ucrt64.sh"
+fi
+
 dotfiles_root=$root_dir/configs/$os
 dotfiles=$(ls -a $dotfiles_root) # grab the list
 

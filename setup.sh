@@ -8,6 +8,7 @@ os=$($root_dir/scripts/get-os.sh 2>&1)
 echo "Setting up configuration for OS '$os'..."
 
 if [[ $os == windows ]]; then
+  source "$root_dir/scripts/windows/require-ucrt64.sh"
   export MSYS=winsymlinks:nativestrict
 fi
 

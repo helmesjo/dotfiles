@@ -9,6 +9,24 @@
 Detects the current OS, installs packages, symlinks configs, and runs
 OS-specific configuration scripts.
 
+### Windows, brand-new machine
+
+`setup.sh` needs a genuine MSYS2 UCRT64 shell to run in, which a stock
+Windows install doesn't have yet.
+
+1. Get this repo onto disk with a real `git clone` (e.g. install Git for
+   Windows first, then `git clone https://github.com/helmesjo/dotfiles`) -
+   a zip download won't work, since `configure.sh` relies on `git ls-files`.
+2. From PowerShell, inside the checkout:
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1
+   ```
+   Installs MSYS2 if it isn't already present, then runs `./setup.sh` inside
+   a real UCRT64 shell.
+
+From then on, use the "MSYS2 UCRT64" shell shortcut and run `./setup.sh`
+directly, same as macOS/Linux.
+
 ---
 
 ## How it works
@@ -17,10 +35,10 @@ OS-specific configuration scripts.
 
 `scripts/get-os.sh` identifies the current OS and returns a key such as
 `linux-arch`, `macos`, or `windows`. This key is used throughout to select
-the right configs and scripts. The OS is identified primarily from `$OSTYPE`
-(set by the shell), with `uname -s` as a fallback. When running inside WSL,
-`$WSL_DISTRO_NAME` (set by the WSL kernel for all WSL processes) is used to
-distinguish WSL from a native Linux host so that WSL-specific scripts apply.
+the right configs and scripts. The OS is identified from `$OSTYPE` (set by
+the shell). When running inside WSL, `$WSL_DISTRO_NAME` (set by the WSL
+kernel for all WSL processes) is used to distinguish WSL from a native Linux
+host so that WSL-specific scripts apply.
 
 ### Config symlinking
 
@@ -50,12 +68,22 @@ need to be massaged into place to make it behave consistently:
   registry imports via `reg.exe`, persistent env vars via `setx`, and
   autostart/Start Menu shortcuts copied into the appropriate Windows
   directories.
+- `scripts/windows/require-ucrt64.sh` refuses to continue outside a genuine
+  MSYS2 UCRT64 shell (checked via `uname -s`, since `$MSYSTEM` can be
+  overridden by `.env.local`) rather than limping along in the wrong
+  subsystem, and points to `bootstrap.ps1` or the UCRT64 shortcut instead.
+  `setup.sh`, `scripts/windows/install.sh`, and `scripts/configure.sh` each
+  source it independently, since any of them can be run standalone rather
+  than only via `setup.sh`.
 
 ---
 
 ## Structure
 
 ```bash
+setup.sh                  # entry point
+bootstrap.ps1             # Windows only: gets a fresh machine to a UCRT64 shell, then runs setup.sh
+
 configs/
   <os>/           # files here get symlinked to $HOME
     .zshrc
@@ -69,6 +97,8 @@ scripts/
   <os>/
     install.sh            # package installation
     configure-*.sh        # post-install configuration
+  windows/
+    require-ucrt64.sh     # guard: refuse to run outside genuine MSYS2 UCRT64
 ```
 
 ### Adding a new config

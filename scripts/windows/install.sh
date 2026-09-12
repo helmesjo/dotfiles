@@ -8,6 +8,9 @@ function on_error {
 }
 trap on_error ERR
 
+file_dir=`dirname $(readlink -f "${BASH_SOURCE[0]:-$0}")`
+source "$file_dir/require-ucrt64.sh"
+
 if ! command -v gsudo &>/dev/null; then
   winget install --disable-interactivity \
                  --ignore-warnings \
@@ -16,7 +19,6 @@ if ! command -v gsudo &>/dev/null; then
                  gerardog.gsudo # sudo
 fi
 
-file_dir=`dirname $(readlink -f "${BASH_SOURCE[0]:-$0}")`
 $file_dir/install-zsh-antidote.sh
 $file_dir/install-win32yank.sh
 $file_dir/install-browser-selector.sh
@@ -48,6 +50,7 @@ wingetpkgs=(
 )
 pacmanpkgs=(
   zsh
+  mingw-w64-ucrt-x86_64-gcc
 )
 
 winget install --accept-source-agreements \
@@ -65,14 +68,10 @@ function run_in_mintty {
   wait $! || true
 }
 
-# MSYS2's installer shuts down running MSYS2 sessions, so run it in a
-# separate cmd window that survives the shutdown and wait for it to finish.
-if ! winget list | grep 'MSYS2' >/dev/null; then
-  cmd.exe //c "start /wait winget install --disable-interactivity --ignore-warnings --accept-source-agreements --accept-package-agreements MSYS2.MSYS2"
 # Upgrading msys2-runtime terminates the running shell mid-upgrade, so a
 # second pass is required to finish. Check before starting so we only pay
 # the cost when the runtime actually needs upgrading.
-elif pacman -Qu 2>/dev/null | grep -q '^msys2-runtime '; then
+if pacman -Qu 2>/dev/null | grep -q '^msys2-runtime '; then
   run_in_mintty 'pacman --noconfirm -Syu'
 fi
 
