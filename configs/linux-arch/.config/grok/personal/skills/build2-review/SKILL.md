@@ -34,7 +34,9 @@ send email, and never modify the repository under review (no commits, no
 tags, no file edits, no `bdep release`, no `bdep publish`, no `git push`).
 If a step below would make such a change, skip it and turn it into a
 reported finding instead. The repository under review must come out of
-this check exactly as it went in.
+this check exactly as it went in. Drafting a plan for the reported
+findings, without carrying it out, does not count as a change, see
+"Plan mode" below for when that applies.
 
 The checklist and criteria in
 [packaging-guide-review.md](../build2/guides/packaging-guide-review.md)
@@ -243,6 +245,25 @@ hold:
 - Strictly backwards-compatible with the version it replaces.
 - No major structural changes (source layout, exported target names,
   config variable names).
+
+## Plan mode
+
+This skill stays read-only either way, it never carries out the fixes
+itself. What changes is only whether a plan for the required changes and
+improvements gets drafted alongside the report.
+
+- If the current session is in plan mode (the assistant is expected to
+  propose an implementation plan for approval before making changes,
+  rather than act right away): after reporting, also draft a plan that
+  addresses the blocking and non-blocking findings, then present it
+  through whatever plan-approval mechanism the environment provides.
+  Scope the plan to blocking and non-blocking findings, skip notes
+  unless the user asks. Group related fixes, and call out any that
+  touch generated `bdep new` layout, `manifest`, or `buildfile` files
+  needing particular care or ordering.
+- Otherwise, follow the established reporting flow above and stop
+  there. Do not draft, propose, or hint at an implementation plan, the
+  fixes are for the user or a separate workflow to carry out.
 
 ## Stop and ask
 
