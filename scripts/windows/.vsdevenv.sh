@@ -39,13 +39,6 @@ C=command
 #       'readlink -f' is so that we get the real windows user path.
 VS_ENVAR_CACHE="$(cygpath -u "$(readlink -f ~/.vsdevenv.cache)")"
 
-function vsdevenv_retard_path()
-{
-  # cmd.exe is retarded and needs retarded paths
-  # with double forward-slashes.
-  echo -e "${1//\////}"
-}
-
 function vsdevenv_remove_clashing_bins()
 {
   # Remove clashing tools (eg. msys2 link.exe)
@@ -233,13 +226,6 @@ function vsdevenv_setup()
       echo "-- Latest: $VS_VARSALL"
       echo "-- Setting up developer prompt ($TARGET_ARCH_CONV) for '$VSPATH_LATEST'"
 
-      # Msys: Deal with '/' being parsed as path & not cmd flag
-      CMD_EXE=($(dir.exe $(which cmd.exe)))
-      case "${MSYSTEM:-}" in
-          MINGW*) CMD_EXE+=(start //wait cmd //C);;
-          *)      CMD_EXE+=(start /wait cmd /C);;
-      esac
-
       # Inside dev prompt, export all envars (using 'export -p'),
       # then extract only the unique envars & 'PATH' values.
       VS_ENVARS_CACHE_BAK="${VS_ENVAR_CACHE}.bak"
@@ -248,11 +234,23 @@ function vsdevenv_setup()
         && cp "$VS_ENVAR_CACHE" "$VS_ENVARS_CACHE_BAK"
 
       # Run varsall.bat in a subshell & extract new envars specified by devprompt.
-      # NOTE: Below is such a pain in the ass to get right, so avoid modifying.
-      BASH_PATH="$(vsdevenv_retard_path "$(cygpath -m "$(which bash)")")"
-      VS_VARSALL="$(vsdevenv_retard_path "$(cygpath -m "$VS_VARSALL")")"
+      # Do this via a temp .bat script rather than passing the whole command
+      # line as one cmd.exe argument: a single argv element containing
+      # embedded '"' characters gets backslash-escaped by MSYS for native-
+      # process interop, which cmd.exe's own /C parser doesn't understand,
+      # so it never runs anything (found this the hard way - avoid modifying
+      # without testing against a real vcvarsall.bat path containing spaces).
+      BASH_PATH="$(cygpath -m "$(which bash)")"
+      VS_VARSALL="$(cygpath -m "$VS_VARSALL")"
       VS_ENVARS_TMP="$(cygpath -m "$(mktemp)")"
-      ${CMD_EXE[@]} " "$VS_VARSALL" $TARGET_ARCH_CONV >NUL 2>&1 && "$BASH_PATH" -c 'export -p' " >$VS_ENVARS_TMP
+      VS_CMD_SCRIPT="$(mktemp --suffix=.bat)"
+      cat >"$VS_CMD_SCRIPT" <<EOF
+@echo off
+call "$VS_VARSALL" $TARGET_ARCH_CONV >NUL 2>&1
+"$BASH_PATH" -c "export -p"
+EOF
+      MSYS2_ARG_CONV_EXCL="/C" cmd.exe /C "$(cygpath -m "$VS_CMD_SCRIPT")" >"$VS_ENVARS_TMP"
+      rm -f "$VS_CMD_SCRIPT"
 
       # Clear cache then fill with diff (that is, only the VS stuff).
       # Deal specifically with 'PATH' to subtract the current PATH. Store result in 'VCPATHS'.
