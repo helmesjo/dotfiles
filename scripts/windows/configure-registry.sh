@@ -12,11 +12,15 @@ export MSYS=winsymlinks:nativestrict
 
 this_dir=$(dirname $(readlink -f $BASH_SOURCE))
 
-# Msys: Deal with '/' being parsed as path & not cmd flag
-CMD_EXE=($(dir.exe $(which cmd.exe)))
-case "${MSYSTEM:-}" in
-    MINGW*) CMD_EXE+=(//C);;
-    *)      CMD_EXE+=(/C);;
-esac
-
-${CMD_EXE[@]} " reg.exe import "$(cygpath -w $this_dir)/settings.reg" "
+# Run via a temp .bat script rather than embedding the path (with its own
+# quotes, for spaces) directly into cmd.exe's /C argument: a bash argv
+# element containing literal '"' characters gets backslash-escaped by
+# MSYS for native-process interop, which cmd.exe's own /C parser doesn't
+# understand, so it never runs anything.
+reg_cmd_script="$(mktemp --suffix=.bat)"
+cat >"$reg_cmd_script" <<EOF
+@echo off
+reg.exe import "$(cygpath -w "$this_dir")\\settings.reg"
+EOF
+MSYS2_ARG_CONV_EXCL="/C" cmd.exe /C "$(cygpath -m "$reg_cmd_script")"
+rm -f "$reg_cmd_script"
