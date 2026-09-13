@@ -92,9 +92,10 @@ if ! $file_dir/.vsdevenv.sh &>/dev/null; then
 fi
 
 # upgrade only those that aren't 'pinned' (otherwise the command fails).
-wingetpinned=($(winget pin list | awk 'NR>2 {print $2}' | tr '\n' ' '))
-wingetupgrade=($(printf '%s\n' "${wingetpkgs[@]}" | grep -v -Fxf <(echo ${wingetpinned[@]})))
-winget upgrade --ignore-warnings \
+wingetpinned=($(winget pin list | awk 'NR>2 {print $2}'))
+wingetupgrade=($(printf '%s\n' "${wingetpkgs[@]}" | grep -v -Fxf <(printf '%s\n' "${wingetpinned[@]}")))
+winget upgrade --disable-interactivity \
+               --ignore-warnings \
                --accept-source-agreements \
                --accept-package-agreements \
                ${wingetupgrade[@]}
