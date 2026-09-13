@@ -76,7 +76,7 @@ elif pacman -Qu 2>/dev/null | grep -q '^msys2-runtime '; then
   run_in_mintty 'pacman --noconfirm -Syu'
 fi
 
-pacman --noconfirm -Syu ${pacmanpkgs[*]}
+pacman --noconfirm --needed -Syu ${pacmanpkgs[*]}
 
 # vc++ build tools (if not already available in path or installed):
 if ! $file_dir/.vsdevenv.sh &>/dev/null; then
