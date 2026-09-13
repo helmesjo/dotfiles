@@ -2,6 +2,12 @@
 
 set -eu -o pipefail
 
+function on_error {
+    echo "Failed: '$2' exited with $? at ${BASH_SOURCE[0]}:$1" >&2
+    exit 1
+}
+trap 'on_error $LINENO "$BASH_COMMAND"' ERR
+
 if ! command -v yay >/dev/null 2>&1; then
   URL="https://aur.archlinux.org/yay-bin.git"
   BRANCH=

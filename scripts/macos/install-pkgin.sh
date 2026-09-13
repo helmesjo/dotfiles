@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -eu -o pipefail
 
+function on_error {
+    echo "Failed: '$2' exited with $? at ${BASH_SOURCE[0]}:$1" >&2
+    exit 1
+}
+trap 'on_error $LINENO "$BASH_COMMAND"' ERR
+
 if ! command -v pkgin &> /dev/null; then
   #
   # Copy and paste the lines below to install the Big Sur on ARM64 (M1) set.

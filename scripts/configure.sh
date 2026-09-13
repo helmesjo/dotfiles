@@ -3,10 +3,10 @@ set -eu -o pipefail
 unalias -a # disable aliases for script
 
 function on_error {
-    echo "Failed..."
+    echo "Failed: '$2' exited with $? at ${BASH_SOURCE[0]}:$1" >&2
     exit 1
 }
-trap on_error ERR
+trap 'on_error $LINENO "$BASH_COMMAND"' ERR
 
 root_dir=$(git rev-parse --show-toplevel)
 os=$($root_dir/scripts/get-os.sh 2>&1)

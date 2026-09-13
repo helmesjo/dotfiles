@@ -1,6 +1,12 @@
 #!/bin/bash
 set -eu -o pipefail
 
+function on_error {
+    echo "Failed: '$2' exited with $? at ${BASH_SOURCE[0]}:$1" >&2
+    exit 1
+}
+trap 'on_error $LINENO "$BASH_COMMAND"' ERR
+
 ## Attaching to a process on Linux with GDB as a normal user may fail with "ptrace:Operation not permitted".
 # By default Linux does not allow attaching to a process which wasn't launched by the debugger
 # (see the Yama security documentation for more details).
