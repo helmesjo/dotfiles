@@ -166,6 +166,14 @@ Load on demand while checking:
 - compile options: `${ROOT}/HOWTO/buildfile-compile-options.md`
 - what not to do: `${ROOT}/guides/packaging-guide-antipatterns.md`
 
+When verifying "Uses git submodule and symlinks for upstream": also run
+`find . -type l -exec test -d {} \; -print` in each package directory and
+confirm every result has a matching `symlink=dir` entry in that package's
+own `<pkg>/.gitattributes` (see
+`${ROOT}/guides/packaging-guide-summary.md` Step 5). `git` does not record
+symlink type, so a directory symlink missing this entry silently breaks a
+Windows checkout. Treat a missing entry as blocking.
+
 ### Test install and distribution
 
 Static inspection of the checklist is not enough. Also build the package

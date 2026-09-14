@@ -56,6 +56,14 @@ These are not optional. Violating any one is a failed run.
 10. Do not merge `review` into `main`, do not `bdep release`, and do not
     `bdep publish` until local tests, installed-case tests, distribution
     tests, and CI are green.
+11. Every directory-level symlink (not a plain file symlink) needs a
+    matching `symlink=dir` entry in that package's own
+    `<pkg>/.gitattributes` (a new file, `bdep new --package` does not
+    generate one), in the same commit that adds the symlink. Verify with
+    `find <pkg>/ -type l -exec test -d {} \; -print` and cross-check every
+    hit against `<pkg>/.gitattributes`. `git` does not record symlink type
+    and always recreates a file symlink on checkout, so skipping this
+    breaks the package on a Windows checkout.
 
 ## Mandatory reads (this turn, before any write)
 
@@ -97,6 +105,9 @@ Gate K (publish-time):
   options are local vs exported.
 - `${ROOT}/HOWTO/package-naming.md`: the naming decisions made at
   Gate E, a rename discovered late is expensive.
+- `${ROOT}/guides/packaging-guide-summary.md` Step 5: every directory
+  symlink in every package has a `symlink=dir` entry in that package's
+  own `<pkg>/.gitattributes` (Hard rule 11).
 
 If the tree no longer matches one of these, fix it before moving to the
 next gate rather than carrying the drift forward.
@@ -252,9 +263,24 @@ by hand later. See `${ROOT}/HOWTO/package-changes-file.md`.
 - Interface headers in this library's public headers go in `intf_libs`.
   Everything else goes in `impl_libs`.
 
-### Gate H: buildfiles
+### Gate H: fill source and buildfiles
 
-Adjust generated files only. Preserve generated structure and comments.
+Fill the package tree with upstream source before touching buildfiles:
+symlink individual header/source files first, and symlink a whole
+subdirectory only when that saves many individual symlinks (requires the
+`buildfile-in-prefix` layout, see packaging-guide-antipatterns.md). Follow
+the worked example in
+`${ROOT}/guides/packaging-guide-summary.md` Step 5.
+
+**Mandatory:** for every directory symlink just added, add a matching
+`symlink=dir` entry to that package's own `<pkg>/.gitattributes` (create
+the file if it does not exist yet) in the same commit. Verify with
+`find <pkg>/ -type l -exec test -d {} \; -print` and cross-check every hit.
+This is Hard rule 11, skipping it breaks the package on a Windows checkout.
+Commit the symlinks (and `.gitattributes`) before adjusting buildfiles, so
+rollback is easy.
+
+Then adjust generated files only. Preserve generated structure and comments.
 
 Load on demand:
 
@@ -334,7 +360,9 @@ the initial stretch).
    `upstream/`) for layout, dependencies, source files, and build-system
    changes.
 5. Re-apply any `.orig` / `.patch` overlays. See antipatterns.
-6. Adjust symlinks and `buildfile`s. Review `manifest` and both READMEs.
+6. Adjust symlinks and `buildfile`s (update `.gitattributes` for any new
+   or changed directory symlinks, see Hard rule 11). Review `manifest`
+   and both READMEs.
 7. Repeat Gate I (local, installed, dist including `clean`, CI).
 8. Fast-forward merge `wip-X.Y.Z` into `main` (or open a PR if you are
    not the maintainer).
