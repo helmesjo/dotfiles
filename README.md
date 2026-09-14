@@ -32,28 +32,26 @@ the shell). When running inside WSL, `$WSL_DISTRO_NAME` (set by the WSL
 kernel for all WSL processes) is used to distinguish WSL from a native Linux
 host so that WSL-specific scripts apply.
 
-### Config symlinking
+### Installation step
+
+`scripts/<os>/install.sh` installs packages for that OS.
+
+### Configuration step
 
 `scripts/configure.sh` iterates over `configs/<os>/` and creates a symlink
 in `$HOME` for each tracked file or directory. Only files tracked by git are
 linked - untracked files are skipped. If something already exists at the
 target path, it is backed up with a timestamp suffix before being replaced.
 
-### Install and configure scripts
+It then re-sources `~/.profile`, so the PATH changes made by the
+installation step above (e.g. newly installed tools) are picked up before
+continuing.
 
-`scripts/<os>/install.sh` installs packages for that OS.
+Finally, it runs every `configure-*.sh` script found in `scripts/<os>/`.
+These handle OS-specific setup that can't be expressed as a config file
+(registry entries, service enablement, symlinks outside `$HOME`, etc.).
 
-After installation, `scripts/configure.sh` runs every `configure-*.sh`
-script found in `scripts/<os>/`. These handle OS-specific setup that can't
-be expressed as a config file (registry entries, service enablement,
-symlinks outside `$HOME`, etc.).
-
-On a clean host, `~/.profile` doesn't exist until the config symlinking step
-above creates it, so the running `setup.sh` process still has the PATH from
-before it existed. `scripts/configure.sh` re-sources `~/.profile` right
-after symlinking configs and before running any `configure-*.sh` script, so
-those scripts see the same PATH a normal new shell would (e.g. newly
-winget-installed tools).
+### Platform quirks
 
 On Windows, there is additional ceremony involved. The shell is zsh running
 inside MSYS2, which provides a Unix-like layer over Win32. Several things
