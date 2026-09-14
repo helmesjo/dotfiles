@@ -61,9 +61,15 @@ for sourcename in ${dotfiles[@]}; do
   echo "  - Creating symlink for '$sourcename'"
   printf "%s" "    - "
   if [[ -d "$targetpath" && ! -L "$targetpath"  ]]; then
-    mv -fv "$targetpath" "${targetpath}.$(date +%Y%m%d_%H%M%S).bak"
+    if ! mv -fv "$targetpath" "${targetpath}.$(date +%Y%m%d_%H%M%S).bak"; then
+      echo "  - Warning: couldn't back up '$targetpath' (in use?) - skipping" >&2
+      continue
+    fi
   else
-    rm -fv "$targetpath"
+    if ! rm -fv "$targetpath"; then
+      echo "  - Warning: couldn't remove '$targetpath' (in use?) - skipping" >&2
+      continue
+    fi
   fi
   printf "%s" "    - "
   while [[ -L "$sourcepath" ]]; do sourcepath=$(readlink -f "$sourcepath"); done
