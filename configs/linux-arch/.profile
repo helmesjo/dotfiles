@@ -73,7 +73,9 @@ $(cygpath_u \
     "$PROGRAMFILES/tre-command/bin" \
     "$PROGRAMFILES/gsudo/Current" \
     "$PROGRAMFILES/Git/mingw64/bin" \
-    "$PROGRAMFILES/LLVM/bin")
+    "$PROGRAMFILES/LLVM/bin" \
+    "$PROGRAMFILES/komorebi/bin" \
+    "$PROGRAMFILES/whkd/bin")
 EOF
     unset _p
     pathappend "/c/build2/bin"
