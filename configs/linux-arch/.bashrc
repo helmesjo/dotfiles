@@ -2,7 +2,9 @@
 # ~/.bashrc
 #
 
-[[ -f "$HOME/.env" ]] && { set -a; source "$HOME/.env"; set +a; }
+if [[ -f "$HOME/.env" ]]; then
+  set -a; source "$HOME/.env"; set +a
+fi
 
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return

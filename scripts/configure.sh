@@ -71,7 +71,9 @@ done
 # tools, ~/.local/bin, etc). The loop above may have just symlinked it into
 # place for the first time - re-source it now so the configure-*.sh scripts
 # below see the same PATH a normal new shell would.
-[[ -f "$HOME/.profile" ]] && . "$HOME/.profile"
+if [[ -f "$dotfiles_root/.profile" ]]; then
+  . "$dotfiles_root/.profile"
+fi
 
 echo "Custom config..."
 

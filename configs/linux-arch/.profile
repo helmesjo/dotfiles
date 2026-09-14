@@ -2,7 +2,9 @@
 # Sourced automatically by bash; zsh sources this via ~/.zprofile.
 
 # Load base env vars (EDITOR, GOPATH, LANG, etc.).
-[ -f "$HOME/.env" ] && { set -a; . "$HOME/.env"; set +a; }
+if [ -f "$HOME/.env" ]; then
+  set -a; . "$HOME/.env"; set +a
+fi
 OSTYPE=${OSTYPE:-$(uname -s | tr '[:upper:]' '[:lower:]')}
 
 pathappend() {
