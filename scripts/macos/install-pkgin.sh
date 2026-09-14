@@ -7,6 +7,12 @@ function on_error {
 }
 trap 'on_error $LINENO "$BASH_COMMAND"' ERR
 
+# Not currently used - brew covers everything needed on macOS. Kept for
+# reference; this used to only run via a commented-out call site, now that
+# scripts/install.sh discovers every install-*.sh unconditionally, this
+# early exit is what keeps it inert.
+exit 0
+
 if ! command -v pkgin &> /dev/null; then
   #
   # Copy and paste the lines below to install the Big Sur on ARM64 (M1) set.

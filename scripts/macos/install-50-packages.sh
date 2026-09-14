@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 set -eu -o pipefail
 
 function on_error {
@@ -7,12 +6,6 @@ function on_error {
     exit 1
 }
 trap 'on_error $LINENO "$BASH_COMMAND"' ERR
-
-file_dir=`dirname $(readlink -f $BASH_SOURCE)`
-$file_dir/install-zsh-antidote.sh
-$file_dir/install-brew.sh
-$file_dir/install-browser-selector.sh
-# $file_dir/install-pkgin.sh
 
 brewpkgs=(
   # Core
