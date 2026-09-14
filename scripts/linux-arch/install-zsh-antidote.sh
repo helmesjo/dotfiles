@@ -17,9 +17,10 @@ latest=$(curl -sf "https://api.github.com/repos/mattmc3/antidote/releases/latest
 latest_version="${latest#v}"
 
 # Get currently installed version: 'antidote version X.Y.Z (abc1234)'
+# If the version can't be determined, treat it as not installed.
 installed_version=""
 if command -v antidote >/dev/null 2>&1; then
-  installed_version=$(antidote --version 2>/dev/null | awk '{print $3}')
+  installed_version=$(antidote --version 2>/dev/null | awk '{print $3}') || true
 fi
 
 # Skip if installed >= latest (sort -V: lowest first, so tail-1 is the greater)
@@ -31,7 +32,7 @@ fi
 
 echo "Installing $NAME $latest to $DIR..."
 rm -rf "$DIR"
-git clone --quiet --depth=1 --branch="$latest" "$URL" "$DIR" >/dev/null
+git -c core.autocrlf=false -c advice.detachedHead=false clone --quiet --depth=1 --branch="$latest" "$URL" "$DIR" >/dev/null
 
 mkdir -p "$HOME/.local/bin"
 chmod +x "$DIR/antidote"
