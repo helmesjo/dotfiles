@@ -45,7 +45,11 @@ need to be massaged into place to make it behave consistently:
 - `~/.config` is symlinked to `AppData/Roaming` since Windows doesn't
   follow XDG conventions, so config files land where apps expect them.
 - Symlinks require `MSYS=winsymlinks:nativestrict` to produce real Windows
-  native symlinks rather than MSYS copies or junctions.
+  native symlinks rather than MSYS copies or junctions. Set in
+  `configs/windows/.env.local` for regular shells, but also explicitly in
+  every setup/configure script that creates a symlink - `.env.local` only
+  exists first after `configure.sh` has symlinked it into place at least once,
+  so scripts that run before or during first-time setup can't rely on it.
 - Some setup can't go through dotfiles at all and is applied directly:
   registry imports via `reg.exe`, persistent env vars via `setx`, and
   autostart/Start Menu shortcuts copied into the appropriate Windows
