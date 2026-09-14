@@ -4,6 +4,14 @@
 # an interactive shell (configs/windows/.env.local does this on every
 # startup) or into a caller script that wants vsdevenv_setup's result
 # without spawning a subprocess for it.
+#
+# vsdevenv_export_envars (below) is the only place that touches PATH for
+# this: it prepends $VCPATHS, deduplicated, so MSVC tools shadow MSYS2's
+# own POSIX link/lib/etc. .env.local used to also do its own unconditional
+# 'PATH="$VCPATHS:$PATH"' after sourcing this file - since .env.local
+# re-sources this on every single process in a chain like setup.sh, that
+# duplicated the entire VS path block on every process until PATH got long
+# enough to break spawning native processes (cmd.exe et al).
 
 #  Table for converting between our representation of architecture
 ## to that of Microsoft/CL.exe fantasy land.
@@ -83,7 +91,20 @@ function vsdevenv_export_envars()
     $C set -o allexport
     $C source "$VS_ENVAR_CACHE"
     if [[ -n "${VCPATHS:-}" ]]; then
-      PATH="$PATH:$VCPATHS"
+      # Prepend the deduplicated entries - see the file header for why.
+      if [[ -n "${ZSH_VERSION:-}" ]]; then
+          _vsdevenv_vcpaths=("${(s/:/)VCPATHS}")
+      else
+          IFS=: read -ra _vsdevenv_vcpaths <<< "$VCPATHS"
+      fi
+      _vsdevenv_prefix=""
+      for _p in "${_vsdevenv_vcpaths[@]}"; do
+        if [[ ":$PATH:" != *":$_p:"* ]]; then
+          _vsdevenv_prefix="${_vsdevenv_prefix:+$_vsdevenv_prefix:}$_p"
+        fi
+      done
+      [[ -n "$_vsdevenv_prefix" ]] && PATH="$_vsdevenv_prefix:$PATH"
+      unset _vsdevenv_vcpaths _vsdevenv_prefix _p
     fi
     $C set +o allexport
 
