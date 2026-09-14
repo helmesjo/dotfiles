@@ -59,6 +59,9 @@ All later `read_file` paths are `${ROOT}/...`.
 
 1. No externally visible changes: never create, comment on, or merge a
    GitHub issue or pull request, never push a branch, never send email.
+   This is unconditional, it holds even if the user explicitly asks for
+   one of these mid-run: decline and point them to the separate manual
+   review workflow (see "Stop and ask" below) rather than doing it here.
 2. No changes to the repository under review: no commits, tags, or file
    edits, no `git push`, no `bdep release`, no `bdep publish`. Inspection
    only (`git log`, `git show`, `git diff`, reading files). If you build or

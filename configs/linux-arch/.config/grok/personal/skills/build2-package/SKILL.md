@@ -33,6 +33,27 @@ from the system context). Let `ROOT` be `HERE/../build2`
 
 All later `read_file` paths are `${ROOT}/...`.
 
+## External actions require explicit approval
+
+This skill creates a real, publicly visible package and eventually
+publishes it. Nothing that becomes visible outside your own local working
+tree happens automatically. That covers: creating a repository on GitHub,
+any `git push` (a branch or a tag), transferring or renaming a repository
+on GitHub, opening or merging a pull request, running `bdep ci`, and
+running `bdep publish`.
+
+Running `/build2-package` (or `/build2 package`) is not approval for any
+of these, and neither is reaching the gate where one of them happens.
+Before performing one of them for the first time in this run, stop, state
+exactly what is about to happen (the command, and what it makes visible
+externally), and wait for the user's explicit go-ahead for that specific
+action. Approval for one such action does not carry over to a later one,
+ask again each time. Default assumption: none of these happen unless the
+user explicitly asks for that step.
+
+Everything else, local commits, branch creation, editing files, local
+builds and tests, cloning or fetching read-only, proceeds without asking.
+
 ## Hard rules
 
 These are not optional. Violating any one is a failed run.
@@ -69,6 +90,11 @@ These are not optional. Violating any one is a failed run.
     along the way. Comments and READMEs reflect only the final state (see
     packaging-guide-antipatterns.md, "Don't leave diary-style comments or
     notes").
+13. Never create a repository, push, transfer or rename a repository on
+    GitHub, open or merge a pull request, run `bdep ci`, or run
+    `bdep publish` without the user's explicit approval for that specific
+    action, given at the time (see "External actions require explicit
+    approval" above). The default is that none of these happen.
 
 ## Mandatory reads (this turn, before any write)
 
@@ -180,6 +206,12 @@ to join that work (`continue` / `new-version` / `revision`) instead of
 starting a duplicate.
 
 ### Gate B: empty repository and first commit
+
+**Stop and get explicit approval before this gate's external actions:**
+creating the GitHub repository and pushing the initial commit to it. Do
+the local scaffold (`bdep new`, `git add`, `git commit`) first if that
+helps show what is about to be pushed, but do not create the remote
+repository or run `git push` until the user has said to go ahead.
 
 Create an empty public git repository in the user's personal workspace.
 Description: `build2 package for <name>`. Clone with SSH. No README, no
@@ -315,8 +347,11 @@ A library needs at least one test to be publishable.
 2. Local: `bdep update` and `bdep test -a`.
 3. Installed case: the recipe in packaging-guide-testing.md Step 9.
 4. Source distribution, including `b clean` in the unpacked archive.
-5. Commit on `review`, `git push -u origin review`, then `bdep ci`.
-   Wait until no configuration is `<unbuilt>` or `building`.
+5. Commit on `review`. Then stop and get explicit approval before
+   `git push -u origin review` and before `bdep ci`, these are two
+   separate external actions (a push, and a CI queue submission). Once
+   approved and run, wait until no configuration is `<unbuilt>` or
+   `building`.
 6. Only then replace the smoke test with upstream tests (if applicable).
    Extra test-only dependencies belong in a sibling `-tests` package.
 
@@ -334,21 +369,27 @@ Adjust repository `README.md`.
 
 ### Gate K: publish-time only
 
-Do this only after Gates I and J are green.
+Do this only after Gates I and J are green. Every numbered step from 2
+onward is an external action and needs its own explicit approval, given
+right before that step, not assumed from having reached this gate.
 
 1. Fast-forward `review` into `main` (`git merge --ff-only review`). If
    that fails, stop. `main` should still be the first `bdep new` commit.
-2. Transfer the repository to `github.com/build2-packaging` before the
-   first publish (GitHub Settings, Danger Zone, Transfer). Rename first
-   if the name still has a `build2-` prefix or `-package` suffix.
-   If you transferred while still on `review`, merge through a pull
-   request (`base: main`, `compare: review`) because `main` is protected
-   on that org.
-3. From `main`: `bdep release --no-open --show-push`, review the commit,
-   push the tag.
-4. `bdep publish`. Review the queue build. Do not pass `--section=stable`
-   unless the version would otherwise land in the wrong section (zero
-   major that upstream does not treat as alpha).
+   This step is local, no approval needed.
+2. Stop, get explicit approval, then transfer the repository to
+   `github.com/build2-packaging` before the first publish (GitHub
+   Settings, Danger Zone, Transfer). Rename first if the name still has a
+   `build2-` prefix or `-package` suffix. If you transferred while still
+   on `review`, merge through a pull request (`base: main`,
+   `compare: review`) because `main` is protected on that org, opening
+   and merging that PR is its own external action and needs its own
+   approval too.
+3. Stop, get explicit approval, then from `main`:
+   `bdep release --no-open --show-push`, review the commit, push the tag.
+4. Stop, get explicit approval, then `bdep publish`. Review the queue
+   build. Do not pass `--section=stable` unless the version would
+   otherwise land in the wrong section (zero major that upstream does not
+   treat as alpha).
 
 After the first submission, the package waits in `testing` for a
 `build2-review`. That review is a different skill.
@@ -369,10 +410,13 @@ the initial stretch).
 6. Adjust symlinks and `buildfile`s (update `.gitattributes` for any new
    or changed directory symlinks, see Hard rule 11). Review `manifest`
    and both READMEs.
-7. Repeat Gate I (local, installed, dist including `clean`, CI).
-8. Fast-forward merge `wip-X.Y.Z` into `main` (or open a PR if you are
-   not the maintainer).
-9. `bdep release --no-open --show-push`, then `bdep publish`.
+7. Repeat Gate I (local, installed, dist including `clean`, CI), the same
+   explicit-approval requirement applies to its push and `bdep ci` step.
+8. Fast-forward merge `wip-X.Y.Z` into `main` if you are the maintainer
+   (local, no approval needed), or, with explicit approval, open a PR if
+   you are not.
+9. Stop, get explicit approval, then `bdep release --no-open --show-push`,
+   then, with a separate explicit approval, `bdep publish`.
 
 A from-scratch rewrite of upstream may mean deleting the package directory
 and repeating Gate F on this branch.
@@ -389,7 +433,9 @@ rewrites.
 
 The revision release is one squashed commit (`bdep release --revision`,
 with `--amend --squash N` if the work was developed as several commits).
-Test locally and with CI before `bdep publish`.
+Test locally first, then, with explicit approval for the push and
+`bdep ci`, test with CI, and only then, with a separate explicit
+approval, `bdep publish`.
 
 ## Stop and ask
 
