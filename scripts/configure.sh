@@ -62,6 +62,13 @@ for sourcename in ${dotfiles[@]}; do
   ln -sv $sourcepath $targetpath
 done
 
+# On a clean host, ~/.profile didn't exist yet when this login shell started,
+# so this process is still missing everything it appends to PATH (winget
+# tools, ~/.local/bin, etc). The loop above may have just symlinked it into
+# place for the first time - re-source it now so the configure-*.sh scripts
+# below see the same PATH a normal new shell would.
+[[ -f "$HOME/.profile" ]] && . "$HOME/.profile"
+
 echo "Custom config..."
 
 # os specific configuration

@@ -38,6 +38,13 @@ script found in `scripts/<os>/`. These handle OS-specific setup that can't
 be expressed as a config file (registry entries, service enablement,
 symlinks outside `$HOME`, etc.).
 
+On a clean host, `~/.profile` doesn't exist until the config symlinking step
+above creates it, so the running `setup.sh` process still has the PATH from
+before it existed. `scripts/configure.sh` re-sources `~/.profile` right
+after symlinking configs and before running any `configure-*.sh` script, so
+those scripts see the same PATH a normal new shell would (e.g. newly
+winget-installed tools).
+
 On Windows, there is additional ceremony involved. The shell is zsh running
 inside MSYS2, which provides a Unix-like layer over Win32. Several things
 need to be massaged into place to make it behave consistently:
