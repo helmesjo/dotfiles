@@ -32,7 +32,8 @@ fi
 
 echo "Installing $NAME $latest to $DIR..."
 rm -rf "$DIR"
-git -c core.autocrlf=false -c advice.detachedHead=false clone --quiet --depth=1 --branch="$latest" "$URL" "$DIR" >/dev/null
+git -c core.autocrlf=false -c advice.detachedHead=false -c core.hooksPath=/dev/null \
+  clone --quiet --depth=1 --branch="$latest" "$URL" "$DIR" >/dev/null
 
 mkdir -p "$HOME/.local/bin"
 chmod +x "$DIR/antidote"

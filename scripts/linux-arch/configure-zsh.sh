@@ -12,4 +12,9 @@ root_dir=$(git -C "$this_dir" rev-parse --show-toplevel)
 os=$($root_dir/scripts/get-os.sh 2>&1)
 dotfiles_root="$root_dir/configs/$os"
 
+# antidote clones plugin repos internally, outside our control - disable
+# hooks via env vars (rather than a git -c flag) so the setting reaches
+# those clones too, not just a git command we invoke directly.
+export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=core.hooksPath GIT_CONFIG_VALUE_0=/dev/null
+
 $HOME/.local/bin/antidote bundle < "$dotfiles_root/.zsh_plugins.txt" > ~/.zsh_plugins.sh
