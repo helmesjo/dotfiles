@@ -1,24 +1,9 @@
 #!/usr/bin/env bash
 
-function vsdevenv_is_sourced()
-{
-  if [[ -n "$ZSH_VERSION" ]]; then
-    case "$ZSH_EVAL_CONTEXT" in *:file:*) return 0 ;; esac
-    return 1
-  fi
-  # In bash, BASH_SOURCE[0] holds the script path regardless of how it was
-  # invoked; $0 is the caller's arg0 (e.g. '-bash', '--', or the script path
-  # itself). They differ iff we are being sourced.
-  [[ "${BASH_SOURCE[0]:-}" != "$0" ]]
-}
-
-if ! vsdevenv_is_sourced; then
-  vsdevenv__caller="toplevel:file:cmdsubset"
-  this_script="$(readlink -f "${BASH_SOURCE[0]:-$0}")"
-  source "$this_script"; ec=$?
-  which cl.exe
-  exit $ec
-fi
+# This file must be sourced, not executed - it's meant to be sourced into
+# an interactive shell (configs/windows/.env.local does this on every
+# startup) or into a caller script that wants vsdevenv_setup's result
+# without spawning a subprocess for it.
 
 #  Table for converting between our representation of architecture
 ## to that of Microsoft/CL.exe fantasy land.
@@ -42,7 +27,7 @@ VS_ENVAR_CACHE="$(cygpath -u "$(readlink -f ~/.vsdevenv.cache)")"
 function vsdevenv_remove_clashing_bins()
 {
   # Remove clashing tools (eg. msys2 link.exe)
-  if [[ -n "${VCToolsInstallDir}" ]]; then
+  if [[ -n "${VCToolsInstallDir:-}" ]]; then
     local bad_linkers=($(which -a link.exe 2>/dev/null | $C grep -v "$(cygpath -u "$VCToolsInstallDir")"))
     for f in ${bad_linkers[@]}; do
       f="$(cygpath -u "$f")"
@@ -78,7 +63,7 @@ function is_vs_env_valid()
     WindowsSdkVerBinPath
   )
   for var in ${vsvars[@]}; do
-    eval "local dir=\$$var"
+    eval "local dir=\"\${$var:-}\""
     [ -d "$dir" ] || { echo "-- Err: Stale envar detected ('$var=$dir')"; ec=1; }
   done
 
@@ -277,7 +262,7 @@ EOF
           # Split VAL into an array using ':' as the delimiter
           # note: zsh (even in emulated ksh mode) doesn't support
           #       '-a' ("read into array")
-          if [[ -n $ZSH_VERSION ]]; then
+          if [[ -n ${ZSH_VERSION:-} ]]; then
               VCPATH_EXPORTED=("${(s/:/)VAL}")
           else
               IFS=: read -ra VCPATH_EXPORTED <<< "$VAL"
@@ -293,7 +278,7 @@ EOF
           # echo "-- Added envar: $VCPATHS=\"$VCPATHS\""
         else
           # Only add if it doesn't already exist and has a value assigned.
-          if [[ -z "$(eval echo \$$VAR 2>/dev/null)" ]]; then
+          if [[ -z "$(eval echo \"\${$VAR:-}\")" ]]; then
             echo "export $VAR=\"$VAL\"" >> $VS_ENVAR_CACHE
             # echo "-- Added envar: $VAR=\"$VAL\""
           else
@@ -322,7 +307,7 @@ EOF
 }
 
 # if zsh, emulate 'bash' for this file (-L)
-[[ -n "$ZSH_VERSION" ]] && ZSH_MODE=$(emulate) && emulate -L bash
+[[ -n "${ZSH_VERSION:-}" ]] && ZSH_MODE=$(emulate) && emulate -L bash
 vsdevenv_setup; ec=$?
-[[ -n "$ZSH_VERSION" ]] && emulate -L $ZSH_MODE
+[[ -n "${ZSH_VERSION:-}" ]] && emulate -L $ZSH_MODE
 return $ec

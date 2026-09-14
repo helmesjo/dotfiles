@@ -77,8 +77,10 @@ fi
 
 pacman --noconfirm --needed -Syu ${pacmanpkgs[*]}
 
-# vc++ build tools (if not already available in path or installed):
-if ! $file_dir/.vsdevenv.sh &>/dev/null; then
+# vc++ build tools (if not already available in path or installed): a
+# subshell isolates .vsdevenv.sh's own variables/functions from ours; its
+# exit code is non-zero iff cl.exe wasn't found/set up.
+if ! ( source "$file_dir/.vsdevenv.sh" ) >/dev/null; then
   winget install --force \
                  --disable-interactivity \
                  --accept-source-agreements \
