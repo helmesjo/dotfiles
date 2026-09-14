@@ -16,11 +16,20 @@ latest=$(curl -sf "https://api.github.com/repos/mattmc3/antidote/releases/latest
   awk -F'"' '/"tag_name"/{print $4}')
 latest_version="${latest#v}"
 
+# Remove a leftover symlink from the old install method (upstream commit
+# 94a8210 broke self-location through a symlink - see below), so it can't
+# be left dangling by 'rm -rf "$DIR"' below and silently swallow the
+# 'cat >' write to this same path further down.
+if [[ -L "$HOME/.local/bin/antidote" ]]; then
+  rm -f "$HOME/.local/bin/antidote"
+fi
+
 # Get currently installed version: 'antidote version X.Y.Z (abc1234)'
 # If the version can't be determined, treat it as not installed.
 installed_version=""
 if command -v antidote >/dev/null 2>&1; then
-  installed_version=$(antidote --version 2>/dev/null | awk '{print $3}') || true
+  installed_version=$(antidote --version 2>/dev/null | awk '{print $3}') \
+    || installed_version=""
 fi
 
 # Skip if installed >= latest (sort -V: lowest first, so tail-1 is the greater)
@@ -37,4 +46,15 @@ git -c core.autocrlf=false -c advice.detachedHead=false -c core.hooksPath=/dev/n
 
 mkdir -p "$HOME/.local/bin"
 chmod +x "$DIR/antidote"
-ln -sfv "$DIR/antidote" "$HOME/.local/bin/antidote"
+# Not a symlink to $DIR/antidote: that script finds its sibling
+# antidote.zsh via zsh's ${0:...:h}, and upstream commit 94a8210
+# deliberately switched that from ':A' (resolves symlinks) to ':a'
+# (does not) for Homebrew's benefit - so invoking it through a symlink
+# elsewhere no longer finds antidote.zsh at all. A wrapper that
+# hardcodes the real path sidesteps self-location entirely.
+cat > "$HOME/.local/bin/antidote" <<WRAPPER
+#!/bin/zsh
+source "$DIR/antidote.zsh"
+antidote-dispatch "\$@"
+WRAPPER
+chmod +x "$HOME/.local/bin/antidote"
