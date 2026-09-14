@@ -165,6 +165,10 @@ Load on demand while checking:
 - private headers: `${ROOT}/HOWTO/third-party-private-headers.md`
 - compile options: `${ROOT}/HOWTO/buildfile-compile-options.md`
 - what not to do: `${ROOT}/guides/packaging-guide-antipatterns.md`
+- diary-style comments or notes in `buildfile`s, `manifest`, or READMEs
+  (process narration, an earlier approach that did not work, a mishap
+  along the way): `${ROOT}/guides/packaging-guide-antipatterns.md`, "Don't
+  leave diary-style comments or notes"
 
 When verifying "Uses git submodule and symlinks for upstream": also run
 `find . -type l -exec test -d {} \; -print` in each package directory and

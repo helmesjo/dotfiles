@@ -64,6 +64,11 @@ These are not optional. Violating any one is a failed run.
     hit against `<pkg>/.gitattributes`. `git` does not record symlink type
     and always recreates a file symlink on checkout, so skipping this
     breaks the package on a Windows checkout.
+12. Never leave a comment or README note that narrates the packaging
+    process itself, an earlier approach that did not work, or a mishap
+    along the way. Comments and READMEs reflect only the final state (see
+    packaging-guide-antipatterns.md, "Don't leave diary-style comments or
+    notes").
 
 ## Mandatory reads (this turn, before any write)
 
@@ -95,7 +100,8 @@ Gate K (publish-time):
   (hand-written buildfiles, fixing upstream in the package, changed
   upstream layout, header-only despite a compiled mode, bundled
   dependencies, main targets in the root buildfile, an over-broad
-  revision, bad header inclusion, ad hoc patching).
+  revision, bad header inclusion, ad hoc patching, diary-style comments
+  or notes).
 - `${ROOT}/guides/packaging-guide-review.md`: the same checklist a
   cppget.org reviewer applies. Self-check the tree against it before
   publish rather than finding out during the actual review.
