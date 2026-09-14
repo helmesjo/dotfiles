@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Sourced by any entry point that assumes a genuine MSYS2 UCRT64 shell
-# (setup.sh, scripts/windows/install.sh, scripts/configure.sh). Each of
-# those can be run standalone rather than only via setup.sh, so each
-# verifies this independently instead of trusting a prior caller.
+# (setup.sh, scripts/install.sh, scripts/configure.sh). Each of those can be
+# run standalone rather than only via setup.sh, so each verifies this
+# independently instead of trusting a prior caller.
 #
 # $MSYSTEM is checked directly. uname -s can't be used for this: MSYS2's
 # uname reports 'MINGW64_NT-...' for the whole 64-bit mingw family (MINGW64,

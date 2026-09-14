@@ -34,7 +34,13 @@ host so that WSL-specific scripts apply.
 
 ### Installation step
 
-`scripts/<os>/install.sh` installs packages for that OS.
+`scripts/install.sh` runs every `install-*.sh` script found in
+`scripts/<os>/`, installing packages and tools for that OS. Where one script
+genuinely depends on another running first, it's named
+`install-<order>-<name>.sh` (a two-digit prefix, e.g. `10`, `20`, `50` -
+same idea as `configs/linux-arch/.zsh.d/`'s numbered drop-ins) so the plain
+directory listing sorts them correctly; everything else is just
+`install-<name>.sh`, with no ordering guarantee relative to the others.
 
 ### Configuration step
 
@@ -73,9 +79,9 @@ need to be massaged into place to make it behave consistently:
   MSYS2 UCRT64 shell (checked via `$MSYSTEM`, since `uname -s` can't tell
   UCRT64 apart from MINGW64) rather than limping along in the wrong
   subsystem, and points to `bootstrap.ps1` or the UCRT64 shortcut instead.
-  `setup.sh`, `scripts/windows/install.sh`, and `scripts/configure.sh` each
-  source it independently, since any of them can be run standalone rather
-  than only via `setup.sh`.
+  `setup.sh`, `scripts/install.sh`, and `scripts/configure.sh` each source
+  it independently, since any of them can be run standalone rather than
+  only via `setup.sh`.
 
 ---
 
@@ -94,9 +100,10 @@ configs/
 
 scripts/
   get-os.sh               # OS detection
+  install.sh              # runs install-* scripts for the OS
   configure.sh            # symlinks configs/, runs configure-* scripts
   <os>/
-    install.sh            # package installation
+    install-*.sh          # package/tool installation (install-<order>-<name>.sh if order matters)
     configure-*.sh        # post-install configuration
   windows/
     require-ucrt64.sh     # guard: refuse to run outside genuine MSYS2 UCRT64
