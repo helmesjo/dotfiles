@@ -7,6 +7,10 @@ function on_error {
 }
 trap 'on_error $LINENO "$BASH_COMMAND"' ERR
 
+# Only needed on native Windows or inside WSL - a native, non-WSL Linux
+# host uses wl-clipboard instead.
+[[ "$OSTYPE" == "linux-gnu"* && -z ${WSL_DISTRO_NAME:-} ]] && exit 0
+
 # Install win32yank.exe and a wrapper script that defaults to LF output.
 # win32yank has no config file so the wrapper is the only way to set a default.
 # In WSL, also installs wl-copy/wl-paste shims so any app using the standard
