@@ -7,11 +7,6 @@ function on_error {
 }
 trap 'on_error $LINENO "$BASH_COMMAND"' ERR
 
-file_dir=`dirname $(readlink -f $BASH_SOURCE)`
-$file_dir/install-cachyos-repo.sh
-$file_dir/install-zsh-antidote.sh
-$file_dir/install-yay.sh
-
 is_laptop=$(cat /sys/class/dmi/id/chassis_type 2>/dev/null | grep "\b9\b" > /dev/null && echo 1 || echo 0)
 is_wsl=$([[ -n ${WSL_DISTRO_NAME:-} ]] && echo 1 || echo 0)
 
@@ -100,11 +95,11 @@ aurpkgs=(
 
 if [[ $is_wsl -eq 1 ]]; then
   # WSL requires win32-compatible clipboard, so wl-clipboard won't work and
-  # win32yank is used instead. It's a Windows native executable that accesses
-  # the Win32 clipboard API, so WSL interop runs it as a real Windows process,
-  # giving it access to the shared Windows host clipboard.
+  # win32yank is used instead (installed separately by install-win32yank.sh).
+  # It's a Windows native executable that accesses the Win32 clipboard API,
+  # so WSL interop runs it as a real Windows process, giving it access to
+  # the shared Windows host clipboard.
   pacpkgs_rem=(cliphist wl-clipboard)
-  $file_dir/install-win32yank.sh
 fi
 
 if [[ $is_laptop -eq 1 ]]; then
@@ -123,73 +118,3 @@ yay -Sy --needed --noconfirm "${aurpkgs[@]}"
 # Remove unused (orphan) packages
 pacman -Qtdq | sudo pacman -Rns --noconfirm - 2>/dev/null || true
 yay -Yc --noconfirm
-
-# None of the below applies to WSL: Wayland env vars are irrelevant without
-# a native compositor, hardware groups (audio, bluetooth, etc.) are managed
-# by the Windows host, and display manager / bluetooth services don't exist.
-if [[ $is_wsl -eq 0 ]]; then
-  $file_dir/install-browser-selector.sh
-
-  # Setup system/package envars
-  envar_file="/etc/environment"
-  envars=(
-    # Firefox
-    MOZ_ENABLE_WAYLAND=1
-    # Qt
-    QT_QPA_PLATFORM=wayland
-    QT_WAYLAND_DISABLE_WINDOWDECORATION=1
-    QT_QPA_PLATFORMTHEME=qt6ct
-  )
-  echo "Setting up environment variables in '$envar_file'..."
-  for envar in ${envars[@]}; do
-    echo "  - $envar"
-    envar=($(echo $envar | tr "=" "\n"))
-    if grep --quiet "${envar[0]}" $envar_file; then
-      sudo sed -i "s/${envar[0]}=.*$/${envar[0]}=${envar[1]}/" $envar_file
-    else
-      echo "${envar[0]}=${envar[1]}" | sudo tee -a $envar_file
-    fi
-  done
-
-  groups=(
-    audio
-    lp # external devices/bluetooth
-    optical
-    storage
-    video
-    wheel
-  )
-
-  services=(
-    bluetooth.service
-    greetd.service
-  )
-  user_services=()
-  if [ "$is_laptop" == "true" ]; then
-    services+=(tlp.service)
-  fi
-
-  echo "Adding user '$(whoami)' to groups..."
-  for group in ${groups[@]}; do
-    echo "  - $group"
-    sudo usermod -aG $group $(whoami)
-  done
-
-  echo "Enabling services..."
-  for service in ${services[@]}; do
-    echo "  - $service"
-    sudo systemctl enable $service
-  done
-
-  for service in ${user_services[@]}; do
-    echo "  - $service"
-    systemctl --user enable $service
-  done
-
-  # Laptop only
-  if [ "$is_laptop" == "true" ]; then
-    # tlp specific
-    sudo systemctl mask systemd-rfkill.service
-    sudo systemctl mask systemd-rfkill.socket
-  fi
-fi

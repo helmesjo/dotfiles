@@ -7,6 +7,8 @@ function on_error {
 }
 trap 'on_error $LINENO "$BASH_COMMAND"' ERR
 
+[[ -n ${WSL_DISTRO_NAME:-} ]] && exit 0
+
 this_dir=$(dirname "$(readlink -f "$BASH_SOURCE")")
 BROWSER_SELECTOR_SH="$this_dir/browser-selector.sh"
 INSTALL_PATH="$HOME/.local/bin/browser-selector"
