@@ -78,6 +78,8 @@ echo "Custom config..."
 # os specific configuration
 configs=$(ls $root_dir/scripts/$os | grep "configure-" --include .sh) # grab the list
 for script in ${configs[@]}; do
-  echo "  Running '$os/$script'..."
+  name="${script#configure-}"
+  name="${name%.sh}"
+  echo "==> Configuring $name..."
   $root_dir/scripts/$os/$script
 done
