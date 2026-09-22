@@ -3,5 +3,8 @@
   "viewMode": "verbose",
   "showThinkingSummaries": true,
   "theme": "dark",
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "env": {
+    "CLAUDE_CODE_ENABLE_TODO_TOOLS": "1"
+  }
 }
