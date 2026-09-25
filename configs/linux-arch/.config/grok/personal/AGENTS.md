@@ -3,6 +3,7 @@
 - Check `<work-dir>/custom-skills/` for detailed tool information. CLI tools follow the naming convention `<tool>-cli.md` (e.g. `az-cli.md` for the `az` tool).
 
 - Always use POSIX tools (assume cygwin/msys2 on Windows).
+- Never run a search (`grep`, `rg`, `find`, `ls -R`, or similar) directly against the root directory or the user's home directory. Always scope searches to a specific, targeted subdirectory first, otherwise the search can end up traversing an enormous, potentially unbounded set of files.
 - Never add `Co-Authored-By` to commit messages.
 - Only use keyboard-available characters in all written language, docs, and comments (no emojis or Unicode ornaments).
 - Always match the repository's natural commit message language, layout, and style for any new commits.
