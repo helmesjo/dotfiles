@@ -52,7 +52,7 @@ function vsdevenv_remove_clashing_bins()
 function is_vs_env_valid()
 {
   local ec=0
-  command -v cl.exe >/dev/null || { echo "-- Err: Failed to find cl.exe"; ec=1; }
+  command -v cl.exe >/dev/null || { echo "-- Warn: Failed to find cl.exe"; ec=1; }
 
   # list of typical VS envars we want to validate and (if stale) unset.
   local vsvars=(
@@ -72,7 +72,7 @@ function is_vs_env_valid()
   )
   for var in ${vsvars[@]}; do
     eval "local dir=\"\${$var:-}\""
-    [ -d "$dir" ] || { echo "-- Err: Stale envar detected ('$var=$dir')"; ec=1; }
+    [ -d "$dir" ] || { echo "-- Warn: Stale envar detected ('$var=$dir')"; ec=1; }
   done
 
   # unset to make sure they get updated
@@ -108,7 +108,7 @@ function vsdevenv_export_envars()
     fi
     $C set +o allexport
 
-    is_vs_env_valid || { echo "-- Err: Invalid cache"; return 1; }
+    is_vs_env_valid || { echo "-- Warn: Invalid cache"; return 1; }
 }
 
 function vsdevenv_find_vsvarsall_bat()
