@@ -258,8 +258,45 @@ EOF
       MSYS2_ARG_CONV_EXCL="/C" cmd.exe /C "$(cygpath -m "$VS_CMD_SCRIPT")" >"$VS_ENVARS_TMP"
       rm -f "$VS_CMD_SCRIPT"
 
+      # Collect known VS/SDK install-root directories first, so the PATH
+      # filter below can positively identify genuine MSVC additions instead
+      # of diffing against the current $PATH. The current $PATH can't be
+      # trusted as a "before" baseline here: it may already carry stale
+      # VCPATHS from an earlier cache, or unrelated entries .profile added
+      # in this same (possibly nested) shell, so a plain "not already in
+      # $PATH" check wrongly treats those as new VS additions too.
+      VS_ROOT_VARS=(
+        DevEnvDir ExtensionSdkDir FrameworkDir FrameworkDir64
+        VCIDEInstallDir VCINSTALLDIR VCToolsInstallDir VCToolsRedistDir
+        UniversalCRTSdkDir VSINSTALLDIR WindowsSdkDir WindowsSdkBinPath
+        WindowsSdkVerBinPath
+      )
+      VS_ROOTS=()
+      while read -r root_line; do
+        root_line="${root_line//\\\\\\\\//}"
+        root_line="${root_line//\\\\//}"
+        root_VAR="${root_line%%=*}"
+        root_VAR="${root_VAR#'declare -x '*}"
+        root_VAL="${root_line#*=}"
+        root_VAL="${root_VAL#\"}"
+        root_VAL="${root_VAL%\"}"
+        for rv in "${VS_ROOT_VARS[@]}"; do
+          if [[ "$root_VAR" == "$rv" && -n "$root_VAL" ]]; then
+            # The captured value's form isn't reliable on its own (POSIX,
+            # or mixed "C:/..." depending on how bash was invoked to
+            # capture it) - cygpath normalizes either to plain POSIX.
+            root_VAL_posix="$(cygpath -u "$root_VAL" 2>/dev/null)"
+            [[ -n "$root_VAL_posix" ]] && VS_ROOTS+=("${root_VAL_posix%/}")
+          fi
+        done
+      done <"$VS_ENVARS_TMP"
+      # vcvarsall.bat also prepends the classic .NET Framework tools dir
+      # (for MSBuild) - not under any of the roots above.
+      VS_ROOTS+=("$(cygpath -u "$SYSTEMROOT")/Microsoft.NET")
+
       # Clear cache then fill with diff (that is, only the VS stuff).
-      # Deal specifically with 'PATH' to subtract the current PATH. Store result in 'VCPATHS'.
+      # Deal specifically with 'PATH': keep only entries rooted under one
+      # of $VS_ROOTS. Store result in 'VCPATHS'.
       >"$VS_ENVAR_CACHE"
       while read -r line; do
         # Clean up path separators (sometimes double or even quad backslashes in paths)
@@ -271,6 +308,7 @@ EOF
         VAL="${line#*=}"            # Remove from (including) first '=' to start of string
         VAL="${VAL#\"}"             # Removes leading "
         VAL="${VAL%\"}"             # Removes trailing "
+        VAL="${VAL//\"/\\\"}"       # Escape embedded " so the cache stays valid shell syntax
 
         if    [[ "$VAR"   == "$line" ]] \
            || [[ "$VAL" == "$line" ]] \
@@ -280,6 +318,12 @@ EOF
         fi
 
         if [[ $VAR == 'PATH' ]]; then
+          # Normalize to a clean, colon-separated POSIX list first - the
+          # captured value's separator/form isn't reliable on its own (it
+          # can come through already-POSIX, or as Windows-style "C:/..."
+          # entries joined by ';', depending on how bash was invoked to
+          # capture it). 'cygpath -p' handles either form correctly.
+          VAL="$(cygpath -p -u "$VAL" 2>/dev/null)"
           # Split VAL into an array using ':' as the delimiter
           # note: zsh (even in emulated ksh mode) doesn't support
           #       '-a' ("read into array")
@@ -289,11 +333,19 @@ EOF
               IFS=: read -ra VCPATH_EXPORTED <<< "$VAL"
           fi
           VCPATHS=""
-          # Loop through each path in devprompt exported PATH and add it to VCPATHS if it's not in PATH
+          # Loop through each path in devprompt exported PATH and add it
+          # only if it's rooted under one of the VS/SDK dirs found above.
           for p in "${VCPATH_EXPORTED[@]}"; do
-              if [[ ":$PATH:" != *":$p:"* ]]; then
-                  VCPATHS="${VCPATHS:+$VCPATHS:}$p"
-              fi
+              p="${p%/}"
+              [[ -z "$p" ]] && continue
+              for root in "${VS_ROOTS[@]}"; do
+                case "$p" in
+                  "$root"|"$root"/*)
+                    VCPATHS="${VCPATHS:+$VCPATHS:}$p"
+                    break
+                    ;;
+                esac
+              done
           done
           echo "export VCPATHS=\"$VCPATHS\"" >>"$VS_ENVAR_CACHE"
           # echo "-- Added envar: $VCPATHS=\"$VCPATHS\""
