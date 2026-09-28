@@ -143,12 +143,12 @@ function _erdtree() {
   fi
 }
 if [[ ! $OSTYPE =~ ^(msys|cygwin) ]]; then
-  alias ll='_erdtree -H -I --disk-usage physical --layout inverted --long --no-ignore --no-progress -L1'
+  alias ll='_erdtree -H -I --disk-usage logical --layout inverted --long --no-ignore --no-progress -L1'
 else
   # no permission info (erd --long) on Windows/msys2/cygwin
-  alias ll='_erdtree -H -I --disk-usage physical --layout inverted --no-ignore --no-progress -L1'
+  alias ll='_erdtree -H -I --disk-usage logical --layout inverted --no-ignore --no-progress -L1'
 fi
-alias tree='_erdtree -H -I --disk-usage physical --layout inverted --no-progress'
+alias tree='_erdtree -H -I --disk-usage logical --layout inverted --no-progress'
 [[ $OSTYPE =~ ^(msys|cygwin) ]] && alias ssh="$(cygpath -m "${WINDIR}")/System32/OpenSSH/ssh.exe"
 [[ $OSTYPE =~ ^(msys|cygwin) ]] && {
   alias reboot='powershell.exe -command restart-computer'
