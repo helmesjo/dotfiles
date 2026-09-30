@@ -105,11 +105,15 @@ _bdep_sync_cfg_dirs() {
 }
 
 _bdep_sync_arr_idx() {
-  # Print the index of value $1 within the array named $2 (bash-3.2-safe
-  # indirection, no namerefs/associative arrays), or fail with no output.
+  # Find the index of value $1 within the array named $2 (bash-3.2-safe
+  # indirection, no namerefs/associative arrays).  Sets the caller's _idx
+  # (dynamic scoping, same mechanism _bdep_sync_cleanup already relies on)
+  # and returns 0, or returns 1 with _idx untouched -- avoids forking a
+  # subshell on every call the way `_idx=$(...)` would, and this runs many
+  # times per suspend/resume pass.
   local _ref="$2[@]" _v _i=0
   for _v in "${!_ref}"; do
-    [[ "$_v" == "$1" ]] && { printf '%s\n' "$_i"; return 0; }
+    [[ "$_v" == "$1" ]] && { _idx=$_i; return 0; }
     _i=$((_i + 1))
   done
   return 1
@@ -133,19 +137,19 @@ _bdep_sync_loc_diff() {
     done < <(_bdep_sync_parse_locs "$_root/packages.manifest")
   fi
 
+  # Line-bounded substring membership instead of `printf | grep -Fxq` (which
+  # forked two processes per location compared): every entry above already
+  # ends in \n, so prefixing one more \n lets "\n$_loc\n" only ever match a
+  # whole entry, never a partial one.
   local _removed="" _added=""
   while IFS= read -r _loc; do
     [[ -n "$_loc" ]] || continue
-    if ! printf '%s\n' "$_curr_locs" | grep -Fxq -- "$_loc" 2>/dev/null; then
-      _removed+="$_loc"$'\n'
-    fi
+    [[ $'\n'"$_curr_locs" == *$'\n'"$_loc"$'\n'* ]] || _removed+="$_loc"$'\n'
   done <<<"$_prev_locs"
 
   while IFS= read -r _loc; do
     [[ -n "$_loc" ]] || continue
-    if ! printf '%s\n' "$_prev_locs" | grep -Fxq -- "$_loc" 2>/dev/null; then
-      _added+="$_loc"$'\n'
-    fi
+    [[ $'\n'"$_prev_locs" == *$'\n'"$_loc"$'\n'* ]] || _added+="$_loc"$'\n'
   done <<<"$_curr_locs"
 
   printf -v "$_removed_var" '%s' "$_removed"
@@ -207,8 +211,17 @@ _bdep_sync_hook() {
     command -v bdep >/dev/null 2>&1 || clr_res=$clr_warn
   fi
   if [[ -z "$clr_res" ]]; then
-    _bdep_sync_loc_diff "$prev_head" "$root" removed added
-    [[ -z "$removed" && -z "$added" ]] && clr_res=$clr_warn
+    # Fast path: packages.manifest is byte-identical between the prev commit
+    # and the current worktree on most checkouts (which packages exist
+    # rarely changes), and that alone guarantees no removed/added locations.
+    # Skip the git-show + full parse/compare below in that (common) case --
+    # this hook runs on every checkout in every repo on the machine.
+    if git -C "$root" diff --quiet "$prev_head" -- packages.manifest 2>/dev/null; then
+      clr_res=$clr_warn
+    else
+      _bdep_sync_loc_diff "$prev_head" "$root" removed added
+      [[ -z "$removed" && -z "$added" ]] && clr_res=$clr_warn
+    fi
   fi
 
   if [[ -z "$clr_res" ]]; then
@@ -234,13 +247,30 @@ _bdep_sync_hook() {
       # never deletes those files.  When only an empty skeleton (e.g. committed
       # out-root.build artifacts) or nothing is tracked, restore from prev HEAD
       # and schedule the location for cleanup.
+      # One batched ls-tree + one batched restore for every removed location
+      # instead of one of each per location (multi-package removals are
+      # exactly the case a branch switch is likely to hit).
+      local -a _removed_locs=() _restore_paths=() _need_restore=()
       while IFS= read -r loc; do
         [[ -z "$loc" ]] && continue
-        if [[ -z "$(git -C "$root" ls-tree "$new_head" "$loc/manifest" 2>/dev/null)" ]]; then
-          git -C "$root" restore --quiet --source="$prev_head" --worktree -- "$loc" 2>/dev/null
-          restored_locs+=("$root/$loc")
-        fi
+        _removed_locs+=("$loc")
+        _restore_paths+=("$loc/manifest")
       done <<<"$removed"
+
+      if [[ ${#_removed_locs[@]} -gt 0 ]]; then
+        local _tracked
+        _tracked=$'\n'"$(git -C "$root" ls-tree --name-only "$new_head" -- "${_restore_paths[@]}" 2>/dev/null)"$'\n'
+        for loc in "${_removed_locs[@]}"; do
+          [[ "$_tracked" == *$'\n'"$loc/manifest"$'\n'* ]] && continue
+          _need_restore+=("$loc")
+        done
+        if [[ ${#_need_restore[@]} -gt 0 ]]; then
+          git -C "$root" restore --quiet --source="$prev_head" --worktree -- "${_need_restore[@]}" 2>/dev/null
+          for loc in "${_need_restore[@]}"; do
+            restored_locs+=("$root/$loc")
+          done
+        fi
+      fi
 
       # Collect packages that have an out-tree and need suspension.
       # Packages never initialized (no src-root.build anywhere) are skipped:
@@ -328,7 +358,7 @@ _bdep_sync_hook() {
             [[ -f "$src" ]] && { _srb_names+=("$_pname"); _srb_content+=("$(<"$src")"); }
           done
           for pkg in "${_cfg_pkgs[@]}"; do
-            _bdep_sync_arr_idx "$pkg" _srb_names >/dev/null && continue
+            _bdep_sync_arr_idx "$pkg" _srb_names && continue
             src="$cfg/$pkg/build/bootstrap/src-root.build"
             [[ -f "$src" ]] && { _srb_names+=("$pkg"); _srb_content+=("$(<"$src")"); }
           done
@@ -338,7 +368,7 @@ _bdep_sync_hook() {
           local -a _to_disfigure=()
           local _disfigure_ok=1
           for pkg in "${_cfg_pkgs[@]}"; do
-            _idx=$(_bdep_sync_arr_idx "$pkg" _bp_names) &&
+            _bdep_sync_arr_idx "$pkg" _bp_names &&
               [[ "${_bp_states[$_idx]}" == configured ]] && _to_disfigure+=("$pkg")
           done
           if [[ "${#_to_disfigure[@]}" -gt 0 ]]; then
@@ -361,7 +391,7 @@ _bdep_sync_hook() {
           # leaving it stuck registered as broken in bpkg while "suspended".
           for pkg in "${_cfg_pkgs[@]}"; do
             [[ " $_bpkg_failed_str " == *" $pkg "* ]] && continue
-            _idx=$(_bdep_sync_arr_idx "$pkg" _bp_names) || continue
+            _bdep_sync_arr_idx "$pkg" _bp_names || continue
             local -a _purge_opts=()
             case "${_bp_states[$_idx]}" in
               configured|unpacked) ;;
@@ -379,7 +409,7 @@ _bdep_sync_hook() {
           # Write .suspend markers for suspended packages from saved content.
           for pkg in "${_cfg_pkgs[@]}"; do
             [[ " $_bpkg_failed_str " == *" $pkg "* ]] && continue
-            _idx=$(_bdep_sync_arr_idx "$pkg" _srb_names) || continue
+            _bdep_sync_arr_idx "$pkg" _srb_names || continue
             local srb_dir="$cfg/$pkg/build/bootstrap"
             mkdir -p "$srb_dir"
             printf '%s\n' "${_srb_content[$_idx]}" > "$srb_dir/src-root.build.suspend"
@@ -389,7 +419,7 @@ _bdep_sync_hook() {
           [[ $_disfigure_ok -eq 0 ]] && continue
           for _pname in "${_bp_names[@]}"; do
             [[ " $_suspended_list " == *" $_pname "* ]] && continue
-            _idx=$(_bdep_sync_arr_idx "$_pname" _srb_names) || continue
+            _bdep_sync_arr_idx "$_pname" _srb_names || continue
             srb_dir="$cfg/$_pname/build/bootstrap"
             mkdir -p "$srb_dir"
             printf '%s\n' "${_srb_content[$_idx]}" > "$srb_dir/src-root.build"
@@ -404,10 +434,10 @@ _bdep_sync_hook() {
       # ("no build/bootstrap.build in <pkg-dir>") until manually fixed.
       if [[ ${#_failed_pkgs[@]} -gt 0 ]]; then
         local -a _keep_restored=()
-        local _rloc _ridx
+        local _rloc
         for _rloc in "${restored_locs[@]}"; do
-          _ridx=$(_bdep_sync_arr_idx "${_rloc#"$root/"}" _suspend_locs)
-          if [[ -n "$_ridx" ]] && [[ " ${_failed_pkgs[*]} " == *" ${_suspend_loc_pkgs[$_ridx]} "* ]]; then
+          if _bdep_sync_arr_idx "${_rloc#"$root/"}" _suspend_locs &&
+             [[ " ${_failed_pkgs[*]} " == *" ${_suspend_loc_pkgs[$_idx]} "* ]]; then
             continue  # leave this one on disk: package still registered
           fi
           _keep_restored+=("$_rloc")
