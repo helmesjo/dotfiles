@@ -66,6 +66,7 @@ _bdep_sync_pkg_name() {
   # Print the package name from the manifest file at $1.
   local _line
   while IFS= read -r _line; do
+    _line="${_line%$'\r'}"  # strip CR (CRLF-checked-out manifest)
     [[ "$_line" == name:* ]] || continue
     _line="${_line#name:}"
     _line="${_line#"${_line%%[! ]*}"}"  # ltrim spaces
@@ -79,6 +80,7 @@ _bdep_sync_parse_locs() {
   # Trailing slash and surrounding whitespace stripped.
   local _line _loc
   while IFS= read -r _line; do
+    _line="${_line%$'\r'}"  # strip CR (CRLF-checked-out manifest)
     [[ "$_line" == location:* ]] || continue
     _loc="${_line#location:}"
     _loc="${_loc#"${_loc%%[! ]*}"}"  # ltrim spaces
@@ -89,14 +91,28 @@ _bdep_sync_parse_locs() {
 
 _bdep_sync_cfg_dirs() {
   # Print bdep configuration directories for project at $1, one per line,
-  # with forward slashes (normalises Windows backslash paths from bdep output).
+  # with forward slashes (normalises Windows backslash paths from bdep output)
+  # and no trailing slash (bdep config list's regular format always prints
+  # one, e.g. "@gcc /path/to/cfg/ 1 target default,forwarded").
   local _line _path
   while IFS= read -r _line; do
     [[ -z "$_line" ]] && continue
     [[ "$_line" == @* ]] && _line="${_line#* }"  # strip @name prefix
     _path="${_line%% *}"                          # first field = cfg-dir path
-    printf '%s\n' "${_path//\\//}"               # normalise to forward slashes
+    _path="${_path//\\//}"                        # normalise to forward slashes
+    printf '%s\n' "${_path%/}"                    # strip trailing slash
   done < <(bdep config list --directory "$1" 2>/dev/null)
+}
+
+_bdep_sync_arr_idx() {
+  # Print the index of value $1 within the array named $2 (bash-3.2-safe
+  # indirection, no namerefs/associative arrays), or fail with no output.
+  local _ref="$2[@]" _v _i=0
+  for _v in "${!_ref}"; do
+    [[ "$_v" == "$1" ]] && { printf '%s\n' "$_i"; return 0; }
+    _i=$((_i + 1))
+  done
+  return 1
 }
 
 _bdep_sync_loc_diff() {
@@ -167,13 +183,18 @@ _bdep_sync_hook() {
   local prev_head="$1" new_head="$2" is_branch="$3"
   local clr_ok=$'\e[1;32m' clr_warn=$'\e[1;33m' clr_err=$'\e[1;31m' clr_def=$'\e[1;0m'
   local clr_res="" root="" removed="" added=""
-  local cfg loc pkg src bak="" _manifest_swapped=0 suspend _err err_out="" _ok _any _found_any
+  local cfg loc pkg src bak="" _manifest_swapped=0 suspend _err err_out="" _ok _any _found_any _idx
   local -a cfg_dirs restored_locs=() _suspend_pkgs
 
   # Skip silently during interactive rebase / git-am. git manipulates HEAD
   # rapidly and bdep sync would interleave with the in-progress operation.
+  # rebase-merge/rebase-apply are per-worktree state, so this must check
+  # --git-dir (the worktree-specific admin dir), not --git-common-dir (the
+  # dir shared across all worktrees) -- they only coincide in the main
+  # worktree, and a rebase running in a linked worktree would otherwise go
+  # undetected.
   local _gd
-  _gd=$(git rev-parse --git-common-dir 2>/dev/null) || _gd=""
+  _gd=$(git rev-parse --git-dir 2>/dev/null) || _gd=""
   [[ -d "$_gd/rebase-merge" || -d "$_gd/rebase-apply" ]] && return 0
 
   # Skip silently if not a bdep project.
@@ -270,31 +291,39 @@ _bdep_sync_hook() {
           done
           [[ "${#_cfg_pkgs[@]}" -eq 0 ]] && continue
 
-          # Check bpkg state once.
-          local -a _bpkg_pkgs=()
+          # Check bpkg state once.  --all: a collaterally-disfigured kept
+          # dependent (below) may not be a held package, and must still be
+          # visible here or its src-root.build could never be restored.
+          # State/content are kept in parallel arrays (name[i] <-> state[i]
+          # / content[i]), reset fresh every cfg iteration, rather than
+          # building bash variable names out of package names: package names
+          # legally contain '-', '.', '+' (none valid in a bash identifier),
+          # which silently broke that scheme for exactly the hyphenated
+          # names the build2 naming guide recommends.
+          local -a _bp_names=() _bp_states=()
           local _line _pname _bpkg_failed_str="" _suspended_list=" ${_cfg_pkgs[*]} "
           while IFS= read -r _line; do
             _pname="${_line#!}"; _pname="${_pname%% *}"
             [[ -z "$_pname" ]] && continue
-            _bpkg_pkgs+=("$_pname")
-            if   [[ "$_line" == *configured* ]]; then 
-              printf -v "_bpkg_state_$_pname" '%s' "configured"
-            elif [[ "$_line" == *unpacked*   ]]; then 
-              printf -v "_bpkg_state_$_pname" '%s' "unpacked"
+            _bp_names+=("$_pname")
+            if   [[ "$_line" == *configured* ]]; then _bp_states+=("configured")
+            elif [[ "$_line" == *unpacked*   ]]; then _bp_states+=("unpacked")
+            elif [[ "$_line" == *broken*     ]]; then _bp_states+=("broken")
+            else                                      _bp_states+=("")
             fi
-          done < <(bpkg pkg-status --directory "$cfg" 2>/dev/null)
+          done < <(bpkg pkg-status --all --directory "$cfg" 2>/dev/null)
 
-          # Save src-root.build content for all configured packages and mark
+          # Save src-root.build content for all known packages and mark
           # which are being suspended.
-          for _pname in "${_bpkg_pkgs[@]}"; do
+          local -a _srb_names=() _srb_content=()
+          for _pname in "${_bp_names[@]}"; do
             src="$cfg/$_pname/build/bootstrap/src-root.build"
-            [[ -f "$src" ]] && printf -v "_saved_srb_$_pname" '%s' "$(<"$src")"
+            [[ -f "$src" ]] && { _srb_names+=("$_pname"); _srb_content+=("$(<"$src")"); }
           done
           for pkg in "${_cfg_pkgs[@]}"; do
-            local saved_var="_saved_srb_$pkg"
-            [[ -n "${!saved_var+set}" ]] && continue
+            _bdep_sync_arr_idx "$pkg" _srb_names >/dev/null && continue
             src="$cfg/$pkg/build/bootstrap/src-root.build"
-            [[ -f "$src" ]] && printf -v "_saved_srb_$pkg" '%s' "$(<"$src")"
+            [[ -f "$src" ]] && { _srb_names+=("$pkg"); _srb_content+=("$(<"$src")"); }
           done
 
           # Disfigure Phase: one pkg-drop call handles suspended pkgs + any kept
@@ -302,8 +331,8 @@ _bdep_sync_hook() {
           local -a _to_disfigure=()
           local _disfigure_ok=1
           for pkg in "${_cfg_pkgs[@]}"; do
-            local state_var="_bpkg_state_$pkg"
-            [[ "${!state_var:-}" == configured ]] && _to_disfigure+=("$pkg")
+            _idx=$(_bdep_sync_arr_idx "$pkg" _bp_names) &&
+              [[ "${_bp_states[$_idx]}" == configured ]] && _to_disfigure+=("$pkg")
           done
           if [[ "${#_to_disfigure[@]}" -gt 0 ]]; then
             if ! _err=$(bpkg pkg-drop --drop-dependent --disfigure-only --yes \
@@ -318,11 +347,20 @@ _bdep_sync_hook() {
           fi
 
           # Purge Phase: only suspended packages (kept dependents stay unpacked).
+          # A broken package (e.g. left over from an interrupted build) needs
+          # --force to purge; without recognizing it explicitly it was
+          # silently skipped here yet still got a .suspend marker below,
+          # leaving it stuck registered as broken in bpkg while "suspended".
           for pkg in "${_cfg_pkgs[@]}"; do
             [[ " $_bpkg_failed_str " == *" $pkg "* ]] && continue
-            local state_var="_bpkg_state_$pkg"
-            [[ "${!state_var:-}" == configured || "${!state_var:-}" == unpacked ]] || continue
-            if ! _err=$(bpkg pkg-purge --directory "$cfg" "$pkg" 2>&1); then
+            _idx=$(_bdep_sync_arr_idx "$pkg" _bp_names) || continue
+            local -a _purge_opts=()
+            case "${_bp_states[$_idx]}" in
+              configured|unpacked) ;;
+              broken) _purge_opts=(--force) ;;
+              *) continue ;;
+            esac
+            if ! _err=$(bpkg pkg-purge --directory "$cfg" "${_purge_opts[@]}" "$pkg" 2>&1); then
               err_out+="[bpkg purge $pkg @ ${cfg##*/}]: $_err"$'\n'
               clr_res=$clr_err
               _bpkg_failed_str="$_bpkg_failed_str $pkg "
@@ -332,22 +370,20 @@ _bdep_sync_hook() {
           # Write .suspend markers for suspended packages from saved content.
           for pkg in "${_cfg_pkgs[@]}"; do
             [[ " $_bpkg_failed_str " == *" $pkg "* ]] && continue
-            local saved_var="_saved_srb_$pkg"
-            [[ -n "${!saved_var+set}" ]] || continue
+            _idx=$(_bdep_sync_arr_idx "$pkg" _srb_names) || continue
             local srb_dir="$cfg/$pkg/build/bootstrap"
             mkdir -p "$srb_dir"
-            printf '%s\n' "${!saved_var}" > "$srb_dir/src-root.build.suspend"
+            printf '%s\n' "${_srb_content[$_idx]}" > "$srb_dir/src-root.build.suspend"
           done
 
           # Restore src-root.build for kept packages disfigured as dependents.
           [[ $_disfigure_ok -eq 0 ]] && continue
-          for _pname in "${_bpkg_pkgs[@]}"; do
+          for _pname in "${_bp_names[@]}"; do
             [[ " $_suspended_list " == *" $_pname "* ]] && continue
-            local saved_var="_saved_srb_$_pname"
-            [[ -n "${!saved_var+set}" ]] || continue
+            _idx=$(_bdep_sync_arr_idx "$_pname" _srb_names) || continue
             srb_dir="$cfg/$_pname/build/bootstrap"
             mkdir -p "$srb_dir"
-            printf '%s\n' "${!saved_var}" > "$srb_dir/src-root.build"
+            printf '%s\n' "${_srb_content[$_idx]}" > "$srb_dir/src-root.build"
           done
         done
       fi
@@ -357,36 +393,43 @@ _bdep_sync_hook() {
 
     # == RESUME reappearing packages ===========================================
     if [[ -n "$added" ]]; then
-      # First pass: rename markers and collect cfg union + package dirs.
-      local -a _resume_pkg_dirs=() _resume_cfgs=()
-      local _resume_seen=""
+      # A package may have been suspended in only some of the project's
+      # configurations (e.g. it was never part of every cfg to begin with).
+      # bdep init applies every given package to every given configuration
+      # (a full cross-product), so batching resumed packages against the
+      # *union* of cfgs that held a marker for any of them would wrongly
+      # initialize a package into a configuration it was never part of.
+      # Group by cfg instead: one bdep init call per cfg, each scoped to
+      # only the packages whose marker actually lived there.
+      local -a _resume_locs=() _resume_pkgs=() _resume_logged=()
       while IFS= read -r loc; do
         [[ -z "$loc" ]] && continue
-        pkg=$(_bdep_sync_pkg_name "$root/$loc/manifest")
-        _found_any=0
-        for cfg in "${cfg_dirs[@]}"; do
-          [[ -d "$cfg" ]] || continue
+        _resume_locs+=("$loc")
+        _resume_pkgs+=("$(_bdep_sync_pkg_name "$root/$loc/manifest")")
+      done <<<"$added"
+
+      local -a _cfg_resume_dirs
+      local _ri
+      for cfg in "${cfg_dirs[@]}"; do
+        [[ -d "$cfg" ]] || continue
+        _cfg_resume_dirs=()
+        for ((_ri = 0; _ri < ${#_resume_pkgs[@]}; _ri++)); do
+          pkg="${_resume_pkgs[$_ri]}"
+          loc="${_resume_locs[$_ri]}"
           suspend="$cfg/$pkg/build/bootstrap/src-root.build.suspend"
           [[ -f "$suspend" ]] || continue
           mv "$suspend" "${suspend%.suspend}"
-          _found_any=1
-          if [[ " $_resume_seen " != *" $cfg "* ]]; then
-            _resume_seen="$_resume_seen $cfg "
-            _resume_cfgs+=("$cfg")
+          _cfg_resume_dirs+=( "-d" "$root/$loc" )
+          if [[ " ${_resume_logged[*]} " != *" $pkg "* ]]; then
+            printf 'initializing package %s\n' "$pkg"
+            _resume_logged+=("$pkg")
           fi
         done
-        [[ $_found_any -eq 0 ]] && continue
-        printf 'initializing package %s\n' "$pkg"
-        _resume_pkg_dirs+=( "-d" "$root/$loc" )
-      done <<<"$added"
-      # Single bdep init call for all resumed packages across the cfg union.
-      # All packages in _resume_pkg_dirs have src-root.build in every cfg in
-      # _resume_cfgs (the union of cfgs that held .suspend markers).
-      if [[ ${#_resume_pkg_dirs[@]} -gt 0 ]]; then
-        if ! bdep init --no-sync "${_resume_cfgs[@]}" "${_resume_pkg_dirs[@]}"; then
+        [[ "${#_cfg_resume_dirs[@]}" -eq 0 ]] && continue
+        if ! bdep init --no-sync --config "$cfg" "${_cfg_resume_dirs[@]}"; then
           clr_res=$clr_err
         fi
-      fi
+      done
     fi
   fi
 
@@ -398,5 +441,5 @@ _bdep_sync_hook() {
 
 _bdep_sync_hook "$@"
 _bdep_sync_rc=$?
-unset -f _bdep_sync_hook _bdep_sync_cleanup _bdep_sync_loc_diff _bdep_sync_parse_locs _bdep_sync_cfg_dirs _bdep_sync_pkg_name
+unset -f _bdep_sync_hook _bdep_sync_cleanup _bdep_sync_loc_diff _bdep_sync_parse_locs _bdep_sync_cfg_dirs _bdep_sync_pkg_name _bdep_sync_arr_idx
 exit $_bdep_sync_rc
