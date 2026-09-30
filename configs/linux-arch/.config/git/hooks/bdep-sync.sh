@@ -184,7 +184,7 @@ _bdep_sync_hook() {
   local clr_ok=$'\e[1;32m' clr_warn=$'\e[1;33m' clr_err=$'\e[1;31m' clr_def=$'\e[1;0m'
   local clr_res="" root="" removed="" added=""
   local cfg loc pkg src bak="" _manifest_swapped=0 suspend _err err_out="" _ok _any _found_any _idx
-  local -a cfg_dirs restored_locs=() _suspend_pkgs
+  local -a cfg_dirs restored_locs=() _suspend_pkgs _suspend_locs _suspend_loc_pkgs _failed_pkgs=()
 
   # Skip silently during interactive rebase / git-am. git manipulates HEAD
   # rapidly and bdep sync would interleave with the in-progress operation.
@@ -246,6 +246,8 @@ _bdep_sync_hook() {
       # Packages never initialized (no src-root.build anywhere) are skipped:
       # bdep deinit would fail on them and there is nothing to preserve.
       _suspend_pkgs=()
+      _suspend_locs=()
+      _suspend_loc_pkgs=()
       while IFS= read -r loc; do
         [[ -z "$loc" ]] && continue
         pkg=$(_bdep_sync_pkg_name "$root/$loc/manifest")
@@ -255,6 +257,8 @@ _bdep_sync_hook() {
         done
         [[ $_any -eq 0 ]] && continue
         _suspend_pkgs+=("$pkg")
+        _suspend_locs+=("$loc")
+        _suspend_loc_pkgs+=("$pkg")
       done <<<"$removed"
 
       if [[ ${#_suspend_pkgs[@]} -gt 0 ]]; then
@@ -266,10 +270,13 @@ _bdep_sync_hook() {
                       "${_suspend_pkgs[@]}" 2>&1); then
           # "not initialized in" means the bdep DB is already clean; proceed
           # with Phase 2 (bpkg DB and bdep DB are independent).
-          # Any other failure is hard: skip bpkg+filesystem cleanup for all.
+          # Any other failure is hard: skip bpkg+filesystem cleanup for all,
+          # and keep their sources out of the git-restored-tree cleanup below
+          # since bdep/bpkg may still consider them initialized here.
           if [[ "$_err" != *"not initialized in"* ]]; then
             err_out+="[bdep deinit]: $_err"$'\n'
             clr_res=$clr_err
+            _failed_pkgs+=("${_suspend_pkgs[@]}")
             _suspend_pkgs=()
           fi
         fi
@@ -341,6 +348,7 @@ _bdep_sync_hook() {
               clr_res=$clr_err
               for pkg in "${_to_disfigure[@]}"; do
                 _bpkg_failed_str="$_bpkg_failed_str $pkg "
+                _failed_pkgs+=("$pkg")
               done
               _disfigure_ok=0
             fi
@@ -364,6 +372,7 @@ _bdep_sync_hook() {
               err_out+="[bpkg purge $pkg @ ${cfg##*/}]: $_err"$'\n'
               clr_res=$clr_err
               _bpkg_failed_str="$_bpkg_failed_str $pkg "
+              _failed_pkgs+=("$pkg")
             fi
           done
 
@@ -386,6 +395,24 @@ _bdep_sync_hook() {
             printf '%s\n' "${_srb_content[$_idx]}" > "$srb_dir/src-root.build"
           done
         done
+      fi
+
+      # Never let cleanup delete a restored source whose package bdep/bpkg
+      # still believes is initialized there (deinit, disfigure, or purge
+      # failed for it above): that would strand it pointing at a source
+      # missing build/bootstrap.build, breaking the next bdep/b update
+      # ("no build/bootstrap.build in <pkg-dir>") until manually fixed.
+      if [[ ${#_failed_pkgs[@]} -gt 0 ]]; then
+        local -a _keep_restored=()
+        local _rloc _ridx
+        for _rloc in "${restored_locs[@]}"; do
+          _ridx=$(_bdep_sync_arr_idx "${_rloc#"$root/"}" _suspend_locs)
+          if [[ -n "$_ridx" ]] && [[ " ${_failed_pkgs[*]} " == *" ${_suspend_loc_pkgs[$_ridx]} "* ]]; then
+            continue  # leave this one on disk: package still registered
+          fi
+          _keep_restored+=("$_rloc")
+        done
+        restored_locs=("${_keep_restored[@]}")
       fi
 
       _bdep_sync_cleanup

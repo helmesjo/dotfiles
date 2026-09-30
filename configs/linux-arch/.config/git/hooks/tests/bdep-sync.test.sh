@@ -512,6 +512,50 @@ scenario_S20_broken_state() {
   fi
 }
 
+scenario_S21_cleanup_survives_partial_failure() {
+  # Reported real-world failure: switch to a branch where a package is
+  # dropped, suspend partially fails (e.g. bpkg pkg-drop can't disfigure it,
+  # a locked file on Windows is a realistic trigger), then a later `bdep
+  # update`/`b` blows up with "no build/bootstrap.build in <pkg-dir>" --
+  # because cleanup had already deleted the git-restored source out from
+  # under a package bpkg still considers configured there.
+  local _d; _d=$(_new_repo)
+  _mk_cfg "$_d" gcc "$_d-gcc" >/dev/null 2>&1
+  local _with; _with=$(git -C "$_d" rev-parse HEAD)
+  ( cd "$_d" && _manifest_remove_pkg packages.manifest libcore-ext && git rm -rq libcore-ext &&
+      git commit -qam "remove libcore-ext" ) >/dev/null 2>&1
+  local _without; _without=$(git -C "$_d" rev-parse HEAD)
+
+  # A fake bpkg that fails pkg-drop (disfigure) for libcore-ext specifically,
+  # forwarding every other call (pkg-status, pkg-purge, etc.) to the real
+  # bpkg -- simulates any real-world disfigure failure without depending on
+  # a platform-specific way to actually induce one.
+  local _fakebin="$_root_tmp/fakebin.$$"
+  mkdir -p "$_fakebin"
+  local _realbpkg; _realbpkg=$(command -v bpkg)
+  cat > "$_fakebin/bpkg" <<EOF
+#!/usr/bin/env bash
+if [[ "\$1" == "pkg-drop" ]]; then
+  echo "fake: disfigure blocked (simulated failure)" >&2
+  exit 1
+fi
+exec "$_realbpkg" "\$@"
+EOF
+  chmod +x "$_fakebin/bpkg"
+
+  _run_checkout "$_d" "" "$_with" >/dev/null 2>&1              # rewind (throwaway)
+  _run_checkout "$_d" "$_fakebin:$PATH" "$_without"             # suspend, with disfigure forced to fail
+
+  # The hook should report the failure (not a silent "ok")...
+  local _r=1
+  if ! _hook_says_ok; then
+    # ...and, crucially, must NOT have deleted the restored source: bpkg
+    # still thinks libcore-ext is configured at this exact path.
+    [[ -f "$_d/libcore-ext/build/bootstrap.build" ]] && _r=0
+  fi
+  _check $_r "S21 cleanup leaves a package's source in place when suspend partially fails" "$_out$_err"
+}
+
 # ---------------------------------------------------------------------------
 # runner
 # ---------------------------------------------------------------------------
@@ -537,6 +581,7 @@ _all_scenarios=(
   scenario_S18_crlf_manifest
   scenario_S19_cfg_dirs_shape
   scenario_S20_broken_state
+  scenario_S21_cleanup_survives_partial_failure
 )
 
 _setup_suite
