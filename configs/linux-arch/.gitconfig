@@ -114,6 +114,9 @@
     rbi = rebase --interactive
     rs = restore --staged
     s = status
+    # Verbose tag info (full annotation metadata: tagger, date, message).
+    # With no argument, lists every tag; pass a tag name to filter to one.
+    tagv = "tag -l --format='%(refname:short)%0aTagger: %(taggername) %(taggeremail)  %(taggerdate)%0a%0a%(contents)'"
     ui = !gitui
 
 [advice]
