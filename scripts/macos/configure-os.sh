@@ -12,3 +12,7 @@ unalias -a # disable aliases for script
 defaults write -g InitialKeyRepeat -int 10             # normal minimum is 15 (225 ms)
 defaults write -g KeyRepeat -int 1                     # normal minimum is 2 (30 ms)
 defaults write -g ApplePressAndHoldEnabled -bool false # disable "press & hold" pallete
+
+## Dock
+defaults write com.apple.dock no-bouncing -bool true # disable bouncing app icons
+killall Dock || true                                 # restart Dock to apply (no-op without a GUI session)
