@@ -155,6 +155,11 @@
     {
       "kind": "Class",
       "id": "UnrealWindow"
+    },
+    {
+      "kind": "Title",
+      "id": "Magnifier updates",
+      "matching_strategy": "Equals",
     }
   ],
   "floating_applications": [
