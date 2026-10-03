@@ -21,6 +21,8 @@ yabai -m rule --add app='^Epic Games Launcher$' manage=off
 yabai -m rule --add app='^UnrealEditor$' manage=off
 yabai -m rule --add app='^Slack$' manage=off
 yabai -m rule --add app='^Microsoft Teams$' manage=off
+yabai -m rule --add app='demo' manage=off
+yabai -m rule --add app='^driver' manage=off
 yabai -m rule --apply
 
 #
