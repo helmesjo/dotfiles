@@ -157,6 +157,11 @@
       "id": "UnrealWindow"
     },
     {
+      "kind": "Class",
+      "id": "_XRAY_\\d+\\.\\d+",
+      "matching_strategy": "Regex",
+    },
+    {
       "kind": "Title",
       "id": "Magnifier updates",
       "matching_strategy": "Equals",
