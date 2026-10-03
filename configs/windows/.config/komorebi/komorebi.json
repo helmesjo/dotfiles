@@ -292,6 +292,11 @@
       "kind": "Exe",
       "id": ".*OneConnect.*",
       "matching_strategy": "Regex",
+    },
+    {
+      "kind": "Class",
+      "id": "WixStdBA",
+      "matching_strategy": "Equals",
     }
   ]
 }
