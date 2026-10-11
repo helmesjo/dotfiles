@@ -13,3 +13,12 @@ permission_mode = "ask"
 simple_mode = false
 vim_mode = true
 scroll_speed = 80
+page_flip_on_send = false
+
+[marketplace]
+default_skills_installs_purged = true
+official_marketplace_auto_installed = true
+
+[[marketplace.sources]]
+name = "xAI Official"
+git = "https://github.com/xai-org/plugin-marketplace.git"
