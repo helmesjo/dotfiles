@@ -1,6 +1,8 @@
 # Normalize all text files to LF on checkout.
 * text=auto eol=lf
 
-# Windows scripts must stay CRLF.
-*.bat text eol=crlf
-*.cmd text eol=crlf
+# Windows scripts must stay CRLF. Use text=auto rather than text, so that
+# scripts a repository already committed with CRLF are not reported as
+# modified after checkout.
+*.bat text=auto eol=crlf
+*.cmd text=auto eol=crlf
