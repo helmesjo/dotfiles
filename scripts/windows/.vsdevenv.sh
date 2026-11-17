@@ -27,6 +27,29 @@ x86_64-arm32  : x64_arm
 # prefix common commands so that aliases and functions are ignored
 C=command
 
+# Typical VS envars pointing at install directories (validated, unset when
+# stale and used to identify genuine MSVC PATH additions).
+VS_DIR_VARS=(
+  DevEnvDir
+  ExtensionSdkDir
+  FrameworkDir
+  FrameworkDir64
+  VCIDEInstallDir
+  VCINSTALLDIR
+  VCToolsInstallDir
+  VCToolsRedistDir
+  UniversalCRTSdkDir
+  VSINSTALLDIR
+  WindowsSdkDir
+  WindowsSdkBinPath
+  WindowsSdkVerBinPath
+)
+
+# Other envars a dev prompt sets (besides PATH), from diffing 'set' before
+# and after 'vcvarsall.bat x64' in a clean cmd.exe. A regex since some of
+# the names vary by VS version or architecture.
+VS_OTHER_VARS_RE='CommandPromptType|EXTERNAL_INCLUDE|INCLUDE|LIB|LIBPATH|Platform|NETFXSDKDir|Framework(40)?Version(64)?|UCRTVersion|VCToolsVersion|VisualStudioVersion|VS[0-9]+COMNTOOLS|WindowsLibPath|WindowsSDK(Lib)?Version|WindowsSDK_ExecutablePath_[A-Za-z0-9_]+|VSCMD_VER|VSCMD_ARG_[A-Za-z0-9_]+|__VSCMD_[A-Za-z0-9_]+|__DOTNET_[A-Za-z0-9_]+'
+
 # NOTE: Don't use '~' since all envars are cleared before
 #       starting devprompt to extract only new vars.
 #       'readlink -f' is so that we get the real windows user path.
@@ -54,35 +77,34 @@ function is_vs_env_valid()
   local ec=0
   command -v cl.exe >/dev/null || { echo "-- Warn: Failed to find cl.exe"; ec=1; }
 
-  # list of typical VS envars we want to validate and (if stale) unset.
-  local vsvars=(
-    DevEnvDir
-    ExtensionSdkDir
-    FrameworkDir
-    FrameworkDir64
-    VCIDEInstallDir
-    VCINSTALLDIR
-    VCToolsInstallDir
-    VCToolsRedistDir
-    UniversalCRTSdkDir
-    VSINSTALLDIR
-    WindowsSdkDir
-    WindowsSdkBinPath
-    WindowsSdkVerBinPath
-  )
-  for var in ${vsvars[@]}; do
+  for var in ${VS_DIR_VARS[@]}; do
     eval "local dir=\"\${$var:-}\""
     [ -d "$dir" ] || { echo "-- Warn: Stale envar detected ('$var=$dir')"; ec=1; }
   done
 
   # unset to make sure they get updated
   if [[ $ec -ne 0 ]]; then
-    for var in ${vsvars[@]}; do
+    for var in ${VS_DIR_VARS[@]}; do
       unset $var
     done
   fi
 
   return $ec
+}
+
+# Unset envars left behind by an earlier dev prompt (eg. from an older cache,
+# possibly inherited from a parent process) before setting up a new one.
+# vcvarsall honors some of them (a stale VCToolsVersion makes it look for a
+# removed toolset and skip the whole VC setup, a stale INCLUDE gets appended
+# to), and the cache only picks up envars that aren't already set, so they
+# would never be refreshed either.
+function vsdevenv_unset_stale_envars()
+{
+  local var
+  for var in ${VS_DIR_VARS[@]} \
+      $($C env | $C sed -nE "s/^($VS_OTHER_VARS_RE)=.*/\1/p"); do
+    unset $var
+  done
 }
 
 function vsdevenv_export_envars()
@@ -232,6 +254,8 @@ function vsdevenv_setup()
       echo "-- Latest: $VS_VARSALL"
       echo "-- Setting up developer prompt ($TARGET_ARCH_CONV) for '$VSPATH_LATEST'"
 
+      vsdevenv_unset_stale_envars
+
       # Inside dev prompt, export all envars (using 'export -p'),
       # then extract only the unique envars & 'PATH' values.
       VS_ENVARS_CACHE_BAK="${VS_ENVAR_CACHE}.bak"
@@ -246,6 +270,9 @@ function vsdevenv_setup()
       # process interop, which cmd.exe's own /C parser doesn't understand,
       # so it never runs anything (found this the hard way - avoid modifying
       # without testing against a real vcvarsall.bat path containing spaces).
+      # BASH_ENV/ENV are cleared so the capturing bash doesn't run the
+      # startup files (~/.profile -> .env -> .env.local -> this file): that
+      # recurses into a nested setup whose output pollutes 'export -p'.
       BASH_PATH="$(cygpath -m "$(which bash)")"
       VS_VARSALL="$(cygpath -m "$VS_VARSALL")"
       VS_ENVARS_TMP="$(cygpath -m "$(mktemp)")"
@@ -253,6 +280,8 @@ function vsdevenv_setup()
       cat >"$VS_CMD_SCRIPT" <<EOF
 @echo off
 call "$VS_VARSALL" $TARGET_ARCH_CONV >NUL 2>&1
+set BASH_ENV=
+set ENV=
 "$BASH_PATH" -c "export -p"
 EOF
       MSYS2_ARG_CONV_EXCL="/C" cmd.exe /C "$(cygpath -m "$VS_CMD_SCRIPT")" >"$VS_ENVARS_TMP"
@@ -265,12 +294,6 @@ EOF
       # VCPATHS from an earlier cache, or unrelated entries .profile added
       # in this same (possibly nested) shell, so a plain "not already in
       # $PATH" check wrongly treats those as new VS additions too.
-      VS_ROOT_VARS=(
-        DevEnvDir ExtensionSdkDir FrameworkDir FrameworkDir64
-        VCIDEInstallDir VCINSTALLDIR VCToolsInstallDir VCToolsRedistDir
-        UniversalCRTSdkDir VSINSTALLDIR WindowsSdkDir WindowsSdkBinPath
-        WindowsSdkVerBinPath
-      )
       VS_ROOTS=()
       while read -r root_line; do
         root_line="${root_line//\\\\\\\\//}"
@@ -280,7 +303,7 @@ EOF
         root_VAL="${root_line#*=}"
         root_VAL="${root_VAL#\"}"
         root_VAL="${root_VAL%\"}"
-        for rv in "${VS_ROOT_VARS[@]}"; do
+        for rv in "${VS_DIR_VARS[@]}"; do
           if [[ "$root_VAR" == "$rv" && -n "$root_VAL" ]]; then
             # The captured value's form isn't reliable on its own (POSIX,
             # or mixed "C:/..." depending on how bash was invoked to
@@ -310,7 +333,11 @@ EOF
         VAL="${VAL%\"}"             # Removes trailing "
         VAL="${VAL//\"/\\\"}"       # Escape embedded " so the cache stays valid shell syntax
 
-        if    [[ "$VAR"   == "$line" ]] \
+        # Only accept well-formed 'declare -x NAME="..."' lines. Anything
+        # else is stray output (or a continuation of a multi-line value)
+        # and would break the eval below and corrupt the cache.
+        if    [[ "$line" != 'declare -x '* ]] \
+           || [[ ! "$VAR" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] \
            || [[ "$VAL" == "$line" ]] \
            || [[ "$VAR"   == "_" ]]; then
           # echo "-- SKIPPED envar: $VAR=\"$VAL\""
@@ -338,6 +365,10 @@ EOF
           for p in "${VCPATH_EXPORTED[@]}"; do
               p="${p%/}"
               [[ -z "$p" ]] && continue
+              [[ ":$VCPATHS:" == *":$p:"* ]] && continue
+              # Skip dead entries, eg. a removed toolset's bin dir that a
+              # stale cache had already put on the inherited PATH.
+              [[ -d "$p" ]] || continue
               for root in "${VS_ROOTS[@]}"; do
                 case "$p" in
                   "$root"|"$root"/*)
@@ -351,7 +382,7 @@ EOF
           # echo "-- Added envar: $VCPATHS=\"$VCPATHS\""
         else
           # Only add if it doesn't already exist and has a value assigned.
-          if [[ -z "$(eval echo \"\${$VAR:-}\")" ]]; then
+          if [[ -n "$VAL" && -z "$(eval echo \"\${$VAR:-}\")" ]]; then
             echo "export $VAR=\"$VAL\"" >> $VS_ENVAR_CACHE
             # echo "-- Added envar: $VAR=\"$VAL\""
           else
